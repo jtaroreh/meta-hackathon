@@ -665,6 +665,11 @@ def main():
         if ex["status"] == "solved" and ex["opt_layers"] == \
                 TINY_EXP_LAYERS:
             gate3tiny["solved"] += 1
+        if ex["status"] == "stopped-guard":
+            skipped.append({"what": "tiny-exact",
+                            "reason": "stopped-guard",
+                            "iters_done": ex.get("nodes", 0),
+                            "n_evaluated": EXACT_CAP})
     with open(os.path.join(witdir, "gate3_tiny.json"), "w") as f:
         json.dump(gate3tiny, f, indent=1, default=str)
     checkpoint("tiny")
@@ -679,6 +684,11 @@ def main():
         tex = exact_opt(tdg, EXACT_CAP, over)
         gate3targets.append(dict(tex, code=CODE_NAME[tdg["n"]],
                                  dag=tdg["dag"], seed=TARGET["seed"]))
+        if tex["status"] == "stopped-guard":
+            skipped.append({"what": "target-exact",
+                            "reason": "stopped-guard",
+                            "iters_done": tex.get("nodes", 0),
+                            "n_evaluated": EXACT_CAP})
     with open(os.path.join(witdir, "gate3_targets.json"), "w") as f:
         json.dump(gate3targets, f, indent=1, default=str)
     checkpoint("targets")
