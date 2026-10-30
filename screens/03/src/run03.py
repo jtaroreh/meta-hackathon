@@ -302,7 +302,8 @@ def run_S(cell, T, rng, stop, n_iters):
     done = 1
     for it in range(n_iters):
         if it % 32 == 0 and stop is not None and stop():
-            break
+            return {"stopped": True, "iters_done": done,
+                    "n_evaluated": n_iters + 1}
         pair = rng.integers(0, C, 2)
         i, j = int(pair[0]), int(pair[1])
         if i == j:
@@ -312,7 +313,8 @@ def run_S(cell, T, rng, stop, n_iters):
         out = eval_schedule(cell, pi, T, stop)
         if out.get("stopped"):
             pi[i], pi[j] = pi[j], pi[i]
-            break
+            return {"stopped": True, "iters_done": done,
+                    "n_evaluated": n_iters + 1}
         done += 1
         cost2 = -out["dn"] + LAMBDA * out["depth"]
         if cost2 < cost or bool(
