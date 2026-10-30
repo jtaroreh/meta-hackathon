@@ -140,7 +140,8 @@ def test_direct_entry_and_shell_entry_import_without_venv(tmp_path):
                             env=env, capture_output=True, text=True, timeout=5)
     assert result.returncode == 3
     assert "ImportError" not in result.stderr
-    assert "No such file" in result.stderr
+    assert "Traceback" not in result.stderr
+    assert '"blocked"' in result.stderr
 
 
 def test_live_cli_recovery_kills_descendants_before_reopen(workspace):
