@@ -1,0 +1,19 @@
+== screen18-confirm (dry: command.json + run.sh, no exec) ==
+{
+  "command": ["{python}", "-B", "-m", "tools.overnight.pilot_18"],
+  "wall_limit_sec": 120,
+  "cpu_limit_sec": 1800,
+  "scope": "infrastructure",
+  "source_files": []
+}
+---
+#!/bin/sh
+set -eu
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PY="${OVERNIGHT_PYTHON:-$ROOT/.venv/bin/python}"
+cd "$ROOT"
+exec "$PY" -B -m tools.overnight.run_one --root "$ROOT" run "18"
+---
+brief.md
+command.json
+run.sh

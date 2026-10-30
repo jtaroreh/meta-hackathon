@@ -1,0 +1,78 @@
+The corpus and physical-cost changes are present in the bound bytes. Skip accounting still has a silent omission, and the brief overstates how skips affect Gate 4.
+
+1. **Corpus.** Confirmed in [run06.py](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/06/src/run06.py:142).
+
+   The source defines `"QUBITS_LIST = (10, 20, 30)"`, `"N_GATES = 20"`, deterministic placement through `"perm[q % NPATCH]"`, and calls `"gen_program(size, N_GATES, seed, pi)"`.
+
+   The repair loop advances `bb` while patches coincide. Each supported size occupies at least 10 distinct patches, so a distinct endpoint exists within a complete traversal of the qubit indices. The loop therefore terminates with distinct patches. No active `N_OPS_LIST` or operation-count size logic remains. Historical descriptions of the previous corpus remain.
+
+2. **Physical cost and acceptance.** Confirmed the requested implementation in [run06.py](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/06/src/run06.py:413).
+
+   `program_phys()` sums the selected routes' `"length"` values. Each cell accumulates `"ph_list"` and stores both `"makespans"` and `"phys"`. Completeness requires both lists to contain `"N_PROG = 100"` entries for all `"3 × 5 × 4 = 60"` cells.
+
+   Gate 2p recomputes physical-cost SE and requires spread `" > 2.0 * se_size"` at `"g2p_npass >= 2"` sizes. Physical wins use the same threshold for A minus best of B/C. PURSUE requires `"win_ok and winp_ok"`, target timeout, Gates 1/2/2p/4, self-tests, and exactly four tiny pairs. REJECT requires `"strict_n == 0 and strictp_n == 0"` with complete pools, tiny evidence, and Gate-1 controls.
+
+   The brief's Gate-4 definition and acceptance formulas match those expressions. Its separate claim that **any skip fails Gate 4** does not, as detailed below.
+
+3. **Skip accounting.** The named structural fixes are present, but the broader claim remains false.
+
+   Confirmed that `run_phase()` uses one `"plan"` and fills `"plan[idx:]"` before its only guard return. Whole-phase omissions append four `"tiny-i"` or four `"target-i"` skip records. `"tiny_full = len(gate3_tiny) == 4 and tiny_pairs == 4"` is present.
+
+   Targets use `"gen_program(20, N_TARGET_GATES, 1, ti)"` for indices 0–2 and `"gen_program(20, N_GATES, 1, 0)"` for index 3. The horizon cap is `"16"` and solver timeout is `"20000"` milliseconds. The brief discloses the small-target limitation and coordinator classification.
+
+   Two discrepancies remain:
+
+   - At [run06.py:907](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/06/src/run06.py:907), the required tiny `T*-1` solve is conditional on `"and not over()"`, with no skip-recording alternative. A SAT solve that starts below 420 seconds and finishes above it silently omits this required control. `tiny_full` correctly fails, but the promised explicit omission record is absent.
+   - [brief.md:117](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/06/brief.md:117) says `"Any skip makes completeness (hence Gate 4) fail honestly."` However, [run06.py:1069](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/06/src/run06.py:1069) computes `"g4_ok = complete and wall < WALL_LIMIT_S"`, without consulting solver omissions or `skipped`. A statically permitted path finishes the final C cell at 421 seconds with all routing lists full, records four omitted targets, and still passes Gate 4 below 500 seconds.
+
+   These are source-level counterexamples, not observed executions. They do not establish a false PURSUE.
+
+4. **Command, closure, and wrapper.** Confirmed unchanged.
+
+   [command.json](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/06/command.json:1) contains `"scope": "research"`, `"cpu_limit_sec": 3600`, `"wall_limit_sec": 600`, and exactly `"source_files": ["src/run06.py"]`.
+
+   Static import inspection found only standard-library modules, `numpy`, and lazy `z3`. No undeclared local imports or external executable launches appear. [run.sh](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/06/run.sh:1) invokes only the supervisor entry `"run \"06\""`.
+
+5. **Bindings and independent hashes.** All supplied bindings match the envelope and independently recomputed values.
+
+   ```text
+   run_id           a0268985f0e5456b9384ea8e4e609ee0
+   config_hash      3290f84f2b8003361fa3a9a08256a739f12cbe8639e1e8f366de0acd9ace5d62
+   tool_hash        e10ce85ae9e29f0394fe0d4b50b3e4ed3dac35807dfe4b2f4a0d741a3cffeed3
+   input_hash       6dfa7801a810535fcdc541f959db3d7df4656c608c50956a958b69180d601043
+   preparation_hash 8b690f3d4aa1c84e5f7f1d9695c5943aae6ea490e9d3f87bb219a69fa24cb7fb
+   pilot_hash       f686d3f778e7d6c39af8538491e50f6b4d523307ca04c64259133c0273423661
+   ```
+
+   Recomputed the path-to-SHA256 mapping according to `screen_artifacts()` and `envelope.digest()`:
+
+   ```text
+   brief.md       7cc2bf6d92b8c96c7c5a8f48dcd778ae1481bb6b2a33d8e99493d91cbf4095e2
+   command.json   c6ac4a0816965a213862e73d73b27a4b2038c4caedb94f525441ac9ddb3f1192
+   run.sh         be05cf58ab232c96c5266b15f246a71fcd56a89372752267752c5f72a0e37631
+   src/run06.py   0b41f99f8b266a69d8fff50b9ca50a17e1ce08498c62a61a03a8a1349279b520
+
+   screen_files   214b2c236679b39c76c8b911e0364f3f44dd9c347894bd49e65e974fec6c99fd
+   ```
+
+   This matches the requested digest and differs from failed digest `"f5b0f75d202f070b1b465c7bb63b464979ec532e352f4bb9c4a9351e57ccaea0"`. Only brief/source hashes changed. The final recheck was identical.
+
+6. **Preparation and pilot.** Confirmed actual evidence.
+
+   Preparation records `"ok": true` and proof `"ok": true`. Pilot records `"pilot_ok": true`, `"gate3_timeout_claim": false`, and `"disposition": "unresolved"`. Both executions record `"finished"`, `"exit:0"`, and `"cleanup_verified": true`.
+
+   Recorded wall times are `"1.2027890409808606"` and `"4.751292957982514"` seconds. Each reserves `"1200"` CPU-capacity seconds. Their combined `"2400.0"` matches envelope usage and remains within `"28800"`. Recorded RSS/output usage is within allowances.
+
+   Independently verified all `"64"` preparation artifact hashes, `"38"` pilot artifact hashes, `"3"` preparation evidence hashes, and `"27"` frozen manifest entries. No hash differences, injected/missing manifest files, or symlinks were found. Postpilot evidence and bindings also match.
+
+7. **Contract and scientific limits.** Confirmed the [screen-review clause](/Users/joeltaroreh/projects/challenges/meta-hackathon/docs/overnight-contract.md:65) requires `"verdict": "PASS"`, complete run/input bindings, and artifacts exactly `{preparation, pilot, screen_files}` using the hashes above. The configured reviewer is exactly:
+
+   ```json
+   {"providerInstanceId":"codex-pstack","model":"gpt-6.1-sol","options":{"reasoningEffort":"high","serviceTier":"default"}}
+   ```
+
+   This review pre-clears no scientific gate. Gates 1/2/2p require observed controls and deltas. Gate 3 requires controlled solver expiry during the run. Gate 4 requires physical-cost evidence and completion during the run.
+
+Applied **Prove It Works** through actual-byte inspection and independent hashing. Dispatch stayed in-thread under the no-delegation instruction. No files were created, modified, or deleted. No solver, build, benchmark, pilot, or payload was launched.
+
+VERDICT: FAIL: Required tiny T*-1 controls can still be omitted by the wall guard without skip records; the brief's claim that any skip fails completeness and Gate 4 contradicts the implemented predicate.

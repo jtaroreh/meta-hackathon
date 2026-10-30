@@ -1,0 +1,77 @@
+The corrected bytes contain the requested changes, but the deadline correction still fails for this run. Review time reduces the supervisor's admitted execution window below the `300` second guard.
+
+1. **Guard correction present; deadline requirement fails.** [run01.py](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/01/src/run01.py:29) contains `"WALL_GUARD_S = 300.0"` and the requested deadline comment. Guards remain before every pheno/circuit arm cell and each MLD solve.
+
+   However, [screen_wall_used()](/Users/joeltaroreh/projects/challenges/meta-hackathon/tools/overnight/envelope.py:170) includes time since selection, and [admission](/Users/joeltaroreh/projects/challenges/meta-hackathon/tools/overnight/supervisor.py:323) computes:
+
+   ```text
+   min(600 - screen_wall_used, remaining_run_time, remaining_cpu / capacity)
+   ```
+
+   Independently computed from the actual envelope at `"1793311859.001417"`:
+
+   ```text
+   selected_at                   1793311500.7431
+   screen_wall_used              358.2583169937134
+   remaining 600-second allowance 241.74168300628662
+   CPU-derived allowance         360.0
+   execution window upper bound  238.24168300628662
+   payload guard                 300.0
+   ```
+
+   The execution deadline subtracts another `"0.5"` second termination allowance and `"3.0"` second finalization allowance. Payload startup consumes additional time. The guard therefore occurs after the admitted execution deadline. Subsequent review time only reduces the available window.
+
+2. **Checkpoint implementation verified.** The helper writes `"witnesses/checkpoint-<phase>.json"` with `"cells"`, `"gate3"`, `"circuit_blocked"`, `"wall_s"`, and an `"unresolved-with-reason: partial checkpoint..."` verdict. Its write and serialization are inside `try/except Exception`, so checkpoint failure does not terminate the payload.
+
+   Initialization precedes every call:
+
+   ```text
+   line 339  gate3 = {"d3": None, "d7": [], "skipped": []}
+   line 340  circuit_blocker = None
+   line 341  circuit_meta = {}
+   line 407  checkpoint("pheno")
+   line 465  checkpoint("circuit")
+   line 482  checkpoint("gate3-d3")
+   line 493  checkpoint("gate3-d7")
+   ```
+
+   No early-checkpoint `NameError` arises from those variables.
+
+3. **Brief matches the added mechanisms but overstates deadline protection.** The [Budgets paragraph](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/01/brief.md:57) correctly describes phase order, the `"300 s"` guard, explicit skips, normal-completion `results.json`, phase checkpoints, and coordinator-side classification.
+
+   Its claims that the execution deadline lands near `"~356 s"`, the guard `"honors the admitted deadline"`, and leaves `"~56 s"` reserve omit the cumulative wall-time deduction demonstrated above. Those claims do not hold for this run. Checkpoints preserve completed-phase evidence best-effort; they do not correct that mismatch.
+
+4. **Remaining science, execution, bindings, and evidence reverified.**
+
+   - Read all `"592"` lines of `run01.py`. The hypothesis and corpora remain HGP repetition-product X-noise at `"p=0.06"`, sizes `"3,5,7"`, and circuit `rotated_memory_x` at `"p=0.005"`, sizes `"3,5"`, `"rounds=d"`, with `"300"` samples and seeds `"1,2,3,4,5"`.
+   - Arms remain A/B1/B2/B3 with parallel/serial min-sum and scales `"1.0"`/`"0.625"`, `"max_iter=30"`, C as order-2 BP-OSD reference, and R as zeros. Per-bit priors and the recorded circuit mean-prior fallback remain present.
+   - Circuit failures use sampled true observables, DEM-derived `H_dem`/`L_obs`, syndrome validation, and predicted-observable comparison. Parsing/sampler failures produce named blockers.
+   - Gates remain strict A-versus-R improvement everywhere; pooled non-flat rates exceeding `"2 × SE"` at two sizes; d3 `"Optimal"` plus at least one d7 `"TimeLimit"`; and complete `"150"` planned cells with `"n=300"` and wall time `"<500 s"`.
+   - Acceptance remains `"≥25%"` gap recovery at two pheno sizes, mean latency `"≤5000 us"`, positive circuit gap, and required gates. Classification remains coordinator-side.
+   - MLD uses model-owned PuLP variables and exactly `"pulp.COIN_CMD(msg=0, threads=1, timeLimit=time_limit)"`. Limits remain d3 `"30"` seconds and up to `"20"` d7 solves at `"10"` seconds each. Only literal `"Optimal"`/`"TimeLimit"` satisfy Gate 3; `"BUILD_ERROR: ..."` cannot count. Installed PuLP `"4.2.0"` source supports those status names.
+   - Seed construction, repeat-decode checks, corpus hashing, guarded corpus lookups, explicit skip records, default d3 record, normal-completion `results.json`, and unresolved-with-reason verdict are present.
+   - Command remains `"scope":"research"`, `"cpu_limit_sec":3600`, `"wall_limit_sec":600`, and complete additional local closure `"source_files":["src/run01.py"]`. `run.sh` only invokes supervised `run_one ... run "01"`.
+
+   Independently recomputed bindings:
+
+   ```text
+   run_id           87b79c06198749628ea3f77e7f16c3cb
+   config_hash      3290f84f2b8003361fa3a9a08256a739f12cbe8639e1e8f366de0acd9ace5d62
+   tool_hash        e10ce85ae9e29f0394fe0d4b50b3e4ed3dac35807dfe4b2f4a0d741a3cffeed3
+   input_hash       6dfa7801a810535fcdc541f959db3d7df4656c608c50956a958b69180d601043
+   preparation_hash c84da2054d1b1d9713286a54bca1c6c48cd40c655c3050125e0d0fa3e8e12f25
+   pilot_hash       7b35c334bdbd95df6ffa64edfc5a678f92e5edbf95bc01de52f55fd9a5d7c4dc
+   screen_files     d0c59d8b297d45322fd69c4855eefcd52885fc7229ced65ddfeaa4ba8d6d2bad
+   ```
+
+   The new screen digest differs from `"275ea1e8…"`. All five envelope hashes match. All `"64"` preparation artifacts, `"38"` pilot artifacts, `"3"` preparation evidence hashes, and `"27"` frozen manifest entries match, without manifest injection or symlinks.
+
+   Preparation and pilot evidence consistently record `"finished"`, `"exit:0"`, and `"cleanup_verified":true`. Proof logs record `"PASS: 45 checks, 0 failures"`. Pilot `"ok"`, `"proof.ok"`, `"algebra_control.ok"`, and `"pilot_ok"` are true; `"gate3_timeout_claim"` remains false. Tooling/postpilot review bindings and raw-evidence hashes match.
+
+   The [screen-review clause](/Users/joeltaroreh/projects/challenges/meta-hackathon/docs/overnight-contract.md:65) requires a matching independent PASS with complete bindings and artifacts `{preparation, pilot, screen_files}`. This review cannot supply that PASS.
+
+5. **Frozen tooling unchanged.** The recomputed `"31"`-file tooling closure matches the envelope, covering Python tools/tests, all screen-18 files, contract/scientific-plan documents, and `OVERNIGHT_LAUNCH.md`. Eight additional document hashes match their recorded baseline. Final screen and tooling digest rechecks were stable.
+
+Applied Prove It Works through direct byte inspection and independent hashing. Review stayed in-thread under your no-delegation constraint. No files were written and no solver, build, benchmark, or pilot was launched. Attempt 2 is exhausted, so this failed gate requires stopping the run.
+
+VERDICT: FAIL: cumulative screen wall time makes the admitted execution deadline earlier than the 300-second guard; the brief's claimed ~356-second execution window and ~56-second reserve are invalid for this run.

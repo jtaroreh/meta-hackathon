@@ -1,0 +1,15 @@
+Screen-15 review attempt 2, run f5ac1866b1794567ad299c518a43a391 (read-only; no files changed by reviewer, no launches).
+
+Reviewed screen_files 5f8ab26aa757de16bb9bf8e9a7c8a28498cd8279ce4b14631b2797cb718b6a2 (brief.md + command.json + src/run15.py).
+
+VERDICT: FAIL. All 11 author claims verified against code with file:line evidence; 10 of 11 fully true, 1 with a minor claim-text typo (CAND_CAP is 24, not 25; code and brief agree). One substantive hole plus two minor inconsistencies remain:
+
+F1 (substantive — vacuous solve): dfs_exact sets status "solved" from completed and not capped_extr alone while optimum_twoq may be None when zero terminals extract. Gate 3 checks status only. A target exhausting within caps with no extractable terminal would pass as SOLVE, contradicting the brief's "optimum proven within caps". Fix: require optimum_twoq is not None in the solved/status or gate predicates.
+
+F2 (minor): review-request claim text says "25 CAND_CAP"; code is 24. Code and brief agree; claim text only.
+
+F3 (minor — brief overclaims guards): brief says the guard is checked "before each extraction burst", but the B/C fallback extraction loops and the SA/beam/R inner loops take no stop() checks. Overrun bounded by one instance's arms plus guard-to-limit slack, Gate-4 wall<500 backstop. Residual gap, not launch-blocking alone.
+
+F4 (observation): beam dedupe uses (k, 0, uu2) — allowance tracked, depth hardcoded 0 (level-synchronous, heuristic-only, no soundness impact) — against the brief's universal "(graph, depth, euler-used)" dedupe sentence.
+
+This review clears no gate. Screen 15 has used 2/2 review attempts in this run (attempt 1 FAIL on the unfuse/copy/DFS-terminal/Pareto/R-aggregation findings; attempt 2 FAIL F1-F4 above). Per max-2-attempts per screen-gate, screen 15 is deferred: fixes applied post-review to staging (solved requires optimum_twoq is not None; stop() threaded through run_A/beam_search/run_B/run_C/run_R and fallback loops with stopped-guard arm records; brief beam-dedupe sentence corrected), new screen_files d1970c841df379f9b26ef5d4542fe08ec3e0b04400bfacf9b4c39ed4a3fd1f26, carried to the next run for fresh review. No PASS receipt filed (PASS-only rule).

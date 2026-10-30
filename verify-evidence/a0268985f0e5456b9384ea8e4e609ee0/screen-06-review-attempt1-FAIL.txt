@@ -1,0 +1,112 @@
+The run bindings and infrastructure evidence match. Screen 06 does not satisfy the requested scientific contract. The main blockers are the substituted workload sizes, the missing physical Gate 4, and incomplete skip accounting. This review clears no scientific gate.
+
+1. **Screen brief.** Opened the complete [brief.md](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/06/brief.md:1).
+
+   Verified `"Seeds 1-5"`, `"100 programs per (size, seed)"`, the three routing arms, random control, the pooled `SE_size` formula, and the strict `> 2*SE_size` threshold at two sizes. The written PURSUE and REJECT conditions otherwise match the requested formulas. The brief explicitly discloses `"There is no MILP comparison anywhere in this screen"` and uses z3-SMT instead.
+
+   Two requirements do not hold:
+
+   - The corpus uses `"Workload sizes N_OPS in {10,20,30}"` on a fixed 25-patch grid. These are operation counts, not the required 10/20/30-qubit circuits. This also conflicts with the screen-06 row in the [scientific plan](/Users/joeltaroreh/projects/challenges/meta-hackathon/docs/cloud-swarm-readiness-plan.md:32).
+   - The brief defines Gate 4 as `"every planned (size, seed, arm) cell complete"` and `"payload wall time < 500 s"`. It does not require physical end-to-end cost. Calling the makespan acceptance rule `"frozen Pareto"` does not supply the missing physical-cost gate or encode rejection of the known CNOT increase from 136 to 140.
+
+   The heading also names prior run `6589952c1f534a6981703b3891143664`. The actual bytes are nevertheless bound to the requested run by the matching digest below.
+
+2. **Command and closure.** Opened [command.json](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/06/command.json:1).
+
+   Verified `"scope": "research"`, `"cpu_limit_sec": 3600`, `"wall_limit_sec": 600`, and exactly `"source_files": ["src/run06.py"]`. The command is:
+
+   ```json
+   ["{python}", "-B", "{root}/screens/06/src/run06.py",
+    "--attempt", "{attempt}", "--data", "{data}"]
+   ```
+
+   The closure is complete for the implemented payload. Imports are standard-library modules, `numpy`, and lazily imported `z3`. There are no undeclared local imports, dynamic source loads, or external executable launches. Installed metadata records `numpy` version `"2.5.4"` and `z3-solver` version `"5.3.2.0"`.
+
+   Inspected the supervisor implementation. It substitutes absolute paths, runs with `cwd=<attempt>/work`, and places temp/cache paths under `<attempt>/tmp`.
+
+3. **Complete source.** Read all 1,028 lines of [run06.py](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/06/src/run06.py:1).
+
+   Verified the implemented arm structures:
+
+   - A uses generated operation order, route 0, forward orientation, and earliest feasible placement. Route 0 comes from BFS shortest-path enumeration; the `astar()` routine itself is called by self-tests, not by `run_A()`.
+   - B prioritizes descending shortest-path length and tries both orientations.
+   - C performs `"SA_ITERS = 1500"` seeded annealing iterations over order and route choices, with orientation selection during decoding.
+   - R uses seeded random order and route choices.
+
+   Verified `"SEEDS = (1, 2, 3, 4, 5)"`, `"N_PROG = 100"`, deterministic workload/RNG construction, self-tests, default-empty statistical lookups, initialized exception-path state, and comparisons that avoid division by zero.
+
+   The traversal-timing fix is present in `loc_candidates()`. It reverses the vertex path before constructing edge order and internal offsets, using `internal = tuple((q[j], j) ...)`. The dead `route_candidates` helper is absent.
+
+   Gate 3 uses a real `z3.Solver`, one-hot route/orientation selection, resource-capacity constraints, factory separation, and horizon constraints. Exactness is disclosed as relative to the candidate-route model. Expiry counting requires both `"status" == "unknown"` and `"reason_unknown" == "timeout"`. A solved result, unrelated unknown reason, or outer supervisor timeout cannot satisfy that predicate.
+
+   **Guard bookkeeping does not meet the brief.**
+
+   - `run_phase()` can return at lines 811–814 after a cell crosses the guard, without recording all remaining cells as skipped. Its fill-in block at lines 797–809 is bypassed on these exits.
+   - The outer `if not over()` blocks at lines 825 and 868 silently omit whole tiny/target phases when entered after the guard.
+   - `"tiny_full"` checks that every *recorded* tiny instance has a pair, rather than requiring all four planned instances.
+   - Gate 4 is implemented as `complete and wall < WALL_LIMIT_S`. If all routing cells finish just after 420 seconds, targets can be silently omitted while Gate 4 remains true below 500 seconds. Gate 3 then remains false, so this example does not establish a false PURSUE, but it contradicts the promised explicit skip accounting and guard-failure semantics.
+
+   Normal and caught-exception paths publish `work/results.json`. Runtime below 500 seconds was not measured in this read-only review.
+
+4. **Run wrapper.** Opened [run.sh](/Users/joeltaroreh/projects/challenges/meta-hackathon/screens/06/run.sh:1). Its only execution entry is:
+
+   ```sh
+   exec "$PY" -B -m tools.overnight.run_one --root "$ROOT" run "06"
+   ```
+
+   No direct solver/build/benchmark command or background workload is present.
+
+5. **Run bindings and independent hashes.** Opened [overnight-envelope.json](/Users/joeltaroreh/projects/challenges/meta-hackathon/overnight-envelope.json:1). Its `"run_id"` is `"a0268985f0e5456b9384ea8e4e609ee0"`. Independently recomputed all supplied hashes:
+
+   ```text
+   config_hash      3290f84f2b8003361fa3a9a08256a739f12cbe8639e1e8f366de0acd9ace5d62
+   tool_hash        e10ce85ae9e29f0394fe0d4b50b3e4ed3dac35807dfe4b2f4a0d741a3cffeed3
+   input_hash       6dfa7801a810535fcdc541f959db3d7df4656c608c50956a958b69180d601043
+   preparation_hash 8b690f3d4aa1c84e5f7f1d9695c5943aae6ea490e9d3f87bb219a69fa24cb7fb
+   pilot_hash       f686d3f778e7d6c39af8538491e50f6b4d523307ca04c64259133c0273423661
+   ```
+
+   Following the actual `screen_artifacts()` and `envelope.digest()` implementations, independently hashed the relative-path-to-SHA256 mapping:
+
+   ```text
+   brief.md       5ef7c81eae4dfbb346ea53ab4b26467374d31faa79b04839635767ce5509f9a9
+   command.json   c6ac4a0816965a213862e73d73b27a4b2038c4caedb94f525441ac9ddb3f1192
+   run.sh         be05cf58ab232c96c5266b15f246a71fcd56a89372752267752c5f72a0e37631
+   src/run06.py   6f3f32eb39c4780a59677db28810d74e6332dde24aaa214a3420ea8acc4e82f8
+
+   screen_files   f5b0f75d202f070b1b465c7bb63b464979ec532e352f4bb9c4a9351e57ccaea0
+   ```
+
+   The screen digest remained identical on the final check.
+
+6. **Preparation and pilot evidence.** Opened preparation, pilot, receipt, execution, worker-result, stdout, and control files.
+
+   Verified preparation `"ok": true`, proof `"ok": true`, pilot `"pilot_ok": true`, `"gate3_timeout_claim": false`, and `"disposition": "unresolved"`. Both executions record `"finished"`, `"exit:0"`, and `"cleanup_verified": true`, consistently across receipt/execution/worker records.
+
+   Both logs contain `"PASS: 45 checks, 0 failures"` and successful tiny baseline checks. All seven exact-decoder controls report `"OPTIMAL"` with verified residual fields. These are infrastructure/control results, not screen-06 scientific evidence.
+
+   | Recorded value | Preparation | Pilot |
+   |---|---:|---:|
+   | `wall_seconds` | `1.2027890409808606` | `4.751292957982514` |
+   | `cpu_reserved_sec` | `1200` | `1200` |
+   | `peak_sampled_session_rss` | `142278656` | `184516608` |
+   | `peak_sampled_output_bytes` | `744943` | `1122334` |
+
+   Reservations and observed usage are inside their allowances. The combined reservation equals envelope `"cpu_used_sec": 2400.0`, within `"global_cpu_budget_sec": 28800`.
+
+   Independently verified all 64 preparation artifact hashes, all 38 pilot artifact hashes, all three preparation evidence hashes, and all 27 frozen manifest entries, with no injected/missing files or symlinks. Postpilot raw-evidence hashing also matches.
+
+7. **Review contract and scientific limits.** Opened the [screen-review clause](/Users/joeltaroreh/projects/challenges/meta-hackathon/docs/overnight-contract.md:63). It requires a matching independent `"PASS"`, complete run/input bindings, and artifacts exactly `{preparation, pilot, screen_files}`. Changed bytes require fresh matching review; a bare PASS is insufficient.
+
+   The configured advisor target exactly matches:
+
+   ```json
+   {"providerInstanceId":"codex-pstack","model":"gpt-6.1-sol",
+    "options":{"reasoningEffort":"high","serviceTier":"default"}}
+   ```
+
+   Gate 1 still needs observed positive-control results. Gate 2 still needs observed non-flat deltas. Gate 3 still needs controlled solver expiry with tiny controls on the same hardware. The brief's "target" uses six operations, so it also does not establish expiry at the requested 10/20/30-qubit scale. Gate 4 still needs physical end-to-end cost. The shared contract rejects T-count timeout substitution, outer-wall timeout substitution, and the 136-to-140 CNOT tradeoff; the screen brief does not encode all those requirements.
+
+Applied **Prove It Works** through actual-file inspection and independent hashing. Dispatch stayed in-thread under the no-delegation instruction. No files were created, modified, or deleted, and no solver, build, benchmark, pilot, or payload was launched.
+
+VERDICT: FAIL: Screen substitutes operation counts for the required qubit corpus, replaces physical Gate 4 with completion/runtime checks, and omits required guard-skip evidence; these are multiple independent corrections.
