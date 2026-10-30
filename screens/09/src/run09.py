@@ -37,7 +37,7 @@ DROPOUT_RATES = (0.02, 0.04)
 SEEDS = (1, 2, 3, 4, 5)
 ARMS = ("B", "R", "G", "A")
 
-A_ITERS = 300
+ANNEAL_ITERS = 300
 A_T0 = 1.0
 A_ALPHA = 0.99
 NOTCH_ATTEMPTS = 6
@@ -753,7 +753,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--attempt", required=True)
     ap.add_argument("--data", required=True)
-    ap.add_argument("--anneal-iters", type=int, default=A_ITERS)
+    ap.add_argument("--anneal-iters", type=int, default=ANNEAL_ITERS)
     args = ap.parse_args()
     n_iters = int(args.anneal_iters)
     outdir = os.getcwd()
@@ -1053,8 +1053,8 @@ def main():
             "A=%d/3, strict wins=%d/3, g1=%s g2=%s " \
             "g2s(dist-spread)=%s g3=%s (tiny solved=%s, target " \
             "cap-hit=%s) selftest=%s g4=%s complete=%s skipped=%d; " \
-            "next: dynamic-boundary simulated-annealing retest with " \
-            "wider gauge-fixing move family)." % (
+            "next: wider gauge-fixing move families + " \
+            "correlated-defect masks retest)." % (
                 n_win["G"], n_win["A"], n_strict, g1_ok, g2_ok,
                 g2s_n >= 2, g3pass, tiny_solved, target_cap,
                 selftest_ok, g4_ok, complete, len(skipped))
