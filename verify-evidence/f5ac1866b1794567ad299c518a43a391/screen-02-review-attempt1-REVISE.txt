@@ -1,0 +1,45 @@
+Screen 02 independent review — attempt 1 (REVISE)
+Reviewer: codex-pstack/gpt-6.1-sol (reasoningEffort=high, serviceTier=default)
+Date: 2026-10-29 PDT. Run: f5ac1866b1794567ad299c518a43a391.
+Staged screen_files at review time: 731cb1256529358019dfdaebd716e2289ea53be625f9be010894cf29e1a965d3
+(superseded by guard-accounting fix; see attempt 2).
+
+Verdict: REVISE. One bounded correction required before staging.
+
+Blocking finding: guard accounting contradicts the brief. In run02.py:306,
+random, greedy, and SA inner loops silently break on the wall guard. Random
+still publishes n=60. Exact omits exact-remaining when its entry guard fails,
+and enum guard exits omit skip records.
+
+Exact correction: record actual completed evaluations/iterations for each
+search batch and append an explicit wall-guard skip record for every truncated
+batch and every omitted exact/enum segment, including entry-guard failures.
+Require the configured batch counts for complete. Retain all search constants
+and gate predicates.
+
+Other findings:
+- Reviewed all 764 source lines. Transcribed layout, full-bracket flags,
+  active constants, G1-G4, acceptance conditions, checkpoints, 300/500-second
+  bounds, and coordinator-side classification otherwise match the brief.
+- Manifest and launcher pass. Scope is research; wall/CPU reservations are
+  900/5400 seconds, within caps. src/run02.py closes the payload's local
+  source dependencies. Imports contain only stdlib, Stim, and NumPy. Launcher
+  invokes run_one ... run "02".
+- Scientific controls distinguish deterministic graphlike-distance evaluation
+  from Monte Carlo gradient sampling. Exact optimality is restricted to
+  fixed-order flag subsets. D5 cap-hit remains limit-expiry. G2 establishes
+  increasing sampled observable-flip rates, not a decoded threshold.
+- Dry-run evidence supports the unguarded path. Self-tests pass; all four
+  gates pass; wall 71.914 s with zero skips. Greedy matches the 256-mask exact
+  optimum at 72 CNOTs, zero flags, d_eff=3, versus canonical 120. D5 records
+  150/150 cap-hit. All expected witnesses exist.
+- Recomputed screen_files matches 731cb125... at review time.
+- Binding note: reviewer compared against root overnight-envelope.json
+  authoritative values e10ce85a… / 3b3f3f7… / 0d6a57dd… (identical to filed
+  bindings; no mismatch after normalization).
+
+Disposition: bounded fix applied post-review (per-batch n_evaluated/iters_done
++ truncated/entry-guard skip records + tightened complete); new screen_files
+3f13c56620e25bdeb0324d0782e52c7a7ffdbc6e319daa7f606a6c9ffff59389; fresh
+attempt-2 review requested. No files changed by reviewer; no workload
+launched; no further delegation by reviewer.

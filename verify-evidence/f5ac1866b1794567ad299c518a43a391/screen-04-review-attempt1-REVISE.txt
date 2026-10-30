@@ -1,0 +1,45 @@
+Screen 04 independent review — attempt 1 (REVISE)
+Reviewer: codex-pstack/gpt-6.1-sol (reasoningEffort=high, serviceTier=default)
+Date: 2026-10-29 PDT. Run: f5ac1866b1794567ad299c518a43a391.
+Staged screen_files at review time: 244c822144f56fb4426c83dd4e701fe9b8880cd8f25f3223baed77f956f405dc
+(superseded by MWPM-timeout guard fix; see attempt 2).
+
+Verdict: REVISE. One bounded correction required.
+
+Blocking finding: an MWPM timeout leaves mrec["mwpm"] = None and appends
+that record. Finalization then calls .get("n_evaluated") on None at
+run04.py:1406. With all nine subset records present, this raises
+AttributeError before results.json is written, contradicting the brief's
+promise that every skip path publishes.
+
+Exact correction: replace m.get("mwpm", {}).get("n_evaluated") with
+(m.get("mwpm") or {}).get("n_evaluated") in the mwpm_full predicate. A
+timed-out subset must produce mwpm_full = False and permit final
+publication.
+
+Other findings:
+- Reviewed all 1,524 source lines. Tiling, erasure propagation, HYB peel +
+  shared UF routine, flag-free HYB/UF equivalence, disclosed pulp matching
+  arm, constants, G1-G4 predicates, gradient check, joint Pareto rule, and
+  coordinator-side PURSUE/REJECT classification match the substantive brief.
+  Payload verdict remains unresolved-with-reason. Minor doc caveats: stale
+  module docstring describing set-cover growth; phrase "every kernel
+  pattern" where self-tests exercise eight injection cases.
+- Command scope research; wall/CPU 900/5400 within caps. Source closure
+  complete (stdlib, stim, numpy/scipy, pulp only). No prohibited
+  implementation outside the disclosed pulp arm. run.sh follows the
+  supervisor pattern.
+- Dry evidence internally consistent: 45/45 cells + 9/9 MWPM subsets, zero
+  skips, 79.847 s. Self-tests pass; tiny solved + pulp agreement; target
+  hit its own 20,000-node cap at node 20,001. G1 0/9 HYB wins (2/9
+  MWPM-subset directional wins); G2/G3/G4 pass. REJECT-condition true.
+  HYB 0.534 vs MWPM 31.432 ms/shot. Successful path does not exercise the
+  timeout defect.
+- Recomputed screen_files matched 244c8221… at review time. Config, tool,
+  input, preparation, pilot hashes matched supplied values and live
+  envelope; prior receipt bindings/evidence also matched.
+
+Disposition: bounded fix applied post-review; new screen_files to be
+reported by workhorse with dry re-verification; fresh attempt-2 review
+requested. No files changed by reviewer; no workload launched; no further
+delegation by reviewer.
