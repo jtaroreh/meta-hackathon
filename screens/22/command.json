@@ -1,0 +1,1 @@
+{"command": ["{python}", "-B", "{root}/screens/22/src/run22.py", "--attempt", "{attempt}", "--data", "{data}"], "cpu_limit_sec": 5400, "scope": "research", "source_files": ["src/run22.py"], "wall_limit_sec": 900}
