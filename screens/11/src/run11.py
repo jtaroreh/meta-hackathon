@@ -211,6 +211,10 @@ def apply_choice(size, place, phonon, gate, choice):
         m = a if mover == "a" else b
         t = b if mover == "a" else a
         src, dst = place[m], place[t]
+        # dst is the mover's goal (the partner site) for the whole
+        # choice: the displacement walk below uses its own cursor so
+        # a full target still routes the mover to the cleared
+        # partner site, never to the displaced ion's free site.
         if occ.get(dst, 0) >= TRAP_CAP:
             other = next(i for i, s in enumerate(place)
                          if s == dst and i != t)
@@ -228,13 +232,14 @@ def apply_choice(size, place, phonon, gate, choice):
             if occ.get(dst, 0) >= TRAP_CAP:
                 phonon[other] += HEAT_SPLIT
                 d["heat"] += HEAT_SPLIT
+            cur = dst
             for step in rt[0]:
-                occ[dst] -= 1
-                dst = step
-                occ[dst] = occ.get(dst, 0) + 1
+                occ[cur] -= 1
+                cur = step
+                occ[cur] = occ.get(cur, 0) + 1
                 phonon[other] += HEAT_HOP
                 d["heat"] += HEAT_HOP
-                if dst != tgt and occ[dst] > 1:
+                if cur != tgt and occ[cur] > 1:
                     phonon[other] += HEAT_MERGE
                     d["heat"] += HEAT_MERGE
             d["turns"] += rt[1]
@@ -655,6 +660,14 @@ def self_tests():
                    seed_rng(0, 0, 7, 999), None)
         if tr["stopped"] or not tr["valid"]:
             out["failed"].append("tiny-R-valid: %r" % (tr,))
+        dplace = [(0, 0), (1, 1), (1, 1)]
+        dphon = [0.0, 0.0, 0.0]
+        dd = apply_choice(3, dplace, dphon, (0, 1),
+                          ("a", "short", False))
+        if (dd is None or dplace[0] != (1, 1)
+                or dplace[1] != (1, 1) or dplace[2] != (0, 0)):
+            out["failed"].append(
+                "displacement-colocation: %r %r" % (dd, dplace))
         tex = exact_opt(ti, tg, TINY_SIZE, EXACT_CAP, None)
         if (tex["status"] != "solved" or tex["best"] is None
                 or abs(tex["opt_infid"] - ts["infid"]) > 1e-9):
