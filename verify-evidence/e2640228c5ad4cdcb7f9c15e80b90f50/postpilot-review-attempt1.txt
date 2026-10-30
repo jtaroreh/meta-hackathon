@@ -1,0 +1,45 @@
+# Postpilot-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: e2640228c5ad4cdcb7f9c15e80b90f50
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: postpilot-review-e2640228-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, tests, workloads, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+Verdict PASS.
+
+**Bindings (independently recomputed, not trusted from prose)**
+
+- `input_hash`: SHA-256 of frozen SOURCES.md recomputes to `452cca18481cc10fcd25e129d19d0785c0396090f21e0608fd5eed36cc017b31`, matching overnight-envelope.json:42.
+- `preparation_hash`: SHA-256 of preparation.json recomputes to `44911ee254c7e7974218779bdeafe0de2f434566a89ab3e99e6c68850a8decf6`, matching overnight-envelope.json:48.
+- `pilot_hash`: SHA-256 of the pilot receipt.json recomputes to `9dc5a87bfe0cc6ca540089d1bfe87f6d7419f687f9c11bb0c32bbf2ef5fd1af0`, matching overnight-envelope.json:45. This is the receipt hash defined at run_one.py:142, distinct from `pilot.json` hash `a782845d…` recorded as `pilot_artifact_sha256`.
+- Postpilot artifacts are exactly `{preparation: 44911ee2…, pilot: 9dc5a87b…}`, the map required at run_one.py:58. Tool/config hashes also recompute to the envelope values `b6b50ec6…` / `b114e0fd…`.
+- Both receipt `artifact_hashes` maps re-verify exactly against the on-disk trees (64 files preparation, 38 files pilot), including algebra.json `8a12f174…` and exact_decode.json `5ccdd6dd…`. All 27 manifest entries in SOURCES.md hash-match with no injected or missing frozen files.
+
+**Preparation**
+
+- preparation.json has `ok: true` with verified `proof.ok: true`; all proof steps (`make_shared`, `native_load`, `native_checks`, `tiny_baselines`) are `ok: true`.
+- Prepare stdout.log shows the `cc … -dynamiclib` build, `PASS: 45 checks, 0 failures`, `graysynth tiny ok: 8 gates`, `pmh tiny ok: 3 gates`, and `pyzx tiny ok`.
+
+**Pilot**
+
+- pilot.json has `ok: true`, `disposition: unresolved`, `gate3_timeout_claim: false`, infrastructure/control-only scope, and the same verified proof chain. The pilot receipt.json records `pilot_ok: true` and `scientific_disposition: unresolved`. No pursue recommendation appears in the pilot artifacts.
+- The explicit n=6 control in algebra.json is `OPTIMAL` with `time_limit_s: 5.0`, `elapsed_s: 0.85`, primal/dual `12/12.0`, gap `0.0`, `incumbent_syndrome_verified: true`, and `timeout_is_proof: false`. The outer 60 s bound is the subprocess timeout at pilot_18.py:26; total algebra `runtime_s` is `3.605`.
+
+**Execution, resources, cleanup, preflight**
+
+- Both attempts are `finished` with `exit:0` and `cleanup_verified: true`.
+- Reservations were 1200 CPU-capacity s each against wait4-measured `0.762584` s and `4.714361` s; wall times were `1.533` s and `5.248` s. Stdout was 1018 and 2141 bytes, well under the 5 MiB cap. Peak sampled RSS (142,524,416 / 184,532,992) and output (1,065,475 / 1,443,722) are well under the limits.
+- Launch preflight in both receipts shows `power: ac` with disk free above the 8 GiB start threshold and available memory above the 4 GiB threshold, with all required modules present.
+
+This PASS establishes infrastructure evidence only. It does not establish scientific merit or any of the four gates, and the pilot never recommends pursue. Files changed: none. No supervisor, workload, background process, or sub-delegation was started.
+
+## Coordinator grounding (same session)
+
+Postpilot review attempt 1 of max 2 for run e2640228: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). One provider
+attempt spent, no fallback, no timeout. A matching PASS receipt with
+input_hash bindings opens broader research screens in the relay order
+07 → 12 → 19 → 24 for this run.

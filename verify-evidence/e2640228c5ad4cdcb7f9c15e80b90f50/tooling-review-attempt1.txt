@@ -1,0 +1,52 @@
+# Tooling-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: e2640228c5ad4cdcb7f9c15e80b90f50
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: tooling-review-e2640228-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, tests, workloads, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+Verdict PASS.
+
+**Hash bindings (independently recomputed, two routes agree)**
+
+- `tool_hash`: repo function receipts.py:26 and a manual hashlib/canonical-JSON recomputation over the 31 hashed files both yield `b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b`, equal to overnight-envelope.json:20.
+- `config_hash`: `digest(config)` (envelope.py:30) and manual canonical JSON both yield `b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974`, equal to the envelope value. Envelope also matches run_id `e2640228…`, capacity 10, cutoff 900, global 28800, empty attempts, no blocker (overnight-envelope.json:5); deadline − created = 28800.0 s exactly.
+
+**Frozen targets**
+
+- receipts.py TARGETS:12, overnight-config.json:2, and the literal prompt in OVERNIGHT_LAUNCH.md:75 all pin workhorse `muse/muse-spark-1.3-contributor` xhigh, advisor `muse/muse-wonder-1.0` max, takeover `codex-pstack/gpt-6.1-sol` high/default; `config["targets"] == TARGETS` verified programmatically, and run_one.py:28 refuses any drift. The existing capabilities receipt's evidence hash re-verifies and the raw response advertises all three targets with the required option values.
+
+**Supervisor ownership / cleanup / recovery**
+
+- Session-wide enumeration skips PID ≤ 0 and zombies (supervisor.py:55); every signal is re-checked against `(pid, create_time)` before delivery (supervisor.py:70); TERM→KILL cleanup requires a live ownership anchor or the persisted payload anchor, else it blocks (supervisor.py:81). Worker identity is persisted before `go.json` is written (supervisor.py:358), a crash before acknowledgement cannot start the payload, and `reconcile` blocks on identity mismatch, missing CPU receipt, or survivors (supervisor.py:391).
+
+**Resource policy matches code**
+
+- 28800 global / 900 cutoff (run_one.py:22); per-screen cap 7200 CPU / 9000 wall enforced at launch (run_one.py:94); prepare and pilot are 120 wall / 1800 CPU (overnight-config.json:26, screens/18/command.json:1). Reservations are `allowance × capacity`, charged and saved in `begin_attempt` before spawn, never refunded, with overrun debit-plus-block (envelope.py:177, envelope.py:196). Constants match the stated policy: 4 GiB RSS/available, 8/6 GiB disk, 100 MiB attempt, 2 GiB global (preflight.py:11); stdout capped at 5 MiB during writes (supervisor.py:28); numerical threads forced to 2 after all other env updates (supervisor.py:38).
+
+**Receipt gates**
+
+- Capabilities require `validated_targets` exactly `TARGETS` with hash-bound raw evidence (receipts.py:66); reviews require verdict `PASS`, reviewer exactly the Wonder advisor target, and exact artifact bindings (receipts.py:73); preparation/pilot/screen chains verify manifest, input, pilot artifact hashes, postpilot and per-screen `screen_files` before any broader launch (run_one.py:38).
+
+**Pilot 18 staging and delta**
+
+- screens/18/brief.md:1, command.json:1 (`scope: infrastructure`, empty `source_files`, module command), and run.sh:1 are coherent infrastructure-only staging; the pilot repeats proof on a fresh exec copy and never claims Gate 3 (pilot_18.py:14).
+- Git verified: HEAD `65bde18`, clean tracked tree; the only hashed-path change since `7891811` is `tests/test_stage_run.py` in commit `0659d16` (test_stage_run.py:141, ambient-envelope-independent exit-3/`"blocked"` assertion, test-only); seal commits `e11bc87`/`65bde18` touch no hashed file. Suite not rerun per instructions; inspection count is 55 test definitions plus 7 parametrized expansions = 62 cases.
+
+**Files inspected:** the envelope, config, OVERNIGHT_LAUNCH.md:1, docs/overnight-contract.md:1, docs/cloud-swarm-readiness-plan.md:1, handoff sections 1–4, every `tools/overnight/*.py` (plus hashed `tools/__init__.py`), every `tests/*.py`, and all three `screens/18` files, in full. The stale Codex-advisor prose and 58/58 line are noted as the coordinator-reconciled non-blocking residual; operative config, code, prompt, and receipts pin the Wonder advisor fail-closed.
+
+Files changed: none (git status identical to pre-review). Processes started: none — no supervisor, workload, test suite, or sub-delegation; only read-only file, git, and hash-recomputation commands. This PASS opens preparation and the infrastructure pilot 18 only, never broader research.
+
+## Coordinator grounding (same session)
+
+Tooling review attempt 1 of max 2 for run e2640228: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match, verified from the
+delegate result's provider/model/options). One provider attempt spent, no
+fallback, no timeout, no pending child runs. Tracked tree verified clean
+(the reviewer confirmed git status identical to pre-review). The reviewed
+bytes are identical to stillborn run 52491511's PASS, re-inspected in full
+with dual-route hash recomputation — no receipt or verdict carried over.
+This PASS opens preparation and the infrastructure pilot only.

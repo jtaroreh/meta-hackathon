@@ -1,0 +1,31 @@
+# Screen-12-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: e2640228c5ad4cdcb7f9c15e80b90f50
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: screen-12-review-e2640228-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, tests, workloads, background processes, subtasks, or payload/dry-run executions started.
+
+## Verbatim verdict (delegate_task summary)
+
+Verdict PASS.
+
+- **Hash (1):** Recomputed via `screen_artifacts('/Users/joeltaroreh/projects/challenges/meta-hackathon','12')` from receipts.py:99: `3e8bde6a2b5d6066d673bf6592f4b7e29fe29cf53fbfc65d5f5ddcee2895268e` — matches expected. Directory contains only `brief.md`, `command.json`, `run.sh`, `src/run12.py`.
+- **Closure (2):** command.json:1 is `scope=research`, `cpu_limit_sec=5400`, `wall_limit_sec=900`, `source_files=["src/run12.py"]`. Payload imports only stdlib (`argparse,json,math,os,time`) + `numpy` at run12.py:18; all `open(...)` calls are writes (`selftest.json`, checkpoints, `gate3_*.json`, `cells.json`, `results.json`); no local data files are read (`--data` parsed but unused for input).
+- **Hypothesis/corpus/gates (3):** Frozen §12 hypothesis (40 wires on 16 physical, no SWAP-depth blow-up) at frozen CLOUD_SWARM_RESEARCH_PATHS.md:220, first screen and continue-only-if at lines 222–226. Code implements `FAMILIES=(24,32,40)`, `PHYS_N=16`, `GRID_W=4`, `SEEDS=(1..5)`, `N_INST=36`, `ARMS=(G,B,A,R)` at run12.py:26. Exact gates: G1 `g1_beats and tiny_ok and determinism_ok` at run12.py:888; G2 `n_families_spread_pass>=2` via run12.py:940 and spread rule at line 607; G3 `tiny_solved and target_cap` (cap-hit only) at lines 942–945; G4 `complete and wall<WALL_LIMIT_S(500) and clean` at lines 954–955. Joint acceptance requires same-arm CNOT win `>2*SE` plus depth `<=G` at ≥2 families at lines 919–922, 938–939.
+- **Lessons/guards (4):** `WALL_GUARD_S=300` at run12.py:45, checked before tiny/target/family/cell/arm/rep batches and inside beam/anneal/exact loops (lines 319, 393, 443, 750, 765, 781, 787, 830, 837). Skip records carry `iters_done`/`n_evaluated` on tiny/target entry guards (lines 752–753, 767–768), per-cell/per-family exits (lines 821–825, 832–840). None-guards present in `pooled_stats`/`spread_win`/joint-win and solver best handling (lines 591, 602, 574–585, 914–929). Dry-run 74.4 s / zero skips disclosed at brief.md:69; not re-executed per instruction.
+- **Baseline disclosure (5):** No MILP/SMT/OLSQA/Vandaele/Lau/PhasePoly/torch implementation; disclosed in brief.md:105 and payload design at run12.py:1012. Only exact baseline is the bounded DFS (`exact_opt`).
+- **Determinism (6):** Fixed `SEEDS` and deterministic `seed_rng` at run12.py:62; post-corpus G/R repeat equality checked at lines 865–874.
+- **Outputs/checkpoints (7):** `results.json` written at run12.py:1055; witnesses/checkpoints after self-test, tiny, targets, each family, and corpus at lines 730–775, 845–850.
+- **Verdict + eviction/limits (8):** Payload verdict is always `unresolved-with-reason` at run12.py:1010. Evictions are costed never free: `+6` CNOTs / `+2` time in `eval_schedule` at lines 192–193, beam penalty at line 311, exact branch at lines 474–475; A/B final metrics come through `eval_schedule`. Limitation/next-experiment matches at brief.md:112 and reason text at run12.py:979.
+
+Files changed: none. Processes started: none (payload not executed).
+
+## Coordinator grounding (same session)
+
+Screen-12 review attempt 1 of max 2 for run e2640228: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). One provider
+attempt spent, no fallback, no timeout. Staged files were integrated
+from the workhorse worktree byte-identical (diff -r clean) before this
+review, and the reviewed hash matches the integrated bytes. A matching
+PASS receipt opens supervised run 12 via run.sh (== run_one run 12).

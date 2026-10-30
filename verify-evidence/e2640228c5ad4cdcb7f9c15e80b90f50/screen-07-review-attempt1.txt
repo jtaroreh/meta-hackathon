@@ -1,0 +1,57 @@
+# Screen-07-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: e2640228c5ad4cdcb7f9c15e80b90f50
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: screen-07-review-e2640228-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, tests, workloads, background processes, subtasks, or payload/dry-run executions started.
+
+## Verbatim verdict (delegate_task summary)
+
+Verdict PASS.
+
+**Hash and closure**
+
+- Recomputed `screen_files` via receipts.py:99: `7d6dd15cf723b5668c72c6843d83ed29db6b34367225c23e76050eefa07521eb`. It matches the expected value.
+- command.json:1 has `scope: research`, `cpu_limit_sec: 5400`, `wall_limit_sec: 900`, and `source_files: ["src/run07.py"]`.
+- Closure is complete. The payload imports only stdlib plus numpy at run07.py:19. It reads no local data files. Its opens are output writes. The screen directory contains only `brief.md`, `command.json`, `run.sh`, and `src/run07.py`.
+
+**Frozen §07 implementation**
+
+- Frozen bar is dynamic policies beating static FIFO across plausible ranges, with modeled results labeled, at frozen CLOUD_SWARM_RESEARCH_PATHS.md:142.
+- Hypothesis matches at brief.md:12. Modeled-only and no-hardware-claim limitation is at brief.md:115.
+- Corpus is coded as 3 regimes, seeds 1–5, and 4 arms at run07.py:27. Regime parameters are at run07.py:31. `N_REP = 400` is at run07.py:50.
+
+**Exact gates and acceptance**
+
+- G1 is coded as beats-all-15 plus tiny and determinism at run07.py:641.
+- G2 uses pooled `{S,B,C}` spread `> 2*SE` and requires at least 2 regimes at run07.py:655 and run07.py:705.
+- G3 requires tiny solved with optimum 156, and the target only passes on exact status `cap-hit`, at run07.py:707. Solved, stopped-guard, or skipped-guard targets therefore fail.
+- G4 requires complete cells, tiny and target records present, wall `< 500`, and zero skips at run07.py:712. Cell completeness is enforced through `n == n_rep` at run07.py:578.
+- Acceptance requires the same arm in `{B,C}` to win pooled volume by `> 2*SE` and not regress stalls, at at least 2 regimes, at run07.py:678 and run07.py:725.
+
+**Lessons, determinism, and outputs**
+
+- Entry-guard skips for tiny and target are explicit at run07.py:507 and run07.py:523. Regime, cell, arm, rep, and stopped-simulation exits produce skip records through run07.py:538 and run07.py:590.
+- Completed batches publish counts through arm `n` records and skip `iters_done`/`n_evaluated` fields at run07.py:566.
+- Wall guard is 300 s against the 500 s Gate-4 limit at run07.py:53. It is checked before regimes, cells, arms, rep batches, simulation cycles, and exact-solver node batches. The disclosed dry run is 87.4 s with zero skips at brief.md:74. It was not re-executed in this inspect-only review.
+- Solver paths return dictionaries, and pooled or missing values are None-guarded at run07.py:378 and run07.py:621.
+- All scored randomness uses fixed seeded generators at run07.py:85, run07.py:100, and run07.py:388.
+- `results.json` is written at normal completion at run07.py:823. Per-phase witnesses and checkpoints are written at run07.py:484, run07.py:519, and run07.py:614.
+- The payload verdict remains unresolved-with-reason at run07.py:774. It gives no self-classification beyond reporting pursue or reject condition evidence.
+
+**Baseline and C==B disclosure**
+
+- Baseline disclosure explicitly excludes MILP, SMT, OLSQA, Vandaele, Lau, PhasePoly, and torch at brief.md:108.
+- C matching B is recorded as a finding, not a separate win, at brief.md:37. The limitation repeats that C adds no further gain over B at brief.md:118. Acceptance counts one winner per regime, preferring B when both jointly pass, at run07.py:690.
+
+Files changed: none. Payload, supervisor, workload, background process, child, or sub-delegation started: none.
+
+## Coordinator grounding (same session)
+
+Screen-07 review attempt 1 of max 2 for run e2640228: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). One provider
+attempt spent, no fallback, no timeout. Staged files were integrated
+from the workhorse worktree byte-identical (diff -r clean) before this
+review, and the reviewed hash matches the integrated bytes. A matching
+PASS receipt opens supervised run 07 via run.sh (== run_one run 07).
