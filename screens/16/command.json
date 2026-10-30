@@ -1,0 +1,1 @@
+{"command": ["{python}", "-B", "{root}/screens/16/src/run16.py", "--attempt", "{attempt}", "--data", "{data}"], "cpu_limit_sec": 5400, "scope": "research", "source_files": ["src/run16.py"], "wall_limit_sec": 900}
