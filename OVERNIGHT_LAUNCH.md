@@ -73,9 +73,10 @@ docs/overnight-contract.md, docs/cloud-swarm-readiness-plan.md, and the
 source scientific contracts first. External source checkouts are read-only.
 
 Use session-local role overrides only. Workhorse is
-muse/muse-spark-1.3-contributor with reasoningEffort=xhigh. Advisor and
-bounded takeover are codex-pstack/gpt-6.1-sol with reasoningEffort=high
-and serviceTier=default. Do not change global model settings. Do not
+muse/muse-spark-1.3-contributor with reasoningEffort=xhigh. Advisor is
+muse/muse-wonder-1.0 with reasoningEffort=max; bounded takeover is
+codex-pstack/gpt-6.1-sol with reasoningEffort=high and
+serviceTier=default. Do not change global model settings. Do not
 substitute another provider, model, or unsupported option. An unavailable
 target stops this run with a named blocker.
 
