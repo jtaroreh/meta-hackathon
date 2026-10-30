@@ -39,6 +39,31 @@ TARGET_LIST = [(8, 1, 0), (8, 1, 1)]
 NODE_CAP = 20000
 EXTR_CAP = 8000
 ARMS = ("F", "A", "B", "C")
+# Frozen next-experiment text (finding 3a): byte-identical to the
+# NEXT_EXPERIMENT line in brief.md; interpolated verbatim into the
+# UNRESOLVED reason below.
+NEXT_EXPERIMENT = "12q depth-6 DFS cap-hit regime (probed 20k nodes / ~125 s on 12q seed-2, beyond this screen's 300 s wall-guard budget)"
+
+
+def make_skip(what, reason, iters_done=0, n_evaluated=0):
+    return {"what": what, "reason": reason,
+            "iters_done": int(iters_done),
+            "n_evaluated": int(n_evaluated)}
+
+
+def sa_euler_next(uu, is_euler, accepted):
+    if accepted and is_euler:
+        return uu + 1
+    return uu
+
+
+def r_means(good):
+    if not good:
+        return (None, None, None)
+    n = len(good)
+    return (sum(r["twoq"] for r in good) / n,
+            sum(r["t"] for r in good) / n,
+            sum(r["depth"] for r in good) / n)
 
 
 def zx():
@@ -243,7 +268,9 @@ def matrix_overlap(circ_a, circ_b):
         return None
 
 
-def run_F(g0):
+def run_F(g0, stop=None):
+    if stop is not None and stop():
+        return (False, "stopped-guard", None, g0)
     pyzx = zx()
     g = g0.copy()
     try:
@@ -266,8 +293,10 @@ def run_F(g0):
 def run_A(g0, ztypes, stop=None):
     g = g0.copy()
     cap = max(1, int(INFL_CAP * g0.num_vertices()))
+    stopped = False
     for _ in range(GREEDY_STEP_CAP):
         if stop is not None and stop():
+            stopped = True
             break
         base = score_of(g, ztypes)
         best = None
@@ -279,6 +308,8 @@ def run_A(g0, ztypes, stop=None):
         if best is None:
             break
         g = best
+    if stopped:
+        return (False, "stopped-guard", None, g0)
     ok, why, m = try_extract(g)
     return (ok, why, m, g)
 
@@ -347,11 +378,12 @@ def run_C(g0, ztypes, rng, stop=None):
         if not kids:
             break
         m, g2 = kids[int(rng.integers(len(kids)))]
-        uu = uu + (1 if m[0] == "euler" else 0)
+        is_euler = (m[0] == "euler")
         s2 = score_of(g2, ztypes)
         temp = SA_T0 * (SA_ALPHA ** it)
         accept = s2 <= cur_s or (
             temp > 0 and float(rng.random()) < math.exp(-(s2 - cur_s) / temp))
+        uu = sa_euler_next(uu, is_euler, accept)
         if accept:
             cur, cur_s = g2, s2
             k = graph_key(g2)
@@ -373,8 +405,10 @@ def run_R(g0, ztypes, rng, n_roll, stop=None):
     results = []
     best_g = None
     best_twoq = None
+    stopped = False
     for _ in range(n_roll):
         if stop is not None and stop():
+            stopped = True
             break
         g = g0.copy()
         uu = 0
@@ -388,13 +422,16 @@ def run_R(g0, ztypes, rng, n_roll, stop=None):
             g = g2
         ok, why, m = try_extract(g)
         results.append({"ok": bool(ok), "why": why,
-                        "twoq": m["twoq"] if (ok and m) else None})
+                        "twoq": m["twoq"] if (ok and m) else None,
+                        "t": m["t"] if (ok and m) else None,
+                        "depth": m["depth"] if (ok and m) else None})
         if ok and m is not None and (best_twoq is None or
                                      m["twoq"] < best_twoq):
             best_twoq = m["twoq"]
             best_g = g
-    good = [r for r in results if r["ok"] and r["twoq"] is not None]
-    return results, good, best_g
+    good = [r for r in results
+            if r["ok"] and r["twoq"] is not None]
+    return results, good, best_g, stopped
 
 
 def dfs_exact(g0, ztypes, max_depth, tag, stop=None):
@@ -481,6 +518,112 @@ def self_tests(ztypes):
             r2 = zx().simplify.pivot(g.copy(), u, w)
             if not isinstance(r2, bool):
                 out["failed"].append("pivot-type")
+        # Regression probes, findings 3b/3c/5/10 (forced-stop guards,
+        # skip-record counts, euler allowance, R metric honesty).
+        try:
+            aok, awhy, am, ag = run_A(g, ztypes, stop=lambda: True)
+            if (aok, awhy, am) != (False, "stopped-guard", None) or ag is not g:
+                out["failed"].append("stop-A-guard")
+        except Exception as ex:
+            out["failed"].append("stop-A-raise: %r" % ex)
+        try:
+            import numpy as _np
+            rr, good, _bg, rstopped = run_R(
+                g, ztypes, _np.random.default_rng(0), 3,
+                stop=lambda: True)
+            if rstopped is not True or rr != [] or good != []:
+                out["failed"].append("stop-R-guard")
+        except Exception as ex:
+            out["failed"].append("stop-R-raise: %r" % ex)
+        try:
+            fok, fwhy, fm, fg = run_F(g, stop=lambda: True)
+            if (fok, fwhy, fm) != (False, "stopped-guard", None) or fg is not g:
+                out["failed"].append("stop-F-guard")
+        except Exception as ex:
+            out["failed"].append("stop-F-raise: %r" % ex)
+        try:
+            bok, bwhy, _, _ = run_B(g, ztypes, stop=lambda: True)
+            if (bok, bwhy) != (False, "stopped-guard"):
+                out["failed"].append("stop-B-guard")
+        except Exception as ex:
+            out["failed"].append("stop-B-raise: %r" % ex)
+        try:
+            s = make_skip("probe", "wall-guard", 2, 5)
+            if not (s["what"] == "probe" and s["reason"] == "wall-guard"
+                    and s["iters_done"] == 2 and s["n_evaluated"] == 5):
+                out["failed"].append("skip-fields")
+            s0 = make_skip("probe", "wall-guard")
+            if s0["iters_done"] != 0 or s0["n_evaluated"] != 0:
+                out["failed"].append("skip-defaults")
+        except Exception as ex:
+            out["failed"].append("skip-raise: %r" % ex)
+        try:
+            if not (sa_euler_next(0, True, False) == 0
+                    and sa_euler_next(1, True, False) == 1
+                    and sa_euler_next(0, True, True) == 1
+                    and sa_euler_next(1, False, True) == 1
+                    and sa_euler_next(0, False, False) == 0):
+                out["failed"].append("euler-allowance-rule")
+        except Exception as ex:
+            out["failed"].append("euler-raise: %r" % ex)
+        try:
+            seen = []
+            real_children = children
+
+            def stub_children(cur, zt2, cap, allow_euler):
+                seen.append(bool(allow_euler))
+                if len(seen) <= 2:
+                    g2 = cur.copy()
+                    g2.add_vertex(spider_types()[0],
+                                  phase=__import__("fractions").Fraction(1, 4))
+                    return [(("euler", -1, -2), g2)]
+                return []
+
+            class _FakeRng(object):
+                def integers(self, n):
+                    return 0
+
+                def random(self):
+                    return 0.9999999
+
+            globals()["children"] = stub_children
+            try:
+                run_C(g, ztypes, _FakeRng(), stop=None)
+            finally:
+                globals()["children"] = real_children
+            if seen != [True, True, True]:
+                out["failed"].append("euler-reject-preserves: %r" % seen)
+        except Exception as ex:
+            try:
+                globals()["children"] = real_children
+            except Exception:
+                pass
+            out["failed"].append("euler-behavioral-raise: %r" % ex)
+        try:
+            import numpy as _np2
+            rr2 = run_R(g, ztypes, _np2.random.default_rng(1), 3)[0]
+            if len(rr2) != 3:
+                out["failed"].append("R-n-roll")
+            for r in rr2:
+                if set(("ok", "why", "twoq", "t", "depth")) - set(r):
+                    out["failed"].append("R-rollout-keys")
+                    break
+                if r["ok"] and not (isinstance(r["t"], int)
+                                    and isinstance(r["depth"], int)):
+                    out["failed"].append("R-rollout-metrics")
+                    break
+            m2, mt, md = r_means(
+                [{"twoq": 10, "t": 3, "depth": 5},
+                 {"twoq": 14, "t": 5, "depth": 7}])
+            if (m2, mt, md) != (12.0, 4.0, 6.0):
+                out["failed"].append("R-means")
+            if r_means([]) != (None, None, None):
+                out["failed"].append("R-means-empty")
+            if pooled_stats([]) != {"n": 0, "mean": None, "std": None,
+                                    "se": None}:
+                out["failed"].append("pool-empty")
+        except Exception as ex:
+            out["failed"].append("R-raise: %r" % ex)
     except Exception as ex:
         out["failed"].append("raise: %r" % ex)
     return out
@@ -573,15 +716,25 @@ def main():
         if not init_gf:
             rec["blocked"] = "initial-no-gflow"
             return rec
-        rF = run_F(g0)
+        rF = run_F(g0, over)
         rec["arms"]["F"] = {"ok": rF[0], "why": rF[1], "m": rF[2]}
         rng = arm_rng(seed, size, pi, 11)
-        rr, good, best_g = run_R(g0, ztypes, rng, R_ROLLOUTS, over)
-        if good:
-            ms = [r["twoq"] for r in good]
+        rr, good, best_g, r_stopped = run_R(g0, ztypes, rng, R_ROLLOUTS,
+                                            over)
+        if r_stopped:
+            rec["blocked"] = "stopped-guard"
+            rec["arms"]["R"] = {"ok": False, "why": "stopped-guard",
+                                "mean": None, "best_twoq": None,
+                                "n_ok": len(good), "n_roll": len(rr),
+                                "rollouts": rr, "stopped": True}
+        elif good:
+            m2, mt, md = r_means(good)
             rec["arms"]["R"] = {"ok": True, "why": None,
-                                "mean": {"twoq": float(np.mean(ms))},
-                                "best_twoq": int(min(ms)),
+                                "mean": {"twoq": float(m2),
+                                         "t": float(mt),
+                                         "depth": float(md)},
+                                "best_twoq": int(min(
+                                    r["twoq"] for r in good)),
                                 "n_ok": len(good), "n_roll": len(rr),
                                 "rollouts": rr}
         else:
@@ -646,20 +799,30 @@ def main():
                 cells[(size, seed, a)]["twoq"].append(m["twoq"])
                 cells[(size, seed, a)]["t"].append(m["t"])
                 cells[(size, seed, a)]["depth"].append(m["depth"])
-            rm = rec["arms"]["R"]["mean"]["twoq"]
-            cells[(size, seed, "R")]["twoq"].append(float(rm))
-            cells[(size, seed, "R")]["t"].append(0.0)
-            cells[(size, seed, "R")]["depth"].append(0)
+            # R is a control, never a winner: pooled Gate 2/2t and the
+            # pursue joint-win count only pool {F,A,B,C}, so R's actual
+            # rollout-extracted means below cannot affect gates. R cells
+            # carry actual means (never fabricated zeros).
+            rm = rec["arms"]["R"]["mean"]
+            cells[(size, seed, "R")]["twoq"].append(float(rm["twoq"]))
+            cells[(size, seed, "R")]["t"].append(float(rm["t"]))
+            cells[(size, seed, "R")]["depth"].append(float(rm["depth"]))
             return True
-        skipped.append({"what": "instance %d/%d/%d" % (
-            size, seed, rec.get("pi", -1)), "reason": rec.get(
-                "blocked", "arm-blocked")})
+        arm_whys = [rec["arms"].get(a, {}).get("why")
+                    for a in ("F", "A", "B", "C", "R")]
+        reason = rec.get("blocked") or (
+            "stopped-guard" if "stopped-guard" in arm_whys
+            else "arm-blocked")
+        skipped.append(make_skip("instance %d/%d/%d" % (
+            size, seed, rec.get("pi", -1)), reason, len(instrecs),
+            len(plan)))
         return False
 
     tiny_specs = [(TINY_Q, 0, pi) for pi in range(TINY_N)]
     for (qs, sd, pi) in tiny_specs:
         if over():
-            skipped.append({"what": "tiny-%d" % pi, "reason": "wall-guard"})
+            skipped.append(make_skip("tiny-%d" % pi, "wall-guard",
+                                      gate3tiny["total"], TINY_N))
             gate3tiny["instances"].append({"q": qs, "pi": pi,
                                           "status": "skipped-guard"})
             continue
@@ -669,16 +832,19 @@ def main():
                         stop=over)
         rec["q"] = qs
         gate3tiny["instances"].append(rec)
+        if rec.get("status") == "stopped-guard":
+            gate3tiny["total"] += 1
+            continue
         if rec["status"] == "solved":
             gate3tiny["solved"] += 1
         gate3tiny["total"] += 1
         arms_gap = {}
-        for aname, fn in (("F", lambda: run_F(g0)),
-                          ("A", lambda: run_A(g0, ztypes)),
-                          ("B", lambda: run_B(g0, ztypes)),
+        for aname, fn in (("F", lambda: run_F(g0, over)),
+                          ("A", lambda: run_A(g0, ztypes, over)),
+                          ("B", lambda: run_B(g0, ztypes, over)),
                           ("C", lambda: run_C(
                               g0, ztypes,
-                              arm_rng(sd, qs, pi, 22)))):
+                              arm_rng(sd, qs, pi, 22), over))):
             try:
                 ok, _, m, _ = fn()
             except Exception as ex:
@@ -703,8 +869,9 @@ def main():
     while idx < len(plan):
         if over():
             for (s2, sd2, p2) in plan[idx:]:
-                skipped.append({"what": "instance %d/%d/%d" % (s2, sd2, p2),
-                                "reason": "wall-guard"})
+                skipped.append(make_skip(
+                    "instance %d/%d/%d" % (s2, sd2, p2),
+                    "wall-guard", idx, len(plan)))
             break
         size, seed, pi = plan[idx]
         rec = run_instance(size, seed, pi)
@@ -719,8 +886,9 @@ def main():
 
     for (qs, sd, pi) in TARGET_LIST:
         if over():
-            skipped.append({"what": "target-%d-%d-%d" % (qs, sd, pi),
-                            "reason": "wall-guard"})
+            skipped.append(make_skip("target-%d-%d-%d" % (qs, sd, pi),
+                                      "wall-guard", len(gate3targets),
+                                      len(TARGET_LIST)))
             gate3targets.append({"q": qs, "seed": sd, "pi": pi,
                                  "status": "skipped-guard"})
             continue
@@ -730,6 +898,8 @@ def main():
                         "target-%d-%d-%d" % (qs, sd, pi), stop=over)
         rec["q"] = qs
         gate3targets.append(rec)
+        if rec.get("status") == "stopped-guard":
+            continue
     with open(os.path.join(witdir, "gate3_targets.json"), "w") as f:
         json.dump(gate3targets, f, indent=1, default=str)
     checkpoint("targets")
@@ -875,11 +1045,11 @@ def main():
             "CNOT wins=%d/3, g1=%s g2=%s g2t=%s g3=%s (tiny %d/%d, " \
             "targets solved=%s cap-hits=%d) selftest=%s g4=%s " \
             "complete=%s skipped=%d; hardness boundary not reached " \
-            "within caps — next: 12q targets, probed cap-hit regime " \
-            "beyond this screen's wall budget)." % (
+            "within caps — next: %s)." % (
                 win_n, strict_n, g1_all, g2_ok, g2t_ok, g3pass,
                 gate3tiny["solved"], gate3tiny["total"], targets_solved,
-                target_hits, selftest_ok, g4_ok, complete, len(skipped))
+                target_hits, selftest_ok, g4_ok, complete, len(skipped),
+                NEXT_EXPERIMENT)
     verdict_bits = {
         "gate1": {"pass": bool(g1_all), "cells": g1_cells,
                   "matrix_all_pass": bool(matrix_ok),

@@ -94,6 +94,7 @@ Controls:
   on 12q seed-2 — beyond this screen's 300 s wall-guard budget), so the
   limit-expiry regime is documented but not gated here; it is the
   recorded next experiment.
+NEXT_EXPERIMENT: "12q depth-6 DFS cap-hit regime (probed 20k nodes / ~125 s on 12q seed-2, beyond this screen's 300 s wall-guard budget)"
 - Gate 4: every planned cell complete (extracted metrics for F/A/B/C +
   R stats on all 45 instances; tiny + target DFS records present) AND
   payload wall time < 500 s.
