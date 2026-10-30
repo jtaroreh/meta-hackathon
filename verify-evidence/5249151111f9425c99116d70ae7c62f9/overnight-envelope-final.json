@@ -1,0 +1,39 @@
+{
+  "active_screen": null,
+  "attempts": [
+    {
+      "attempt_id": "prepare-a01",
+      "cpu_reserved_sec": 1200,
+      "cpu_seconds": 0.367719,
+      "deadline": 1793359970.459413,
+      "disposition": "unresolved",
+      "ended_at": 1793359855.258444,
+      "evidence_path": "/Users/joeltaroreh/projects/challenges/meta-hackathon/overnight-data/5249151111f9425c99116d70ae7c62f9/attempts/prepare-7b5aeb922c064522a2da76145ba4336d",
+      "execution_reason": "BlockedError: available memory below 4 GiB",
+      "execution_status": "resource_killed",
+      "pid": 97821,
+      "pid_create_time": 1793359853.960007,
+      "screen_id": "prepare",
+      "started_at": 1793359853.959423
+    }
+  ],
+  "blocked_reason": "unrecoverable local execution failure; stop this run",
+  "capacity": 10,
+  "config_hash": "b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974",
+  "cpu_used_sec": 1200.0,
+  "created_at": 1793359429.9180758,
+  "cutoff_sec": 900,
+  "global_cpu_budget_sec": 28800,
+  "input_hash": "",
+  "original_deadline": 1793388229.9180758,
+  "output_root": "/Users/joeltaroreh/projects/challenges/meta-hackathon/overnight-data/5249151111f9425c99116d70ae7c62f9",
+  "pilot_hash": "",
+  "pilot_receipt": "",
+  "preparation": "",
+  "preparation_hash": "",
+  "run_id": "5249151111f9425c99116d70ae7c62f9",
+  "screen_started_at": {
+    "prepare": 1793359853.959423
+  },
+  "tool_hash": "b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b"
+}

@@ -1,0 +1,69 @@
+# Tooling-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: 5249151111f9425c99116d70ae7c62f9
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: tooling-review-52491511-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, tests, workloads, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+Verdict PASS.
+
+**Recomputed bindings (independent, read-only via repo digest functions)**
+
+- `tool_hash` recomputed = `b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b` — equals overnight-envelope.json:20 and the expected value. Coverage is as implemented in tools/overnight/receipts.py:26: `tools/**/*.py`, `tests/**/*.py`, all `screens/18` files, OVERNIGHT_LAUNCH.md, docs/overnight-contract.md, docs/cloud-swarm-readiness-plan.md.
+- `config_hash` recomputed via `envelope.digest(canonical JSON)` = `b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974` — equals the envelope and expected value.
+- Envelope: `run_id 5249151111f9425c99116d70ae7c62f9`, `created_at + 28800 == original_deadline (1793388229.9180758)`, `cutoff_sec 900`, `global_cpu_budget_sec 28800`, `capacity 10`, zero attempts/CPU, no blocker.
+
+**Frozen targets**
+
+- overnight-config.json:2 `targets` is exactly equal to tools/overnight/receipts.py:12 TARGETS: workhorse `muse/muse-spark-1.3-contributor xhigh`, advisor `muse/muse-wonder-1.0 max`, takeover `codex-pstack/gpt-6.1-sol high/default`. `load_config` rejects any drift (run_one.py:28).
+- Already-filed `receipts/capabilities.json` in the run output: `validated_targets == TARGETS`, bindings match the envelope, `observed_at (1793359486) >= created_at`, `valid_until == deadline`, and its evidence hash recomputes over `capabilities-raw.json`. The raw evidence advertises all three targets with the required option values (muse wonder `max`, spark `xhigh`, codex-pstack sol `high` + `serviceTier default`). No `tooling-review.json` exists yet — this PASS is the review that permits the coordinator to file it.
+
+**Supervisor, ownership, resources (items 3–4)**
+
+- Session-wide enumeration by `getsid`, zombies excluded, PID ≤ 0 skipped before any `getsid` call (supervisor.py:55); creation-time identity rechecked before every signal (supervisor.py:46); TERM→KILL cleanup with leader/payload-anchor uncertainty failing closed (supervisor.py:81); worker writes `owner.json` and waits for `go.json`, parent persists worker PID/creation time before issuing `go` (supervisor.py:282, supervisor.py:354); reconcile uses persisted owner/payload identity and blocks on missing CPU receipts (supervisor.py:391).
+- Reservations are charged in `begin_attempt` before fork/spawn and never refunded; overrun or uncertain cleanup blocks the run (envelope.py:177, envelope.py:196).
+- Policy matches code: 28800 global (run_one.py:22); per-screen cap 7200 CPU / 9000 wall enforced against config (run_one.py:94); prepare and pilot specs are 120 wall / 1800 CPU (overnight-config.json:26, screens/18/command.json:3); 900 s no-launch cutoff checked at admission, handshake, and pre-spawn; 4 GiB RSS/available-memory, 8 GiB start / 6 GiB stop disk, 100 MiB attempt / 2 GiB global output (preflight.py:11); stdout capped at 5 MiB during writes and numerical threads forced to 2 after all other env updates (supervisor.py:28, supervisor.py:38).
+
+**Receipt gates (item 5)**
+
+- Exact `validated_targets` match required (receipts.py:66); review gates require `verdict == PASS`, `reviewer == TARGETS["advisor"]`, exact artifact dicts, scoped/hash-verified raw evidence, and time validity (receipts.py:50); preparation/pilot/screen bindings chain through `verify_inputs`, pilot artifact re-verification, postpilot and per-screen `screen_files` hashes (run_one.py:38, receipts.py:80). Production code has no fixture/power bypass; the fixture CLI is test-only and refuses real commands (tests/fixture_cli.py:12).
+
+**Pilot 18 staging (item 6)**
+
+- screens/18/brief.md:1, command.json:1, and run.sh:1 are coherent with pilot_18.py:14 and proof.py:61: fresh verified exec copy, native proof plus GraySynth/PMH/pyZX controls, n=6 algebra control with 5 s solver / 60 s outer limits, `gate3_timeout_claim: false`, unresolved disposition, named missing baselines. Infrastructure only.
+
+**Single delta (item 7)**
+
+- `git show 0659d16`: one file, `tests/test_stage_run.py`, 2 insertions / 1 deletion at the shell-entry assertion (tests/test_stage_run.py:133). It replaces the ambient-state-dependent `"No such file"` assertion with exit-3 + no-Traceback + `"blocked"` JSON assertions. Test-only and assertion-scoped; no production byte changed (covered-path diff `7891811..HEAD` is only this file, plus non-covered handoff docs in `e11bc87`). Per instruction the suite was not rerun; inspected collection arithmetic totals 62, consistent with the reported 62/62, and the changed assertion is satisfiable in every ambient envelope state because `run_one.main` converts failures to exit-3 `{"blocked": …}` JSON.
+
+**Files inspected**
+
+Envelope, `overnight-config.json`, `OVERNIGHT_LAUNCH.md` (including the literal prompt), `docs/overnight-contract.md`, `docs/cloud-swarm-readiness-plan.md`, `docs/overnight-continuation-handoff.md` §§1–4, all 12 `tools/overnight/*.py`, all 12 `tests/*.py`, and `screens/18/{brief.md,command.json,run.sh}`, plus the filed capabilities receipts and the `0659d16` diff.
+
+**Scope and residual notes**
+
+- This PASS opens preparation and the infrastructure pilot only, never broader research.
+- Non-blocking for that scope, but must be reconciled before any postpilot/screen delegation: stale advisor prose at docs/cloud-swarm-readiness-plan.md:19 and docs/overnight-continuation-handoff.md:91 still names Codex as advisor, and the launch status line still says 58/58. The operative prompt, contract, config, and code all pin the Wonder advisor, and receipts.py:73 rejects any wrong-reviewer receipt fail-closed; the stale docs need correction at the next tooling amendment (which requires a fresh envelope, since the plan is tool-hashed).
+- Files changed: none. Supervisor/workload/background processes and sub-delegations started: none; only the instructed read-only hash recomputation was executed.
+
+## Coordinator grounding (same session)
+
+Tooling review attempt 1 of max 2 for this operation: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match, verified from the
+delegate result's provider/model/options). One provider attempt spent, no
+fallback model used, no timeout, no pending child runs. Working tree
+verified unchanged after the review.
+
+Reconciliation of the residual stale-prose note (recorded before any
+postpilot/screen delegation, no frozen file touched): the operative
+reviewer for every review in run 52491511 is the frozen advisor target
+muse/muse-wonder-1.0 reasoningEffort=max per overnight-config.json and
+tools/overnight/receipts.py TARGETS; receipts.py rejects any other
+reviewer fail-closed. The stale Codex-advisor sentences in
+docs/cloud-swarm-readiness-plan.md and docs/overnight-continuation-handoff.md
+and the 58/58 status line are acknowledged as non-operative prose to be
+corrected at the next between-run tooling amendment (fresh envelope).
+This PASS opens preparation and the infrastructure pilot only.
