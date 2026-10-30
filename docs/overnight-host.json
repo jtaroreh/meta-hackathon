@@ -1,0 +1,27 @@
+{
+  "observed_at": "2026-10-29T09:09:59.512722+00:00",
+  "python": "/Users/joeltaroreh/projects/challenges/meta-hackathon/.venv/bin/python",
+  "python_version": "3.14.7",
+  "machine": "arm64",
+  "logical_cpus": 10,
+  "power_source": "battery",
+  "disk_free_bytes": 9895141376,
+  "mem_available_bytes": 3228680192,
+  "module_versions": {
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "pyzx": "0.10.7",
+    "z3-solver": "5.3.2.0",
+    "qiskit": "2.6.1",
+    "stim": "1.16.0",
+    "ldpc": "2.4.1",
+    "bposd": "2.1",
+    "pulp": "4.2.0",
+    "psutil": "7.2.2"
+  },
+  "tools": {
+    "cc": true,
+    "make": true,
+    "caffeinate": true
+  }
+}

@@ -4,3 +4,7 @@ venv/
 __pycache__/
 node_modules/
 .env
+.pytest-tmp/
+.pytest_cache/
+overnight-data/
+overnight-envelope.json*

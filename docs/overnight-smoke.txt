@@ -1,0 +1,8 @@
+ok   milp-highs
+ok   smt-z3
+ok   zx-extract
+ok   bp-osd
+ok   qiskit-synth
+ok   stim-sample
+numpy 2.5.4
+SMOKE PASS: 6/6
