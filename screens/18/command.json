@@ -1,0 +1,7 @@
+{
+  "command": ["{python}", "-B", "-m", "tools.overnight.pilot_18"],
+  "wall_limit_sec": 120,
+  "cpu_limit_sec": 1800,
+  "scope": "infrastructure",
+  "source_files": []
+}
