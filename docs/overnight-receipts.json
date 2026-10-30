@@ -1,0 +1,470 @@
+{
+  "checkout": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270",
+  "synthetic_only_launch_evidence": {
+    "test_documented_chain_and_shel": {
+      "synthetic_only": true,
+      "original_deadline": 1793293773.082667,
+      "cpu_used_sec": 299.44467782974243,
+      "blocked_reason": "",
+      "attempts": [
+        {
+          "attempt": {
+            "attempt_id": "prepare-a01",
+            "cpu_reserved_sec": 100,
+            "cpu_seconds": 0.127525,
+            "deadline": 1793264982.8885899,
+            "disposition": "unresolved",
+            "ended_at": 1793264973.344264,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_documented_chain_and_shel0/fixture/overnight-data/4d4edf4ced3543d29dd0231b39ba1807/attempts/prepare-5e407912f96b4ae58d41300c8e68b4b5",
+            "execution_reason": "exit:0",
+            "execution_status": "finished",
+            "pid": 16671,
+            "pid_create_time": 1793264973.139178,
+            "screen_id": "prepare",
+            "started_at": 1793264973.138597
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_documented_chain_and_shel0/fixture/overnight-data/4d4edf4ced3543d29dd0231b39ba1807/attempts/prepare-5e407912f96b4ae58d41300c8e68b4b5/receipt.json",
+          "receipt_sha256": "9196a0ceb711a2a5f9957d9a7f119452dc9792b621ba53cf2b9c842c700580c0",
+          "execution": {
+            "execution_status": "finished",
+            "execution_reason": "exit:0",
+            "cpu_seconds": 0.127525,
+            "cpu_reserved_sec": 100,
+            "cleanup_verified": true,
+            "log_bytes": 859,
+            "pilot_ok": null,
+            "gate3_timeout_claim": false
+          }
+        },
+        {
+          "attempt": {
+            "attempt_id": "18-a01",
+            "cpu_reserved_sec": 100,
+            "cpu_seconds": 0.123365,
+            "deadline": 1793264983.370817,
+            "disposition": "unresolved",
+            "ended_at": 1793264973.815657,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_documented_chain_and_shel0/fixture/overnight-data/4d4edf4ced3543d29dd0231b39ba1807/attempts/18-dc851fb0fdbc401a8ece23bf809d652e",
+            "execution_reason": "exit:0",
+            "execution_status": "finished",
+            "pid": 16713,
+            "pid_create_time": 1793264973.621417,
+            "screen_id": "18",
+            "started_at": 1793264973.620825
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_documented_chain_and_shel0/fixture/overnight-data/4d4edf4ced3543d29dd0231b39ba1807/attempts/18-dc851fb0fdbc401a8ece23bf809d652e/receipt.json",
+          "receipt_sha256": "114f6f5fa07415806270fe86f031521f4eb2078aea45b3dfefe3a560255d63f1",
+          "execution": {
+            "execution_status": "finished",
+            "execution_reason": "exit:0",
+            "cpu_seconds": 0.123365,
+            "cpu_reserved_sec": 100,
+            "cleanup_verified": true,
+            "log_bytes": 1225,
+            "pilot_ok": true,
+            "gate3_timeout_claim": false
+          }
+        },
+        {
+          "attempt": {
+            "attempt_id": "01-a01",
+            "cpu_reserved_sec": 99.44467782974243,
+            "cpu_seconds": 0.062583,
+            "deadline": 1793264983.737908,
+            "disposition": "unresolved",
+            "ended_at": 1793264974.244384,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_documented_chain_and_shel0/fixture/overnight-data/4d4edf4ced3543d29dd0231b39ba1807/attempts/01-8c095fa8208340cba89a7df550985f58",
+            "execution_reason": "exit:0",
+            "execution_status": "finished",
+            "pid": 16750,
+            "pid_create_time": 1793264974.043983,
+            "screen_id": "01",
+            "started_at": 1793264974.043448
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_documented_chain_and_shel0/fixture/overnight-data/4d4edf4ced3543d29dd0231b39ba1807/attempts/01-8c095fa8208340cba89a7df550985f58/receipt.json",
+          "receipt_sha256": "a61fd903c72a3e2aeaeba51e633a85c58da80b15aa8aaa3eb3304861fd9299f1",
+          "execution": {
+            "execution_status": "finished",
+            "execution_reason": "exit:0",
+            "cpu_seconds": 0.062583,
+            "cpu_reserved_sec": 99.44467782974243,
+            "cleanup_verified": true,
+            "log_bytes": 26,
+            "pilot_ok": null,
+            "gate3_timeout_claim": false
+          }
+        }
+      ]
+    },
+    "test_live_cli_recovery_kills_d": {
+      "synthetic_only": true,
+      "original_deadline": 1793293776.0976388,
+      "cpu_used_sec": 299.42509174346924,
+      "blocked_reason": "interrupted execution reconciled; autonomous launch stopped",
+      "attempts": [
+        {
+          "attempt": {
+            "attempt_id": "prepare-a01",
+            "cpu_reserved_sec": 100,
+            "cpu_seconds": 0.134292,
+            "deadline": 1793264985.906283,
+            "disposition": "unresolved",
+            "ended_at": 1793264976.36235,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_live_cli_recovery_kills_d0/fixture/overnight-data/8ee38cf1641a4289a53e1372dd892bb4/attempts/prepare-ad88f0f6174544bda3762342f6fc947e",
+            "execution_reason": "exit:0",
+            "execution_status": "finished",
+            "pid": 16886,
+            "pid_create_time": 1793264976.156825,
+            "screen_id": "prepare",
+            "started_at": 1793264976.15629
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_live_cli_recovery_kills_d0/fixture/overnight-data/8ee38cf1641a4289a53e1372dd892bb4/attempts/prepare-ad88f0f6174544bda3762342f6fc947e/receipt.json",
+          "receipt_sha256": "8c9cd1a63705fca3611237f3d7ae9817177cb77dbb18b267779ff47d6949b17b",
+          "execution": {
+            "execution_status": "finished",
+            "execution_reason": "exit:0",
+            "cpu_seconds": 0.134292,
+            "cpu_reserved_sec": 100,
+            "cleanup_verified": true,
+            "log_bytes": 859,
+            "pilot_ok": null,
+            "gate3_timeout_claim": false
+          }
+        },
+        {
+          "attempt": {
+            "attempt_id": "18-a01",
+            "cpu_reserved_sec": 100,
+            "cpu_seconds": 0.126587,
+            "deadline": 1793264986.171702,
+            "disposition": "unresolved",
+            "ended_at": 1793264976.6131,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_live_cli_recovery_kills_d0/fixture/overnight-data/8ee38cf1641a4289a53e1372dd892bb4/attempts/18-82aebc1f7a4140e9aa5c796c5967ce25",
+            "execution_reason": "exit:0",
+            "execution_status": "finished",
+            "pid": 16925,
+            "pid_create_time": 1793264976.422462,
+            "screen_id": "18",
+            "started_at": 1793264976.4217112
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_live_cli_recovery_kills_d0/fixture/overnight-data/8ee38cf1641a4289a53e1372dd892bb4/attempts/18-82aebc1f7a4140e9aa5c796c5967ce25/receipt.json",
+          "receipt_sha256": "0409e74afdaaa0ad77f017704765423bfcd3b4fde2f5049accf73298da28c380",
+          "execution": {
+            "execution_status": "finished",
+            "execution_reason": "exit:0",
+            "cpu_seconds": 0.126587,
+            "cpu_reserved_sec": 100,
+            "cleanup_verified": true,
+            "log_bytes": 1225,
+            "pilot_ok": true,
+            "gate3_timeout_claim": false
+          }
+        },
+        {
+          "attempt": {
+            "attempt_id": "01-a01",
+            "cpu_reserved_sec": 99.42509174346924,
+            "cpu_seconds": 0.027689,
+            "deadline": 1793264986.4229653,
+            "disposition": "unresolved",
+            "ended_at": 1793264976.860457,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_live_cli_recovery_kills_d0/fixture/overnight-data/8ee38cf1641a4289a53e1372dd892bb4/attempts/01-27b14ff0b16e4e30ba79945435f0d5aa",
+            "execution_reason": "coordinator interrupted; reconciled; coordinator process disappeared",
+            "execution_status": "crashed",
+            "pid": 16960,
+            "pid_create_time": 1793264976.731203,
+            "screen_id": "01",
+            "started_at": 1793264976.730465
+          },
+          "receipt_path": null
+        }
+      ]
+    },
+    "test_crash_before_go_never_sta": {
+      "synthetic_only": true,
+      "original_deadline": 1793293778.594657,
+      "cpu_used_sec": 299.39876079559326,
+      "blocked_reason": "uncertain CPU accounting or process cleanup; stop this run",
+      "attempts": [
+        {
+          "attempt": {
+            "attempt_id": "prepare-a01",
+            "cpu_reserved_sec": 100,
+            "cpu_seconds": 0.13955199999999998,
+            "deadline": 1793264988.407266,
+            "disposition": "unresolved",
+            "ended_at": 1793264978.897085,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_crash_before_go_never_sta0/fixture/overnight-data/f4245ba9abaa4ca991f3907503ed1134/attempts/prepare-e21e217b583e456a904047c7a3426dcc",
+            "execution_reason": "exit:0",
+            "execution_status": "finished",
+            "pid": 17123,
+            "pid_create_time": 1793264978.657938,
+            "screen_id": "prepare",
+            "started_at": 1793264978.657275
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_crash_before_go_never_sta0/fixture/overnight-data/f4245ba9abaa4ca991f3907503ed1134/attempts/prepare-e21e217b583e456a904047c7a3426dcc/receipt.json",
+          "receipt_sha256": "9dd988f4596bd8c192a2d042a65e604ea6e64ce3d7f16e3e0abfde455d193ef6",
+          "execution": {
+            "execution_status": "finished",
+            "execution_reason": "exit:0",
+            "cpu_seconds": 0.13955199999999998,
+            "cpu_reserved_sec": 100,
+            "cleanup_verified": true,
+            "log_bytes": 859,
+            "pilot_ok": null,
+            "gate3_timeout_claim": false
+          }
+        },
+        {
+          "attempt": {
+            "attempt_id": "18-a01",
+            "cpu_reserved_sec": 100,
+            "cpu_seconds": 0.13295099999999999,
+            "deadline": 1793264988.710153,
+            "disposition": "unresolved",
+            "ended_at": 1793264979.178215,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_crash_before_go_never_sta0/fixture/overnight-data/f4245ba9abaa4ca991f3907503ed1134/attempts/18-3f6b82e80c7c4ed3b9bc95762912eaee",
+            "execution_reason": "exit:0",
+            "execution_status": "finished",
+            "pid": 17162,
+            "pid_create_time": 1793264978.960898,
+            "screen_id": "18",
+            "started_at": 1793264978.9601622
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_crash_before_go_never_sta0/fixture/overnight-data/f4245ba9abaa4ca991f3907503ed1134/attempts/18-3f6b82e80c7c4ed3b9bc95762912eaee/receipt.json",
+          "receipt_sha256": "2ab061335c14f469f4d011ae77d00515f835665cb9a32c3ddff2444d7bc59840",
+          "execution": {
+            "execution_status": "finished",
+            "execution_reason": "exit:0",
+            "cpu_seconds": 0.13295099999999999,
+            "cpu_reserved_sec": 100,
+            "cleanup_verified": true,
+            "log_bytes": 1225,
+            "pilot_ok": true,
+            "gate3_timeout_claim": false
+          }
+        },
+        {
+          "attempt": {
+            "attempt_id": "01-a01",
+            "cpu_reserved_sec": 99.39876079559326,
+            "cpu_seconds": null,
+            "deadline": 1793264988.991154,
+            "disposition": "unresolved",
+            "ended_at": 1793264979.3797991,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_crash_before_go_never_sta0/fixture/overnight-data/f4245ba9abaa4ca991f3907503ed1134/attempts/01-4cdd11957dc74fefbf3f7a4a7bfb2cae",
+            "execution_reason": "recovered without complete CPU receipt",
+            "execution_status": "crashed",
+            "pid": 17197,
+            "pid_create_time": 1793264979.301942,
+            "screen_id": "01",
+            "started_at": 1793264979.301287
+          },
+          "receipt_path": null
+        }
+      ]
+    },
+    "test_worker_crash_uses_persist": {
+      "synthetic_only": true,
+      "original_deadline": 1793293783.058811,
+      "cpu_used_sec": 299.3528389930725,
+      "blocked_reason": "uncertain CPU accounting or process cleanup; stop this run",
+      "attempts": [
+        {
+          "attempt": {
+            "attempt_id": "prepare-a01",
+            "cpu_reserved_sec": 100,
+            "cpu_seconds": 0.127759,
+            "deadline": 1793264992.8663452,
+            "disposition": "unresolved",
+            "ended_at": 1793264983.307637,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_worker_crash_uses_persist0/fixture/overnight-data/99e236f1ad044034a17f378a1773c705/attempts/prepare-2ce127962c3040479be6cd22e57a1d0f",
+            "execution_reason": "exit:0",
+            "execution_status": "finished",
+            "pid": 17554,
+            "pid_create_time": 1793264983.116903,
+            "screen_id": "prepare",
+            "started_at": 1793264983.116353
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_worker_crash_uses_persist0/fixture/overnight-data/99e236f1ad044034a17f378a1773c705/attempts/prepare-2ce127962c3040479be6cd22e57a1d0f/receipt.json",
+          "receipt_sha256": "33a24dff75bd9bdec62db3f23b79fe1c300df977a87dce1259560ea89f2164c5",
+          "execution": {
+            "execution_status": "finished",
+            "execution_reason": "exit:0",
+            "cpu_seconds": 0.127759,
+            "cpu_reserved_sec": 100,
+            "cleanup_verified": true,
+            "log_bytes": 859,
+            "pilot_ok": null,
+            "gate3_timeout_claim": false
+          }
+        },
+        {
+          "attempt": {
+            "attempt_id": "18-a01",
+            "cpu_reserved_sec": 100,
+            "cpu_seconds": 0.14688299999999999,
+            "deadline": 1793264993.116303,
+            "disposition": "unresolved",
+            "ended_at": 1793264983.619851,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_worker_crash_uses_persist0/fixture/overnight-data/99e236f1ad044034a17f378a1773c705/attempts/18-8d8d283e6aa44f3ba38dec2bc05721d3",
+            "execution_reason": "exit:0",
+            "execution_status": "finished",
+            "pid": 17593,
+            "pid_create_time": 1793264983.366862,
+            "screen_id": "18",
+            "started_at": 1793264983.3663108
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_worker_crash_uses_persist0/fixture/overnight-data/99e236f1ad044034a17f378a1773c705/attempts/18-8d8d283e6aa44f3ba38dec2bc05721d3/receipt.json",
+          "receipt_sha256": "9d767d8daa8c151126845be9c58c4607ed934ed20e0c705a46614d5741996a24",
+          "execution": {
+            "execution_status": "finished",
+            "execution_reason": "exit:0",
+            "cpu_seconds": 0.14688299999999999,
+            "cpu_reserved_sec": 100,
+            "cleanup_verified": true,
+            "log_bytes": 1225,
+            "pilot_ok": true,
+            "gate3_timeout_claim": false
+          }
+        },
+        {
+          "attempt": {
+            "attempt_id": "01-a01",
+            "cpu_reserved_sec": 99.35283899307251,
+            "cpu_seconds": null,
+            "deadline": 1793264993.435994,
+            "disposition": "unresolved",
+            "ended_at": 1793264983.854229,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_worker_crash_uses_persist0/fixture/overnight-data/99e236f1ad044034a17f378a1773c705/attempts/01-cf53887c089d47ed9fb8fd3fe29e7d1a",
+            "execution_reason": "recovered without complete CPU receipt; supervisor: worker exited without accounting receipt",
+            "execution_status": "crashed",
+            "pid": 17642,
+            "pid_create_time": 1793264983.751222,
+            "screen_id": "01",
+            "started_at": 1793264983.750719
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_worker_crash_uses_persist0/fixture/overnight-data/99e236f1ad044034a17f378a1773c705/attempts/01-cf53887c089d47ed9fb8fd3fe29e7d1a/receipt.json",
+          "receipt_sha256": "dfd441088024e42174a1bd71d72b2caf041f39b7d44473702e1ad0ead99ca97f",
+          "execution": {
+            "execution_status": "crashed",
+            "execution_reason": "recovered without complete CPU receipt; supervisor: worker exited without accounting receipt",
+            "cpu_seconds": null,
+            "cpu_reserved_sec": 99.35283899307251,
+            "cleanup_verified": true,
+            "log_bytes": null,
+            "pilot_ok": null,
+            "gate3_timeout_claim": false
+          }
+        }
+      ]
+    },
+    "test_live_output_stays_bounded": {
+      "synthetic_only": true,
+      "original_deadline": 1793293777.704006,
+      "cpu_used_sec": 299.4116282463074,
+      "blocked_reason": "unrecoverable local execution failure; stop this run",
+      "attempts": [
+        {
+          "attempt": {
+            "attempt_id": "prepare-a01",
+            "cpu_reserved_sec": 100,
+            "cpu_seconds": 0.130068,
+            "deadline": 1793264987.514678,
+            "disposition": "unresolved",
+            "ended_at": 1793264977.969562,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_live_output_stays_bounded0/fixture/overnight-data/cc416e4f3d234741bdaffbe862738a03/attempts/prepare-5d2bbc1bea1f4a0da93b8e266ca46096",
+            "execution_reason": "exit:0",
+            "execution_status": "finished",
+            "pid": 17044,
+            "pid_create_time": 1793264977.765245,
+            "screen_id": "prepare",
+            "started_at": 1793264977.7646852
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_live_output_stays_bounded0/fixture/overnight-data/cc416e4f3d234741bdaffbe862738a03/attempts/prepare-5d2bbc1bea1f4a0da93b8e266ca46096/receipt.json",
+          "receipt_sha256": "071c9f3a7df957385e92b5b268a0f8043d507416f88b48996f6cd1f071cfb09f",
+          "execution": {
+            "execution_status": "finished",
+            "execution_reason": "exit:0",
+            "cpu_seconds": 0.130068,
+            "cpu_reserved_sec": 100,
+            "cleanup_verified": true,
+            "log_bytes": 859,
+            "pilot_ok": null,
+            "gate3_timeout_claim": false
+          }
+        },
+        {
+          "attempt": {
+            "attempt_id": "18-a01",
+            "cpu_reserved_sec": 100,
+            "cpu_seconds": 0.124568,
+            "deadline": 1793264987.778565,
+            "disposition": "unresolved",
+            "ended_at": 1793264978.221001,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_live_output_stays_bounded0/fixture/overnight-data/cc416e4f3d234741bdaffbe862738a03/attempts/18-f5565212b01448c3a2ca9a5abe50a82b",
+            "execution_reason": "exit:0",
+            "execution_status": "finished",
+            "pid": 17083,
+            "pid_create_time": 1793264978.029312,
+            "screen_id": "18",
+            "started_at": 1793264978.028574
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_live_output_stays_bounded0/fixture/overnight-data/cc416e4f3d234741bdaffbe862738a03/attempts/18-f5565212b01448c3a2ca9a5abe50a82b/receipt.json",
+          "receipt_sha256": "92a05793ad272f8556d15621ee1cc8134d9009d51115fba8edd122d171c3146d",
+          "execution": {
+            "execution_status": "finished",
+            "execution_reason": "exit:0",
+            "cpu_seconds": 0.124568,
+            "cpu_reserved_sec": 100,
+            "cleanup_verified": true,
+            "log_bytes": 1225,
+            "pilot_ok": true,
+            "gate3_timeout_claim": false
+          }
+        },
+        {
+          "attempt": {
+            "attempt_id": "01-a01",
+            "cpu_reserved_sec": 99.41162824630737,
+            "cpu_seconds": 0.026444,
+            "deadline": 1793264988.0353448,
+            "disposition": "unresolved",
+            "ended_at": 1793264978.463182,
+            "evidence_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_live_output_stays_bounded0/fixture/overnight-data/cc416e4f3d234741bdaffbe862738a03/attempts/01-babad5dfe1ca4bd6be049946e7d3fdf6",
+            "execution_reason": "stdout byte limit",
+            "execution_status": "resource_killed",
+            "pid": 17118,
+            "pid_create_time": 1793264978.34497,
+            "screen_id": "01",
+            "started_at": 1793264978.344192
+          },
+          "receipt_path": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270/.pytest-tmp/test_live_output_stays_bounded0/fixture/overnight-data/cc416e4f3d234741bdaffbe862738a03/attempts/01-babad5dfe1ca4bd6be049946e7d3fdf6/receipt.json",
+          "receipt_sha256": "92926beea4ba683d16a49eba8778567692aa7591eccc40f238ec0bd127276086",
+          "execution": {
+            "execution_status": "resource_killed",
+            "execution_reason": "stdout byte limit",
+            "cpu_seconds": 0.026444,
+            "cpu_reserved_sec": 99.41162824630737,
+            "cleanup_verified": true,
+            "log_bytes": 32768,
+            "pilot_ok": null,
+            "gate3_timeout_claim": false
+          }
+        }
+      ]
+    }
+  },
+  "junit_counts": {
+    "tests": 58,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tool_hash": "fd12c4acf0ee966e3f3def0a23c8d3e2d80c2f210d61a6918c91dd2e23b24342",
+  "native_proof_test": {
+    "passed": true,
+    "stdout_in": "docs/overnight-tests.xml"
+  },
+  "live_verified_test_workers_after_suite": []
+}

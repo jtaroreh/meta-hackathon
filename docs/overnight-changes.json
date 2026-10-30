@@ -1,0 +1,277 @@
+{
+  "checkout": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-aaca8270",
+  "prior_worktree": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-548520bf",
+  "self_hash_omitted": true,
+  "files": [
+    {
+      "path": ".audit/overnight-takeover.tsv",
+      "sha256": "d8759be138c14d3bab597e4c140d88875588b4f0b30534d11ad44cc4ea0efc8b",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "82a3d7aeec38eadb53d9d18170d17e5c49bf9cc363f7210d58507127303d4a10",
+      "relative_to_base": "modified",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "OVERNIGHT_LAUNCH.md",
+      "sha256": "aea0489ddbbc7974b83ce6427253487b39abec2e2485263d67d5234be18665a9",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "docs/cloud-swarm-readiness-plan.md",
+      "sha256": "222534b1588b04bb489dc2e6eca53233f81f807220560b624ca4d343c7414fc9",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "docs/local-readiness-review-20261027.md",
+      "sha256": "3aac7864cc58b8880ac0d97b496fd6b54b4f319a1566d03071f00ffe3c773cc4",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "docs/overnight-changes.json",
+      "sha256": null,
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "docs/overnight-contract.md",
+      "sha256": "9a08088ae774fa224cb2584c8e5fd5801e25337d8edb0816f7673f564b08a1a3",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "docs/overnight-host.json",
+      "sha256": "c33f39c49c202bb8910c006fde567850b2f8fd9e07a10d2140a5b97c1ca02eb4",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "docs/overnight-receipts.json",
+      "sha256": "4b283b78e2a575981071b5006e3e5fe1de7648f6f0b4ed83ff8a6c5a397f67c0",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "docs/overnight-smoke.txt",
+      "sha256": "989b6f49b191c451c68ecd139030caa579cd925e76f14364c6f364832a60eb0e",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "docs/overnight-tests.xml",
+      "sha256": "52466d473d603e555b45822c77144e382539b71bc014ab2035e1e116e70cc267",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "docs/overnight-verification.md",
+      "sha256": "a7fbaf6d8f677fd3141fafa3a7f9bd476c3ceeddb3c097131eda578cd7f06cce",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "env/record_overnight_checks.py",
+      "sha256": "3c033fd3eb1b18f696776050c8d9155674892862785991528bfdf9e66fcc3a08",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "env/requirements.local",
+      "sha256": "53c388ba8daf0fdcd197600131e9f49a256764ee94567d55cb0a4a0a4d94e8b6",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "unchanged source prerequisite"
+    },
+    {
+      "path": "env/smoke.py",
+      "sha256": "fc8148fca2aa2c7eb63fcb70bbf1c3cdec2d3bc479e274f45f6078950e841461",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "unchanged source prerequisite"
+    },
+    {
+      "path": "overnight-config.json",
+      "sha256": "b36ef75b6bb20d70b9932d532d99df10a498971a476b5178c02d7ab3dc6d58e8",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "pytest.ini",
+      "sha256": "9ecdebcaa583d2dbd6546bb3de0c283d5d509dd44ca2e38c5d9696a0f33f0151",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "screens/18/brief.md",
+      "sha256": "9b1b48982a16077349249e509f3354d039ec22626fc3f36e3e2e8a7040655b85",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "screens/18/command.json",
+      "sha256": "42651d1006930e7b446071f38a8a5d5323874981d0596b78c0b86a5fc915c928",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "screens/18/run.sh",
+      "sha256": "9c24d6886cadc630dfbc9d0ba55b4ae2e205bf64f3487bc0461815b20179db23",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tests/__init__.py",
+      "sha256": "5e3a70290b4c5f5035cfd26a27cbfe2a44fb1f08506608e43074ea06759dac3d",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "tests/fixture_cli.py",
+      "sha256": "7f195b63c0e0778397201abf46580df8d4cf0521f08bea8314f344d7a6005d6f",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "tests/fixture_interpreter.py",
+      "sha256": "af865862c77383f1c5f5ac538167183ba7bd1fdcc89093959e128457c6fb3a5c",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "tests/fixture_payload.py",
+      "sha256": "7065adad2c7f707f97bf17c28e4aad0ee8247ebe502ce1c7ad8c6e806acbcf96",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "tests/fixture_support.py",
+      "sha256": "d58592eefcf5c4a553b458db6de82e1206078feee88a1ed4499672adb5b82996",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "tests/test_envelope.py",
+      "sha256": "cbf2ec2edf040446b77f76c2e95bba6b90b468fc4953fea36fdfd6d23fbec955",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tests/test_freeze.py",
+      "sha256": "247c6451a7cb8ab5613bd268a71cc09f2185f6cba9e535ca80b638ee9c07ce68",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tests/test_gates.py",
+      "sha256": "85177be287139b230aea68b37a85e69c58cd4a845a776ad10007270257311736",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "unchanged source prerequisite"
+    },
+    {
+      "path": "tests/test_preflight.py",
+      "sha256": "5db1c7ca2a109e84b4cc3a397e9f4b4c1563d83f4b1f2f218fac109ffabde8f5",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tests/test_proof.py",
+      "sha256": "ed120adee8fa19bdd31fb3fc197e25201a32096e63eb2253dd27740db298b623",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "unchanged source prerequisite"
+    },
+    {
+      "path": "tests/test_stage_run.py",
+      "sha256": "414068dc8171ef2ef7c651c4490649c562cc7e72ac3b179a839dbbe56c8ca7e6",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tests/test_supervisor.py",
+      "sha256": "c5a8ebc3818316f102e10cafb15ff226bf4e07d9e42961835e2e3bb0e106be6c",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tools/__init__.py",
+      "sha256": "239a2929b3a392d27fd4fea28f048e53c41c96e92a7d9d9fbaa3df22af8cf6a6",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tools/overnight/__init__.py",
+      "sha256": "2333f8d6ce5b48943791fceeb1d32a24e60598b9c7633633ab1f3e8522e5c389",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "unchanged source prerequisite"
+    },
+    {
+      "path": "tools/overnight/envelope.py",
+      "sha256": "aecee32421c14961970c3c40bb4e1d43ff1d9af125acf594f18f5431330012ca",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tools/overnight/freeze.py",
+      "sha256": "c43debb83bd4cb42a0a515855cdb2c1748649c826e90f5ece799584dd6853b2f",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tools/overnight/gates.py",
+      "sha256": "9760d5bec5a7bb3e8b111e8703c6db52ec22cffb89ebb05f7c809ff7fdd02a27",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "unchanged source prerequisite"
+    },
+    {
+      "path": "tools/overnight/pilot_18.py",
+      "sha256": "f5133ae999db4c7aafe472542ad7fc5f0cd0d1d69a4849c84740eafc03785bec",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tools/overnight/preflight.py",
+      "sha256": "4a3871498a60816f456efc4c4c28c452dad8e838541350627edefe3dd2bf6432",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tools/overnight/prepare.py",
+      "sha256": "60d8f2dcf19dbb2beb4fc48011f162c65a4003ab3c8cecc4330f7e388da9fc7b",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "tools/overnight/proof.py",
+      "sha256": "fca189eb143bd556317dc9345072f56fdf1d42e766d9811a87289574b146122d",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tools/overnight/receipts.py",
+      "sha256": "2d1b8402b4b52c151acaed2e507c6995806290610d6b9c12a9c6a67bc1899a83",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "new"
+    },
+    {
+      "path": "tools/overnight/run_one.py",
+      "sha256": "61c4a545d3e7f5960e5fe4536d98fac5111bc26cdcd64b2b7e61acaae2682c82",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tools/overnight/stage.py",
+      "sha256": "c6876a51058a5fc1fe13ee3c4f05c6e562d9be3cec16e54f41f3f9d621a83491",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    },
+    {
+      "path": "tools/overnight/supervisor.py",
+      "sha256": "981aa8c9ef23987122ba9cabcc0964c3d49130f3e8bba4ea8d27fc8d01f0d42b",
+      "relative_to_base": "added",
+      "relative_to_prior_worktree": "changed"
+    }
+  ]
+}
