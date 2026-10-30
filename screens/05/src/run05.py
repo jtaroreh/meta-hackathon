@@ -605,6 +605,11 @@ def main():
         gate3tiny["total"] += 1
         if tex["status"] == "solved" and tex.get("best"):
             gate3tiny["solved"] += 1
+        if tex["status"] == "stopped-guard":
+            skipped.append({"what": "tiny-exact",
+                            "reason": "stopped-guard",
+                            "iters_done": tex.get("nodes", 0),
+                            "n_evaluated": EXACT_CAP})
     with open(os.path.join(witdir, "gate3_tiny.json"), "w") as f:
         json.dump(gate3tiny, f, indent=1, default=str)
     checkpoint("tiny")
@@ -620,6 +625,11 @@ def main():
         tcell = build_cell(n, drop=drop_one(si, seed, Cfull))
         tex = bfs_joint(tcell, T_OF[n], EXACT_CAP, over, P_EXACT)
         gate3targets.append(dict(tex, stage=n, seed=seed))
+        if tex["status"] == "stopped-guard":
+            skipped.append({"what": "target-exact",
+                            "reason": "stopped-guard",
+                            "iters_done": tex.get("nodes", 0),
+                            "n_evaluated": EXACT_CAP})
     with open(os.path.join(witdir, "gate3_targets.json"), "w") as f:
         json.dump(gate3targets, f, indent=1, default=str)
     checkpoint("targets")
@@ -771,6 +781,7 @@ def main():
 
     win_rates = []
     win_n = 0
+    win_count = {"G": 0, "A": 0}
     for p in P_ERRS:
         pools, pok, ipools, iok = {}, True, {}, True
         for arm in ("F", "G", "A"):
@@ -826,6 +837,9 @@ def main():
                           "joint": dict(joint), "winner": winner})
         if wpass:
             win_n += 1
+        for a in ("G", "A"):
+            if joint[a]:
+                win_count[a] += 1
 
     tiny_solved = (gate3tiny["total"] == 1 and gate3tiny["solved"]
                    == 1)
@@ -847,8 +861,9 @@ def main():
     selftest_ok = bool(tiny_ok)
     strict_n = sum(1 for wrec in win_rates if wrec.get("strict_win"))
     pools_all = all(wrec.get("pools_ok") for wrec in win_rates)
-    pursue = (win_n >= 2 and g1_ok and g2_ok and g3pass and g4_ok
-              and selftest_ok)
+    same_arm_wins = max(win_count["G"], win_count["A"])
+    pursue = (same_arm_wins >= 2 and g1_ok and g2_ok and g3pass
+              and g4_ok and selftest_ok)
     reject = (complete and tiny_solved and g1_ok and pools_all
               and strict_n == 0)
     if pursue:
@@ -864,13 +879,15 @@ def main():
             "stays unresolved-with-reason, classification is " \
             "coordinator-side."
     else:
-        reason = "UNRESOLVED + next experiment (joint wins=%d/3, " \
+        reason = "UNRESOLVED + next experiment (joint wins=%d/3 " \
+            "(per-arm G=%d A=%d), " \
             "strict abort wins=%d/3, g1=%s g2=%s " \
             "(%d/9 cells) g3=%s (tiny solved=%s, target " \
             "cap-hit=%s) selftest=%s g4=%s complete=%s skipped=%d; " \
             "next: check-order co-optimization + per-round " \
-            "threshold retest)." % (
-                win_n, strict_n, g1_ok, g2_ok, g2_n, g3pass,
+            "threshold variation retest)." % (
+                win_n, win_count["G"], win_count["A"],
+                strict_n, g1_ok, g2_ok, g2_n, g3pass,
                 tiny_solved, target_cap,
                 selftest_ok, g4_ok, complete, len(skipped))
     verdict_bits = {
@@ -890,6 +907,8 @@ def main():
         "acceptance": {"pursue_condition": bool(pursue),
                        "reject_condition": bool(reject),
                        "win_rates": win_rates, "n_win": win_n,
+                       "win_count": dict(win_count),
+                       "same_arm_wins": int(same_arm_wins),
                        "n_strict_win": strict_n,
                        "selftest_ok": bool(selftest_ok)},
         "reason": reason,
