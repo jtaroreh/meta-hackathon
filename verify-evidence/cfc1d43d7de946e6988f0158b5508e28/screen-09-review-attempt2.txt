@@ -1,0 +1,24 @@
+# Screen-09-review attempt 2 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: cfc1d43d7de946e6988f0158b5508e28
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: screen-09-review-cfc1d43d-attempt2 (mode wait, completed, no timeout, attempt 2 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+**Verdict: PASS** — supervised launch of 09-a01 only approved.
+
+Files inspected (current bytes, tree clean): brief.md, command.json, run.sh, run09.py (1167 lines). Read-only.
+
+Findings: (1) Both fixes present and correct — ANNEAL_ITERS=300 at definition + argparse default, no stale A_ITERS, supervised line passes no --anneal-iters so frozen 300 governs (flows run_arm→run_a, reported); UNRESOLVED reason matches brief (wider gauge-fixing move families + correlated-defect masks retest); commit 2618a7d exactly 4+/4- run09.py only. (2) brief/command/run.sh unchanged (diffs empty). (3) No other mismatch; attempt-1 confirmations hold: frozen model exact; gates G1-G4 coded exactly; acceptance per-arm max>=2 same-arm volume+distance; REJECT exact; verdict unresolved-with-reason; tiny hand-check + determinism enforced; guards before every size/cell/arm + every 32 proposals + every 512 nodes with skip records on every exit incl. tiny/target entry + stopped-guard paths; all arms propagate stopped=True (self-tested); stdlib+numpy only; outputs under cwd; witness cadence matches brief. No remaining blocking items.
+
+## Coordinator grounding (same session)
+
+Screen 09 review attempt 2 of max 2 for run cfc1d43d: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). Both
+attempt-1 items verified fixed; all other coded conditions
+re-confirmed on current bytes. Two provider attempts spent (max),
+no fallback, no timeout. This PASS opens supervised launch of
+09-a01 only.

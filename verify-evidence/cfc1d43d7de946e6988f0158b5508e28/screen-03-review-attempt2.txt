@@ -1,0 +1,24 @@
+# Screen-03-review attempt 2 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: cfc1d43d7de946e6988f0158b5508e28
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: screen-03-review-cfc1d43d-attempt2 (mode wait, completed, no timeout, attempt 2 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+**Verdict: PASS** — opens supervised launch of `03-a01` only.
+
+Files inspected: brief.md (full), command.json (full), run.sh (full), run03.py (full, 866 lines), commit d52c96d diff.
+
+(1) D1 fix present and correct at both sites: loop-top guard returns {stopped: True, iters_done: done, n_evaluated: n_iters+1} (no swap outstanding); inner-evaluation guard restores the swap before returning the same stopped dict (mirrors run_G exactly); initial-eval site already returned stopped True; no break statement remains anywhere in the file. (2) No remaining stopped-False path after a guard trip: exact_distance stopped-False returns are completed evaluations; eval_schedule propagates; every arm's detected-stop site returns stopped True (H/R/G/S all sites); each stopped-False return reachable only after full completion; bfs_schedules returns stopped-guard, callers map to blocked=stopped-guard + skip record; Gate 3 accepts only solved/cap-hit. Non-blocking: guard checks sampled (32/512); an arm completing just past 300 s returns complete results, next check truncates with skip record — no incomplete result recorded complete. (3) Attempt-1 confirmations hold on current bytes: fix commit touches run03.py only, other three diffs empty, tree clean; gates coded exactly (G1/G2/G3 cap-hit-only/G4 complete+wall<500+zero skips); acceptance exact (same-arm joint win, pursue, reject, verdict unresolved-with-reason); stdlib+numpy only; harness unchanged (supervised line passes no --s-iters/--r-samples, frozen S_ITERS=30/R_SAMPLES=3 govern); determinism (seeded RNG + repeat checks); outputs under cwd with incremental witnesses; skip-record coverage complete (tiny/target entry guards, per-size, per-cell, blocked cells).
+
+## Coordinator grounding (same session)
+
+Screen 03 review attempt 2 of max 2 for run cfc1d43d: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). D1 fix
+verified present and correct; all other coded conditions
+re-confirmed on current bytes. Two provider attempts spent (max),
+no fallback, no timeout. This PASS opens supervised launch of
+03-a01 only.

@@ -1,0 +1,23 @@
+# Screen-11-review attempt 2 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: cfc1d43d7de946e6988f0158b5508e28
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: screen-11-review-cfc1d43d-attempt2 (mode wait, completed, no timeout, attempt 2 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+**Verdict: PASS** — supervised launch of 11-a01 only open.
+
+Files inspected (read-only): brief.md, command.json, run.sh, run11.py (all 1190 lines), git show ac9c851.
+
+Findings: (1) Fix present and correct — dst bound once, never reassigned; displacement uses own cursor cur; mover routes to original partner site and lands place[m]=dst co-located; accounting unchanged in meaning. (2) Regression test well-formed and discriminating — full-partner-site state asserts pair co-located + displaced ion at first free site; fails pre-fix as coordinator verified. (3) No other contradiction — swap branch exchanges adjacent ions by design (valid gate mechanism, not mover co-location); all other non-None paths end co-located; occupancy never exceeds TRAP_CAP; turns junction-legal only. (4) Attempt-1 confirmations hold: frozen symbols brief-exact; G1-G4 coded exactly; pursue per-arm max>=2 same-arm infidelity+validity; REJECT exact; verdict unresolved-with-reason; stdlib+numpy only; harness unchanged; determinism via seeded RNG + repeat checks; every guard exit appends skip records. (5) Fix commit touches run11.py only; brief/command/run.sh diffs empty; tree clean.
+
+## Coordinator grounding (same session)
+
+Screen 11 review attempt 2 of max 2 for run cfc1d43d: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). Attempt-1
+item verified fixed; all other coded conditions re-confirmed on
+current bytes. Two provider attempts spent (max), no fallback, no
+timeout. This PASS opens supervised launch of 11-a01 only.

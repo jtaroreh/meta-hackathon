@@ -1,0 +1,26 @@
+# Postpilot-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: cfc1d43d7de946e6988f0158b5508e28
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: postpilot-review-cfc1d43d-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, tests, workloads, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+**Verdict: PASS.** This opens broader screens only. Each broader screen still needs its own screen review before launch.
+
+Recomputed hashes (repo's own freeze.py sha256_file + envelope.py digest; values read from overnight-envelope.json and file bytes, not the brief): preparation artifact `754f44dea35a63cef05441d15a03786082062247dc0bec288c5f6e4ec268d050` = envelope; pilot receipt (pilot_hash) `065b49751a8772d8ab651fe2944f09fb8a98013aa4ac7a82b64553a788416bf7` = envelope; pilot artifact (pilot.json) `a782845d130482f3d0da7409b591330698cd6a8934b99029ab36e1cdc9fec694` = receipt pilot_artifact_sha256; input/manifest (SOURCES.md) `8acf6d0c5a095ff1aad3eaa60227a884152593d1ad634d72db69149ef2f84c6a` = envelope. original_deadline - created_at = 28800.0.
+
+Check 1: prepare + pilot receipts both finished, exit:0, disposition/scientific_disposition unresolved, gate3_timeout_claim false, cleanup_verified true, scope infrastructure; execution.json, worker-result.json, and envelope attempts agree; blocked_reason empty, active_screen null. Check 2: verify_artifacts passes both attempts; every artifact_hashes entry recomputes; preparation evidence hashes match preparation.json; verify_manifest passes. Check 3: prepare stdout shows make shared (libphasepoly.dylib), PASS: 45 checks 0 failures, graysynth tiny ok 8 gates, pmh tiny ok 3 gates, pyzx tiny ok; proof artifact make_shared/native_load/native_checks/tiny_baselines all ok, proof.ok true. Check 4: pilot_18.py verifies manifest then fresh exec copy (work tree has only exec + control-output, no frozen-source); pilot stdout repeats full proof; algebra control --time-limit 5 with 60 s outer timeout; algebra.json explicit_run_n6 OPTIMAL elapsed 0.798 s, runtime 3.307 s; pilot wall 4.86 s, exit 0, no outer timeout. Check 5: envelope + pilot bindings carry input_hash = frozen/prepare-exec/pilot-exec SOURCES.md bytes; envelope holds exactly {preparation, pilot_receipt}; pilot.json disposition unresolved, gate3_timeout_claim false, infrastructure-only, no pursue recommendation, no Gate 3 clearance.
+
+Files inspected: stored envelope, both attempts' receipt/execution/worker-result/stdout/payload/owner/go/preparation/pilot.json, control outputs, tooling-review.json + raw evidence + capabilities receipts, run_one.py, receipts.py, prepare.py, supervisor.py.
+
+Residuals, non-blocking: prepare receipt bindings.input_hash empty (launch-time sequencing, input hash frozen by preparation; envelope + pilot carry it; verify_inputs passes; filed postpilot receipt must use inputs=True bindings); native_load has no stdout line (evidenced by proof ok + 45-check native run); four blockers (Vandaele, Lau et al., PhasePoly, torch MinGRU) stay unresolved — pilot is infrastructure only. Read-only; nothing changed or started.
+
+## Coordinator grounding (same session)
+
+Postpilot review attempt 1 of max 2 for run cfc1d43d: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). One provider
+attempt spent, no fallback, no timeout. This PASS opens broader
+screens; each screen still needs its own screen review before launch.

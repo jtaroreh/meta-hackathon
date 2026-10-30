@@ -1,0 +1,27 @@
+# Screen-03-review attempt 1 — RAW advisor evidence (REVISE; superseded by attempt 2 PASS)
+
+Run: cfc1d43d7de946e6988f0158b5508e28
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: screen-03-review-cfc1d43d-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+# Verdict: REVISE
+
+One blocking discrepancy (D1, annealing guard handling). All gates, acceptance conditions, budgets, and dry-run outcomes otherwise coded exactly as briefed, including the wall-window question, which does not block.
+
+Files inspected (read-only; nothing executed): screens/03/brief.md (130 lines), screens/03/command.json, screens/03/run.sh, screens/03/src/run03.py (864 lines), screens/19/command.json + run.sh (mirror references).
+
+Confirmations: (1) brief vs code truth match — SIZES=(8,14,20) with C=10/18/25, T=4, SEEDS 1-5, DEFECTS 0/1/2 nested picks[:k], one permutation per round; arms H canonical order, R 3 seeded permutations mean, G single first-improvement sweep with depth tiebreak, S 30 iters cost -d+0.05*depth best-tracked; metric exact weights 1-3 censored None->4, depth T*max(free); WALL_GUARD 300 / LIMIT 500 / EXACT_CAP 50000; guards before every size/cell/arm, every 32 candidates, every 512 nodes; checkpoints + witnesses after self-test/tiny/targets/each size/corpus. (2) Gates coded exactly: G1 g1_beats && tiny_ok && determinism_ok; G2 n>=4 spanning>=2 sizes spread over {H,G,S} vs 2*SE; G3 tiny_solved && target exactly "cap-hit"; G4 complete && wall<500 && zero skips. (3) Acceptance coded exactly: joint win pools seeds x defects {1,2}, mean(X) > mean(H)+2*SE AND depth(X) <= depth(H) same arm X in {G,S}; pursue = wins>=2 && g1 && g2 && g3 && g4 && selftest; reject = complete && tiny_solved && g1_ok && pools && strict==0; else UNRESOLVED with recoloring + per-round-variation next experiment; payload verdict unconditionally unresolved-with-reason. (4) Libraries clean: stdlib + numpy only; no MILP/SMT/OLSQA/Vandaele/Lau/PhasePoly/torch. (5) Determinism/outputs match except D1: fixed seed_rng, all writes under cwd (results.json + witnesses/), skip paths use guarded .get defaults, no unbound variables; tiny/target entry-guard + per-size/per-cell exits all append skip records with iters_done/n_evaluated. (6) Harness mirrors screen 19 exactly except numbers (cpu 5400, wall 900, scope research, source_files [src/run03.py]); run.sh 187 bytes +x, identical except run "03". (7) Dry-run structurally supported: 45x4 loop cardinality exact; tiny BFS 6+30+120+360+720+720=1956 matches; target nodes=50001 on first increment past cap matches; G1/G2 failure structural (schedule-invariant distance, permutation relabels detector coordinates); brief's ~70-120 s is descriptive staging language, not a coded bound — only G4 wall<500 governs, so 2.53 s satisfies G4 as coded and does not block PASS.
+
+Blocking D1: run_S swallows wall-guard stops — loop-top check and stopped inner evaluation break and fall through to {stopped: False}, unlike H/R/G which propagate stopped True. Guard trip during S arm of final cell records complete with empty skipped, letting G4 pass on a truncated run — contradicting the brief's every-guard-exit-appends-skip-record guarantee. Unreachable at 2.53 s vs 300 s guard, but the coded guarantee is false as written. Fix: return {stopped: True, iters_done: done, n_evaluated: n_iters+1} at both break sites. Non-blocking: stopped R/G skip records report planned totals in n_evaluated with actuals in iters_done (both fields present as briefed); S tracks best among accepted moves only, i==j iterations consume an iteration while n_evaluated claims n_iters+1 (reporting-only, no gate reads these). With D1 fixed, PASS-ready; no other item requires change.
+
+## Coordinator grounding (same session)
+
+Screen 03 review attempt 1 of max 2 for run cfc1d43d: REVISE on
+single item D1 (run_S guard propagation). Reviewer confirmed all
+other coded conditions exact. Coordinator applied the exact
+suggested fix (commit d52c96d, run03.py only, 4+/2-) and proceeded
+to attempt 2. One provider attempt spent, no fallback, no timeout.

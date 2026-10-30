@@ -1,0 +1,25 @@
+# Screen-09-review attempt 1 — RAW advisor evidence (REVISE; superseded by attempt 2 PASS)
+
+Run: cfc1d43d7de946e6988f0158b5508e28
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: screen-09-review-cfc1d43d-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+## Verdict: REVISE. Read-only; payload not launched.
+
+Files inspected: screens/09/brief.md, command.json, run.sh, src/run09.py, plus screens/19 command.json + run.sh mirror checks.
+
+Exact confirmations: (1) brief vs code — grids 7/9/11, rates 2%/4%, seeds 1-5, 30x4 arms; k=1/2,2/3,2/5; rounds=d_eff+n_adj_dead, V=area*rounds, BFS extent-edge distance, valid d_eff>=2; arms B shave-to-rectangle / R notches+undo+repair+B-fallback / G shrink+hill-climb under d>=d_B / A annealing from G best-tracked; tiny B=(18,2) G=(6,2) optimum 6. (2) Gates exact: G1 per-cell V(G)<V(R) all 30 + tiny_ok + determinism_ok; G2 10-value pools {B,G,A} spread>2*SE >=2 sizes, G2s informational; G3 tiny_solved && target cap-hit-only; G4 complete && attempted && wall<500 && clean. (3) Acceptance per-arm max(G,A)>=2 + gates + selftests; joint = pooled V beats B >2*SE AND pooled d>=B same arm (winner field display-only); REJECT exact; verdict always unresolved-with-reason. (4) stdlib+numpy only. (5) Deterministic seeded RNG; outputs under cwd; skip records on tiny/target entry + stopped returns, size/cell guards, blocked cells; arms propagate stopped=True via empty_result; no unbound variables. (6) command.json mirrors 19 (cpu 5400 wall 900 research source_files); run.sh mirrors 19 +x; no --anneal-iters. (7) Dry-run structurally plausible (1.56 s, skips 0, gates pass, A==G, matched distances, G2s 0/3; only coded wall bound G4 wall<500).
+
+Discrepancies: (1) Annealing constant name mismatch — brief ANNEAL_ITERS=300 vs code A_ITERS=300 (value + behavior correct, frozen symbol missing). (2) Next-experiment mismatch — coded UNRESOLVED reason records "dynamic-boundary simulated-annealing retest with wider gauge-fixing move family", omits correlated-defect masks. Fix both alignments, then attempt-2 review.
+
+## Coordinator grounding (same session)
+
+Screen 09 review attempt 1 of max 2 for run cfc1d43d: REVISE on
+two alignment items (anneal symbol name + next-experiment
+wording). Coordinator applied both fixes (commit 2618a7d,
+run09.py only, 4+/4-) and proceeded to attempt 2. One provider
+attempt spent, no fallback, no timeout.

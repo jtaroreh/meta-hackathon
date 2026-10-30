@@ -1,0 +1,26 @@
+{
+  "kind": "screen-11-review",
+  "bindings": {
+    "run_id": "cfc1d43d7de946e6988f0158b5508e28",
+    "config_hash": "b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974",
+    "tool_hash": "b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b",
+    "input_hash": "8acf6d0c5a095ff1aad3eaa60227a884152593d1ad634d72db69149ef2f84c6a"
+  },
+  "observed_at": 1793372227,
+  "valid_until": 1793396378.481708,
+  "evidence_file": "receipts/screen-11-review-attempt2.txt",
+  "evidence_sha256": "80220a2249c83bc9707ac610a2e239cfeb06550c35787ff3ced4c806e3324bcd",
+  "verdict": "PASS",
+  "reviewer": {
+    "providerInstanceId": "muse",
+    "model": "muse-wonder-1.0",
+    "options": {
+      "reasoningEffort": "max"
+    }
+  },
+  "artifacts": {
+    "preparation": "754f44dea35a63cef05441d15a03786082062247dc0bec288c5f6e4ec268d050",
+    "pilot": "065b49751a8772d8ab651fe2944f09fb8a98013aa4ac7a82b64553a788416bf7",
+    "screen_files": "702be5692ccb6094139b74d6e3a997605d7b4cafd9b6c297141e3ba717bdc6a3"
+  }
+}

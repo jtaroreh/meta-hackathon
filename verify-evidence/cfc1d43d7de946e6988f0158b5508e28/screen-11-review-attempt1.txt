@@ -1,0 +1,27 @@
+# Screen-11-review attempt 1 — RAW advisor evidence (REVISE; superseded by attempt 2 PASS)
+
+Run: cfc1d43d7de946e6988f0158b5508e28
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: screen-11-review-cfc1d43d-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+# Verdict: REVISE — do not launch 11-a01 yet.
+
+Files inspected: brief.md, command.json, run.sh, run11.py; mirror checks vs screen 19. Nothing changed or started.
+
+Blocking discrepancy: apply_choice stores the partner site in dst then reuses dst as the displacement cursor (dst=step ends at tgt); the mover is then routed via bfs_path(src,dst) and placed at place[m]=dst — i.e. sent to the displaced ion's free site instead of the cleared partner site. The gate pair can end separated while replay returns valid True with no co-location post-check, breaking the brief/model statement that full targets are cleared by displacement and validity means every gate executes co-located. Affects all arms + exact search (shared apply_choice); tiny unaffected (target occupancy 1); target cap-hit likely unaffected — hidden by reported gate outcomes. Fix: preserve the original destination separately from the displacement cursor, route the mover to the original partner site, add a displacement/co-location regression check.
+
+Exact confirmations: frozen model (all 32 brief symbols match code identifiers + values); G1 per-cell mg<mr + g1_ok conjunction; G2 15-value pools {S,G,A} spread>2*SE, g2_n>=2; G3 tiny_solved && target_cap with tiny optimum 0.003 + target exactly cap-hit (50001 nodes); G4 complete + attempted + wall<500 + clean; acceptance per-arm joint wins (pooled inf >2*SE + validity>=S same arm), pursue max(G,A)>=2 + gates + selftests, reject + unresolved branches match brief, verdict always unresolved-with-reason; stdlib+numpy only; seeded RNG + checkpoints + skip records + stopped propagation + cwd-only writes statically present; supervised shape mirrors 19 (cpu 5400 wall 900 research source_files, no --anneal-iters, run.sh +x). Dry-run structurally plausible only — pooled values uncertifiable until the displacement bug is fixed (transition changes destinations/heat/exposure/later gates on full targets).
+
+## Coordinator grounding (same session)
+
+Screen 11 review attempt 1 of max 2 for run cfc1d43d: REVISE on
+one blocking item (displacement routing bug). Coordinator applied
+the exact suggested fix (commit ac9c851, run11.py only, +17/-4:
+own displacement cursor, dst stays the partner-site goal, plus
+discriminating regression self-test verified fail-pre/pass-post)
+and proceeded to attempt 2. One provider attempt spent, no
+fallback, no timeout.

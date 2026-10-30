@@ -1,0 +1,23 @@
+# Screen-08-review attempt 2 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: cfc1d43d7de946e6988f0158b5508e28
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: screen-08-review-cfc1d43d-attempt2 (mode wait, completed, no timeout, attempt 2 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+**Verdict: PASS** — opens supervised launch of 08-a01 only.
+
+Files inspected (read-only): brief.md, command.json, run.sh, run08.py; git show c16f66e (run08.py only, +10/-0); tree clean, brief/command/run.sh bytes unchanged.
+
+Findings: (1) Fix present and correct at both callers — tiny + target append {what, stopped-guard, iters_done=nodes, n_evaluated=50000} on stopped-guard; nodes key is exactly what exact_opt returns; shape mirrors entry-guard records; skips force G4 clean=False and G3 fails on status — truncated exact phase cannot pass clean. (2) No remaining guard exit lacks a skip: entry guards append directly; arm-level pre-arm check + all stopped=True returns funnel to record_cell skips (Q covered by pre-arm check); per-cell/per-code guards append directly; internal exact both production call sites now record (self-test call uses stop=None, cannot trip); cap-hit is limit-expiry not a guard exit. (3) Attempt-1 confirmations hold: G1/G2/G3/G4 coded exactly; acceptance per-arm max>=2 with >2*SE + all-10-valid same arm; REJECT exact; verdict unresolved-with-reason; stdlib+numpy only; harness unchanged (frozen A_ITERS=200 governs); determinism (fixed seeds + seeded RNG, clock drives guard only); all writes under cwd. No blocking items remain.
+
+## Coordinator grounding (same session)
+
+Screen 08 review attempt 2 of max 2 for run cfc1d43d: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). Attempt-1
+item verified fixed; all other coded conditions re-confirmed on
+current bytes. Two provider attempts spent (max), no fallback, no
+timeout. This PASS opens supervised launch of 08-a01 only.

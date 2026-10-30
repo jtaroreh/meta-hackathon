@@ -1,0 +1,25 @@
+# Screen-05-review attempt 1 — RAW advisor evidence (REVISE; superseded by attempt 2 PASS)
+
+Run: cfc1d43d7de946e6988f0158b5508e28
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: screen-05-review-cfc1d43d-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+## Verdict: REVISE — do not launch 05-a01 yet. One acceptance-logic discrepancy blocking, plus a literal guard-record gap.
+
+Files inspected: screens/05/brief.md, command.json, run.sh, src/run05.py (955 lines), screens/19 command.json + run.sh comparators. Nothing modified or executed.
+
+Confirmations: (1) brief vs code mostly exact — SIZES/T_OF/P_ERRS, C=7/11/14 via drop_one, policy lattice {0,1,2,3,99}/{0,1,2}, arms F=[99]*(T-1) final 0 / R 3 seeded strict-0 / G 2 sweeps inf<=F*1.10+1e-6 / A 40 iters cost W+5000*inf, metric W=E[spent]/P(accept)-V_full weights 0..2 + censored tail, tiny L1==72 + 0 w1 accepted. (2) Gates: G1 pooled W(G)<W(R) all 9 + tiny_ok (full self-test aggregate, stricter) + determinism_ok; G2 5-seed pools, max-min spread over {F,G,A} vs RMS SE, >=4 cells spanning >=2 stages; G3 tiny_solved && target exactly cap-hit (stage idx 2 n=12 seed 1, nodes=50001 past cap); G4 complete 45x4 + tiny/target attempted + wall<500 + zero skips. (3) Acceptance: per-rate joint logic (10% relative W + inf<=F+2*SE RMS) coded per arm; REJECT complete && tiny_solved && g1_ok && pools_all && strict==0; verdict always unresolved-with-reason. (4) stdlib+numpy only. (5) Seeded RNG deterministic; outputs under cwd; R/G/A propagate stopped=True, run_cell maps to blocked=stopped-guard, record_cell appends skip; no unbound variables. (6) command.json mirrors 19 (cpu 5400 wall 900 scope research source_files); run.sh +x differs only by run "05"; no override flags so frozen A_ITERS=40/R_SAMPLES=3 govern. (7) Dry-run structurally supported: tiny BFS 1956 nodes arithmetic; C=14 target cap-hit before any depth-14 leaf; W(G)<=W(F) structural; 9.0 s wall vs "tens of seconds" descriptive language non-blocking (only coded bound G4 wall<500).
+
+Discrepancies: (1) BLOCKING — PURSUE does not require same arm at >=2 rates: code picks per-rate winner (G else A) and increments win_n regardless of identity, pursue=win_n>=2; counterexample G-only-rate-1 + A-only-rate-2 yields win_n=2 pursue_condition=True though no single arm wins two rates. Fix: count per arm, require max(G,A)>=2. (2) Literal guard-record gap: BFS stopped-guard internal returns at tiny/target callers append no skipped record (entry-guard failures do); downstream guards still append so no false G4 pass, but brief's EVERY-guard-exit-appends-skip not literally satisfied. Fix: append skip with iters_done=nodes + configured cap. (3) Minor: code "per-round threshold retest" vs brief "per-round threshold variation"; align with fix 1.
+
+## Coordinator grounding (same session)
+
+Screen 05 review attempt 1 of max 2 for run cfc1d43d: REVISE on
+acceptance-logic item (1) blocking + guard-record item (2) +
+wording (3). Coordinator applied all three fixes (commit 08446bb,
+run05.py only, +24/-5) and proceeded to attempt 2. One provider
+attempt spent, no fallback, no timeout.

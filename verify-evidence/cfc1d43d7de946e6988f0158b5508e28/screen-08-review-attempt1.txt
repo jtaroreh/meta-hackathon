@@ -1,0 +1,25 @@
+# Screen-08-review attempt 1 — RAW advisor evidence (REVISE; superseded by attempt 2 PASS)
+
+Run: cfc1d43d7de946e6988f0158b5508e28
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: screen-08-review-cfc1d43d-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+**Verdict: REVISE** — supervised launch of 08-a01 not opened.
+
+Files inspected: screens/08/brief.md, command.json, run.sh, src/run08.py (971 lines), plus shape check vs screens/19.
+
+Confirmed as coded: codes/DAGs/validity/metric (SHIFTS, GATE_COUNTS, gen_dag rounds+chains+2 edges, req in valid subset, verify_schedule rejects bad shift/misalignment/dup-missing/conflict/order violations, self-tests cover order-blind + shift-blind, latency=layers*2); arms (Q one/layer; R seeded random extension to random feasible layer; G earliest-fit canonical + seeded order best-tracked; A 200 iters from recomputed best-G start, validity-checked, cost=layers, never exceeds G; no --anneal-iters so frozen default governs); tiny hand cell (n=4, {1}, 3 gates, Q/G/A = 6/4/4, layer0 [0,1] layer1 [2] valid); G1 exact (per-cell G<R all 30 + tiny_ok + determinism_ok); G2 exact (pools 10/DAG/arm, max-min>2*SE, layers informational); G3 predicate exact (tiny solved + target C12/L/seed-1 exactly cap-hit, 50001 nodes); G4 predicate exact (30 cells + 10 latencies/(dag,arm) + attempted + wall<500 + clean); acceptance per-arm (pooled mean(X)<mean(Q)-2*SE AND all-10-valid same arm, pursue=max>=2 + gates + selftest, reject exact, verdict always unresolved-with-reason + logical-remapping next experiment); stdlib+numpy only, seeded RNG salts, writes under cwd only; launch shape mirrors 19 (cpu 5400 wall 900 research source_files, run.sh +x); dry-run structurally supported (Q latencies forced 24/40/56, G/R/A within bounds, A==G = no improving proposal, only coded wall limit G4 wall<500).
+
+Blocking discrepancy: internal exact-search stopped-guard produces no skip record — exact_opt returns stopped-guard but tiny/target callers only store the dict; brief's EVERY-guard-exit-appends-skip broken; clean=len(skipped)==0 stays intact so G4 zero-skip evidence wrong on truncation (G3 still fails on status). Arm-level propagation otherwise sound (R/G/A stopped=True, Q behind pre-arm check, blocked/stopped funnel to record_cell skips); no unbound variables. Fix: append skip (tiny-exact/target-exact, stopped-guard, iters_done/n_evaluated from nodes/cap) at both exact callers before writing witnesses.
+
+## Coordinator grounding (same session)
+
+Screen 08 review attempt 1 of max 2 for run cfc1d43d: REVISE on
+single item (internal exact-search stopped-guard skip gap, same
+shape as 05-D2). Coordinator applied the exact suggested fix
+(commit c16f66e, run08.py only, +10/-0) and proceeded to attempt
+2. One provider attempt spent, no fallback, no timeout.
