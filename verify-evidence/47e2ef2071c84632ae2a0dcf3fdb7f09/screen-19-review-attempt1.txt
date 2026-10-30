@@ -1,0 +1,24 @@
+# Screen-19-review attempt 1 (run 47e2ef20) — RAW advisor evidence
+
+Run: 47e2ef2071c84632ae2a0dcf3fdb7f09. Reviewer: muse/muse-wonder-1.0 reasoningEffort=max.
+Task: screen-19-review-47e2ef20-attempt1 (mode wait, completed, no timeout, attempt 1 of 2).
+No files changed. No supervisor/workloads/processes/subtasks/payload executions.
+
+## Verbatim verdict (delegate_task summary)
+
+Verdict PASS.
+
+- Hash: recomputed `screen_artifacts(...,'19')` = `7e2880c8fe891f5a420ab1ca2372c5b77f34a2a06f7f19baead2998b7626539e` — matches expected.
+- Closure: 4 files only; imports stdlib + numpy only (run19.py:21); all `open(` are `"w"` writes (lines 517–844); no local data reads. command.json:1: research, cpu 5400, wall 900, `source_files ["src/run19.py"]`, no test-only overrides.
+- Corpus: `SIZES=(8,12,16)`, 6 gates/qubit, `SEEDS=(1..5)`, `N_INST=1300`, arms D/G/A/R (run19.py:30); layout alternates by rep parity (run19.py:109), matching §19 (frozen paths doc:324).
+- Exact gates: G1 `g1_beats and tiny_ok and determinism_ok` (run19.py:677); G2 `g2_n >= 2` (run19.py:729); G3 `tiny_solved and target_cap`, cap-hit only, `EXACT_CAP=50000` at n=16 (run19.py:731); G4 `complete and wall < WALL_LIMIT_S(500) and clean` plus attempted-record conjuncts (run19.py:743). Same-arm joint acceptance (CNOT >2·SE and depth ≤ D, ≥2 sizes) at run19.py:702 — implements the frozen continue-bar (frozen paths doc:328).
+- D/G construction: D is identity placement (run19.py:223); G starts from identity (plus one seeded restart) and accepts only strictly improving swaps, so G CNOTs never regress vs D (run19.py:236).
+- Lessons/output: 300 s `WALL_GUARD_S` checked at size/cell/arm/rep/exact-node cadences; every guard exit appends a skip with `iters_done`/`n_evaluated` (run19.py:537); `results.json` + `witnesses/{selftest,gate3_tiny,gate3_targets,cells,checkpoint-*}.json` written (run19.py:517); disclosed dry-run 85.6 s zero skips not re-executed (brief.md:76).
+- Baseline disclosed (no MILP/SMT/OLSQA; own B&B tiny optimum + target cap-hit only) (brief.md:99); payload verdict always `unresolved-with-reason`, classification coordinator-side (run19.py:797).
+
+Files changed: none; processes: none.
+
+## Coordinator grounding
+
+Screen-19 review attempt 1 of 2 for run 47e2ef20: PASS, Wonder max.
+Select→review→launch sprint inside the ~890 s admission window.

@@ -1,0 +1,30 @@
+# Postpilot-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: 47e2ef2071c84632ae2a0dcf3fdb7f09
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: postpilot-review-47e2ef20-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, workloads, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+Verdict PASS.
+
+Evidence (independently recomputed, inspect-only; files changed: none; processes: none):
+
+- Bindings: overnight-envelope.json `run_id=47e2ef2071c84632ae2a0dcf3fdb7f09`, `original_deadline=1793393160.3761978` (= `created_at+28800`), `blocked_reason=""`. Recomputed `config_hash=b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974` and `tool_hash=b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b` both match envelope and both attempt `receipt.json:bindings`.
+- Input/preparation: `sha256(preparation.json)=02cb60ede4782cb7de72e758d3f5d441d811652a01e3b8aa3768f4692a847d3d` = envelope `preparation_hash`; `sha256(frozen-source/SOURCES.md)=b65b9cfa84ed520209f7c3f466ccc438594918ddb29ebf2d5ed12b1ff968c8d4` = envelope `input_hash`. preparation.json `ok=true`, `proof.ok=true`, steps `make_shared/native_checks/native_load/tiny_baselines` all `ok`; its `evidence` hashes match recomputed `execution.json`, `stdout.log`, `worker-result.json`. Frozen manifest verified independently: 27 entries + `SOURCES.md` = 28 files, sets equal, all hashes match, no drift/symlink; `work/exec` equals frozen on all listed files (only extra is built `libphasepoly.dylib`).
+- Pilot hash correction: the brief's prose pilot hash did not match bytes. Authoritative envelope value recomputed exactly: `sha256(attempts/18-75643ca2…/receipt.json)=021475b2d50d093da7862c838249e6ed7af3c0600a825f96f89dc7dac10cac1f` = envelope `pilot_hash` (per run_one.py:142 `pilot_hash=sha256(receipt.json)`; `pilot.json` itself is `a782845d…` = receipt `pilot_artifact_sha256`). Required postpilot artifacts are exactly `{preparation: 02cb60ed…, pilot: 021475b2…}`.
+- Execution/cleanup/limits: both attempts `finished`, `exit:0`, `cleanup_verified=true` consistently in `execution.json`/`worker-result.json`/`receipt.json`/envelope; owner pid = execution pid, payload pid distinct child. Prepare: `cpu 0.71s, wall 1.48s, log 1018B`; pilot 18: `cpu 4.46s, wall 4.72s, log 2141B` — all within `wall 120s/cpu 1800s`, `log < 5MiB`, `RSS 142/183MB < 4GiB`, `output 1.15/1.53MB < 100MiB`; reservations `1200s` each, envelope `cpu_used 2400/28800`. `verify_artifacts` recomputed exact for both receipts (64 and 38 files, incl. `algebra.json`, `exact_decode.json`).
+- Preflight/proof/disposition: both receipts `host_preflight` passed (`power ac`, disk ~15.7GB, mem ~5.7GB, 10 modules). pilot.json `ok=true`, receipt `pilot_ok=true`, `gate3_timeout_claim=false`, `disposition/scientific_disposition=unresolved`, `scope=infrastructure and control validation only`; stdout lists 13 algebra sections, `runtime_s 3.418` matches `algebra.json`; no `pursue` recommendation anywhere. Four blockers remain explicitly unresolved. This PASS is infrastructure evidence only, never scientific merit.
+
+## Coordinator grounding (same session)
+
+Postpilot review attempt 1 of max 2 for run 47e2ef20: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). One provider
+attempt spent. Lesson reinforced: never transcribe full hashes into
+briefs — the brief's truncated pilot hash did not match bytes and the
+reviewer correctly recomputed the authoritative value from the
+envelope. Receipts below use envelope-read values only. A matching PASS
+receipt with input_hash bindings opens broader research; screen 12
+sprint (select → review → run inside ~890 s) starts now.

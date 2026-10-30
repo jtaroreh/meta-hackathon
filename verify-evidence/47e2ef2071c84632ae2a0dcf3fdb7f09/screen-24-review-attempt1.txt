@@ -1,0 +1,26 @@
+# Screen-24-review attempt 1 (run 47e2ef20) — RAW advisor evidence
+
+Run: 47e2ef2071c84632ae2a0dcf3fdb7f09. Reviewer: muse/muse-wonder-1.0 reasoningEffort=max.
+Task: screen-24-review-47e2ef20-attempt1 (mode wait, completed, no timeout, attempt 1 of 2).
+No files changed. No supervisor/workloads/processes/subtasks/payload executions.
+
+## Verbatim verdict (delegate_task summary)
+
+Verdict PASS.
+
+- Hash: recomputed `5be33dbc04c1998306269a5cb821da56ba0773a9cb510ef6fce4607965b9030e` via `screen_artifacts(...)` — matches expected. Four files only: brief.md, command.json:1 (cpu 5400, wall 900, research, source_files ["src/run24.py"], no overrides), run.sh:1, run24.py:1.
+- Closure: imports stdlib + numpy only (run24.py:23); all `open(...)` are `"w"` writes to `results.json`/witnesses (run24.py:670, run24.py:1016); no local data reads.
+- Corpus/arms: frozen `SIZES=(12,16,20)`, `SEEDS=(1..5)`, `N_INST=120`, `ARMS=J/K/T/G/A/R` (run24.py:33); seeded Hamiltonians with chain+long hops, densities, pair terms (run24.py:108).
+- Exact gates: G1 `beats_all_15 && tiny_ok && determinism_ok` (run24.py:822); G2 `spread>2*SE` at `>=2` sizes (run24.py:507, run24.py:893); G3 `tiny_solved && target cap-hit` only, cap 50000 (run24.py:895); G4 `complete && wall<500 && zero skips` plus tiny/target attempted (run24.py:900).
+- Acceptance: same-arm joint win — CNOT beats all J/K/T by `>2*SE` and depth `<=` best baseline depth, counted at `>=2` sizes, with Gates 1–4 + selftest for PURSUE; payload classification stays coordinator-side (run24.py:859, run24.py:913, brief.md:133).
+- Tiny hand check independently derived: canon leaf masks `3,3,3,5`; gadget CNOT/depth contributions `4/6 + 4/6 + 20/18 + 2/3 + 10/9 = 40/42`; unrouted optimum `22`. Matches brief.md:58 and run24.py:56.
+- Guards/lessons: `WALL_GUARD_S=300` (run24.py:45); skip records with `iters_done/n_evaluated` on tiny/target/cell/size guard exits (run24.py:690, run24.py:767); None-safe pooled/gate lookups (run24.py:495, run24.py:798). Disclosed dry-run/guard probe not re-executed per instruction.
+- Baseline/limits disclosed: no MILP/SMT/OLSQA/Vandaele/Lau/PhasePoly; exact baseline is own B&B; parity-reuse absent and named as next experiment (brief.md:115, brief.md:123).
+- Determinism/outputs: repeated seeded G/A/R checks (run24.py:808); `results.json` + `selftest/gate3/cells/checkpoint-*` witnesses (run24.py:673); verdict always `unresolved-with-reason` (run24.py:963).
+
+Files changed: none; processes: none.
+
+## Coordinator grounding
+
+Screen-24 review attempt 1 of 2 for run 47e2ef20: PASS, Wonder max.
+Select→review→launch sprint inside the ~890 s admission window.

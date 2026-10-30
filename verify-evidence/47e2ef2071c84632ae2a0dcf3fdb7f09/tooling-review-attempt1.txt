@@ -1,0 +1,30 @@
+# Tooling-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: 47e2ef2071c84632ae2a0dcf3fdb7f09
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: tooling-review-47e2ef20-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, tests, workloads, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+Verdict PASS.
+
+Recomputed hashes (repo's own `digest`/`tool_hash`, read-only): tool_hash `b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b`, config_hash `b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974` — both equal overnight-envelope.json:6 and the stated bindings; run_id `47e2ef2071c84632ae2a0dcf3fdb7f09`, deadline 1793393160.3761978 = created + 28800 s. Coverage is exactly 31 files per receipts.py:26. `git diff 7891811..HEAD` over hashed paths shows only the 3-line test-only change in `tests/test_stage_run.py` (commit `0659d16`); all other post-`7891811` commits touch unhashed `screens/07`, `screens/12`, handoff/findings, and `verify-evidence/`.
+
+Targets frozen identically in receipts.py TARGETS:12, overnight-config.json:2, and the literal prompt (OVERNIGHT_LAUNCH.md:75): workhorse `muse/muse-spark-1.3-contributor` xhigh, advisor `muse/muse-wonder-1.0` max, takeover `codex-pstack/gpt-6.1-sol` high/default; run_one.py:28 rejects any config drift. Stored `capabilities.json` bindings match the envelope, `validated_targets` equals `TARGETS` exactly, evidence SHA-256 matches `capabilities-raw.json` bytes, `observed_at` ≥ creation and `valid_until` = deadline.
+
+Supervisor: session-wide `getsid` enumeration skipping PID ≤ 0 with zombie exclusion and fail-closed `AccessDenied` (supervisor.py:55); `(pid, create_time)` identity checked before every signal (lines 46–78); owner persisted before `go.json`, payload never starts pre-acknowledgement (lines 282–362); `cleanup_group` TERM→KILL with anchor/uncertain-block semantics and `wait4` as sole reaper (lines 81–101, 221–226); `reconcile` blocks on mismatch/missing CPU receipt (lines 391–422), and envelope.py:196 blocks on overrun or unverified cleanup.
+
+Resource policy matches code: 28800 global, 7200/9000 per screen, 120/1800 prepare/pilot, 900 s cutoff, 4 GiB RSS/available, 8/6 GiB disk, 100 MiB/2 GiB output, 5 MiB stdout cap, threads forced to 2, nonrefundable reservations charged pre-spawn. Receipt gates are exact-match and fail-closed. Pilot 18 is coherent infrastructure-only: fresh exec copy, proof repeat, n=6/5 s solver/60 s outer control, `gate3_timeout_claim: false`, unresolved disposition.
+
+Files inspected in full: stored envelope, `overnight-config.json`, `OVERNIGHT_LAUNCH.md`, `docs/overnight-contract.md`, `docs/cloud-swarm-readiness-plan.md`, handoff §§1–4, all 11 `tools/overnight/*.py` (plus hashed `tools/__init__.py`), all 12 `tests/*.py`, and all three `screens/18` files, in full. Standing residuals noted, non-blocking per instructions: stale Codex-advisor prose in the readiness plan/handoff and the 58/58 status line; operative config/code/receipts pin Wonder fail-closed. Suite not rerun (inspection only, per scope). Files changed: none; processes: none. This PASS opens preparation and the infrastructure pilot only.
+
+## Coordinator grounding (same session)
+
+Tooling review attempt 1 of max 2 for run 47e2ef20: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). One provider
+attempt spent, no fallback, no timeout. Tracked tree unchanged since
+runs 52491511/e2640228 reviews (same bytes, re-inspected in full with
+independent hash recomputation). This PASS opens preparation and the
+infrastructure pilot only.

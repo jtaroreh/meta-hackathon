@@ -1,0 +1,22 @@
+# Screen-12-review attempt 1 (run 47e2ef20) — RAW advisor evidence
+
+Run: 47e2ef2071c84632ae2a0dcf3fdb7f09. Reviewer: muse/muse-wonder-1.0 reasoningEffort=max.
+Task: screen-12-review-47e2ef20-attempt1 (mode wait, completed, no timeout, attempt 1 of 2).
+No files changed. No supervisor/workloads/processes/subtasks/payload executions.
+
+## Verbatim verdict (delegate_task summary)
+
+Verdict PASS.
+
+Recomputed hash (via `.venv/bin/python` → `tools/overnight/receipts.py:99` `screen_artifacts('/Users/joeltaroreh/projects/challenges/meta-hackathon','12')`): `3e8bde6a2b5d6066d673bf6592f4b7e29fe29cf53fbfc65d5f5ddcee2895268e` — matches expected. `git log` shows single staging commit `93bf39e`; `git status --porcelain -- screens/12` clean.
+
+Evidence: Closure/scope per command.json:1 (`research`, 5400 CPU / 900 wall, `source_files:["src/run12.py"]`, no test-only overrides). Dir holds only the four staged paths. Payload imports stdlib + numpy only (run12.py:18); all opens are writes; `--data` parsed but never read. run.sh:6 execs `run_one run "12"`. Corpus `FAMILIES=(24,32,40)`, `PHYS_N=16`, `GRID_W=4`, `SEEDS=(1..5)`, `N_INST=36`, `ARMS=(G,B,A,R)` (run12.py:26); cost `3d-2`, duration `2d-1`, eviction `+6/+2`. Exact gates: G1 strict over 15 cells (:876/:888); G2 `spread>2*SE`, `g2_n>=2` (:600/:940); G3 `tiny_solved and target_cap` cap-hit-only (:942); G4 complete + wall<500 + clean (:954). Joint acceptance same-arm CNOT win >2*SE + depth<=G at >=2 counts (:913/:919/:938). Guards: WALL_GUARD_S=300 (:45), skip records with iters_done/n_evaluated on entry/per-arm/per-cell guards (:750/:765/:786/:797/:809/:828), None-guards (:588/:600/:914). Disclosed dry-run 74.4 s / zero skips (brief.md:69), not re-executed. Non-blocking note: anneal guard break returns best-so-far with stopped:False (:393) — weakens A only, cannot inflate PURSUE. Baseline disclosure clean (no MILP/SMT/OLSQA/Vandaele/Lau/PhasePoly/torch; exact baseline own bounded DFS :413). Determinism via seed_rng (:62) + repeat gates (:670/:865). results.json + witnesses/checkpoints (:730–:850/:1055). Payload verdict unconditionally unresolved-with-reason (:1010). Limitation/next-experiment match brief and code (:975).
+
+Files changed: none; processes: none.
+
+## Coordinator grounding
+
+Screen-12 review attempt 1 of 2 for run 47e2ef20: PASS, Wonder max.
+Select→review→run sprint inside the ~890 s admission window. Staged
+files carried from run e2640228 unchanged (commit 93bf39e); this run's
+fresh review binds the new envelope's hashes.
