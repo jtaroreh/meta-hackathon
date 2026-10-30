@@ -8,11 +8,10 @@
       }
     },
     "advisor": {
-      "providerInstanceId": "codex-pstack",
-      "model": "gpt-6.1-sol",
+      "providerInstanceId": "muse",
+      "model": "muse-wonder-1.0",
       "options": {
-        "reasoningEffort": "high",
-        "serviceTier": "default"
+        "reasoningEffort": "max"
       }
     },
     "takeover": {

@@ -12,8 +12,8 @@ from .preflight import BlockedError
 TARGETS = {
     "workhorse": {"providerInstanceId": "muse", "model": "muse-spark-1.3-contributor",
                   "options": {"reasoningEffort": "xhigh"}},
-    "advisor": {"providerInstanceId": "codex-pstack", "model": "gpt-6.1-sol",
-                "options": {"reasoningEffort": "high", "serviceTier": "default"}},
+    "advisor": {"providerInstanceId": "muse", "model": "muse-wonder-1.0",
+                "options": {"reasoningEffort": "max"}},
     "takeover": {"providerInstanceId": "codex-pstack", "model": "gpt-6.1-sol",
                  "options": {"reasoningEffort": "high", "serviceTier": "default"}},
 }
