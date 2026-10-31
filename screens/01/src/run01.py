@@ -157,9 +157,31 @@ def self_tests():
                 "converge_fails", "decode_exceptions", "mean_us", "max_us",
                 "skipped", "iters_done", "n_evaluated"):
         assert key in skip_probe, key
+    blocked_probe = make_blocked_tally("rotmemx_d3", "circuit_p0.005", 1, "A",
+                                       "selftest-blocker")
+    for key in ("code", "noise", "seed", "arm", "n", "logical_fails",
+                "converge_fails", "decode_exceptions", "mean_us", "max_us",
+                "blocked", "iters_done", "n_evaluated"):
+        assert key in blocked_probe, key
+    assert blocked_probe["iters_done"] == 0
+    assert blocked_probe["n_evaluated"] == 0
+    fake_cells = {}
+    for s in SEEDS:
+        fake_cells[(3, s, "A")] = {"logical_fails": 100 if s == 1 else 0,
+                                   "n": 300}
+        fake_cells[(3, s, "C")] = {"logical_fails": 0 if s == 1 else 100,
+                                   "n": 300}
+        fake_cells[(5, s, "A")] = {"logical_fails": 60, "n": 300}
+        fake_cells[(5, s, "C")] = {"logical_fails": 10, "n": 300}
+
+    def fake_lookup(code, noise, seed, arm):
+        return fake_cells[(3 if code == "rotmemx_d3" else 5, seed, arm)]
+
+    assert pooled_circuit_gap_sizes(fake_lookup) == ["rotmemx_d5"]
     return {"HxHz_orth": True, "logical_kernel": True, "logical_nontrivial": True,
             "syndrome_linearity": True, "bp_configs_honored": True,
-            "none_guard": True, "skip_schema": True}
+            "none_guard": True, "skip_schema": True, "blocked_schema": True,
+            "pooled_circuit_gap": True}
 
 
 def make_skip_tally(code, noise, seed, arm, reason, iters_done):
@@ -167,6 +189,33 @@ def make_skip_tally(code, noise, seed, arm, reason, iters_done):
             "logical_fails": 0, "converge_fails": 0, "decode_exceptions": 0,
             "mean_us": 0.0, "max_us": 0.0, "skipped": reason,
             "iters_done": iters_done, "n_evaluated": 0}
+
+
+def make_blocked_tally(code, noise, seed, arm, blocker):
+    """Named-blocker tally on the same schema as skips: counted as a skip
+    by gate4, so it must carry iters_done/n_evaluated (review 01 finding)."""
+    return {"code": code, "noise": noise, "seed": seed, "arm": arm, "n": 0,
+            "logical_fails": 0, "converge_fails": 0, "decode_exceptions": 0,
+            "mean_us": 0.0, "max_us": 0.0, "blocked": blocker,
+            "iters_done": 0, "n_evaluated": 0}
+
+
+def pooled_circuit_gap_sizes(lookup_fn):
+    """Circuit sizes with pooled-over-seeds gap (fail_A - fail_C) > 0.
+    Pooling precedes the sign test (brief acceptance rule); a single
+    positive seed must not list a size whose pooled gap is <= 0."""
+    sizes = []
+    for d in CIRCUIT_D:
+        code = "rotmemx_d%d" % d
+        Fa = sum(lookup_fn(code, "circuit_p0.005", s, "A")["logical_fails"]
+                 for s in SEEDS)
+        Na = sum(lookup_fn(code, "circuit_p0.005", s, "A")["n"] for s in SEEDS)
+        Fc = sum(lookup_fn(code, "circuit_p0.005", s, "C")["logical_fails"]
+                 for s in SEEDS)
+        Nc = sum(lookup_fn(code, "circuit_p0.005", s, "C")["n"] for s in SEEDS)
+        if Na and Nc and (Fa / Na - Fc / Nc) > 0:
+            sizes.append(code)
+    return sorted(sizes)
 
 
 def make_bp(H, error_rate, schedule, ms_scale, channel=None):
@@ -533,17 +582,15 @@ def main():
                 circuit_blocker = "%s: %s" % (type(ex).__name__, ex)
                 for seed in SEEDS:
                     for arm in ARMS:
-                        cells.append({"code": "rotmemx_d%d" % d, "noise": "circuit_p0.005",
-                                      "seed": seed, "arm": arm, "n": 0, "logical_fails": 0,
-                                      "converge_fails": 0, "decode_exceptions": 0,
-                                      "mean_us": 0.0, "max_us": 0.0, "blocked": circuit_blocker})
+                        cells.append(make_blocked_tally("rotmemx_d%d" % d,
+                                                        "circuit_p0.005", seed, arm,
+                                                        circuit_blocker))
         else:
             for seed in SEEDS:
                 for arm in ARMS:
-                    cells.append({"code": "rotmemx_d%d" % d, "noise": "circuit_p0.005",
-                                  "seed": seed, "arm": arm, "n": 0, "logical_fails": 0,
-                                  "converge_fails": 0, "decode_exceptions": 0,
-                                  "mean_us": 0.0, "max_us": 0.0, "blocked": circuit_blocker})
+                    cells.append(make_blocked_tally("rotmemx_d%d" % d,
+                                                    "circuit_p0.005", seed, arm,
+                                                    circuit_blocker))
 
     checkpoint("circuit")
 
@@ -668,9 +715,7 @@ def main():
                 if hit_b:
                     per_arm_sizes[b].append(d)
         pooled.append(prow)
-    circuit_gaps = [g for g in gaps
-                    if g["code"].startswith("rotmemx") and g.get("gap") is not None]
-    circuit_gap_sizes = sorted({g["code"] for g in circuit_gaps if g["gap"] > 0})
+    circuit_gap_sizes = pooled_circuit_gap_sizes(lookup)
 
     g1 = all(lookup("hgp_d%d" % d, "pheno_p0.06", s, "A")["logical_fails"]
              < lookup("hgp_d%d" % d, "pheno_p0.06", s, "R")["logical_fails"]
