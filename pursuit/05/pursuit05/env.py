@@ -1,11 +1,19 @@
 from __future__ import annotations
 
+from typing import Protocol
+
 import numpy as np
 import pufferlib
 from gymnasium.spaces import Box, Discrete
 
 OBS_SIZE = 7
 _EMPTY_INFO: dict = {}
+
+
+class ActFn(Protocol):
+    def __call__(
+        self, obs: np.ndarray, s: int, w: np.ndarray, rows: np.ndarray
+    ) -> np.ndarray: ...
 
 
 def draw_trajectories(pre: dict, p: float, n: int, rng) -> tuple:
@@ -30,12 +38,7 @@ def draw_trajectories(pre: dict, p: float, n: int, rng) -> tuple:
     return w, rows
 
 
-def rollout_loaded(env, w_all, rows_all, act_fn) -> list:
-    """Step explicit trajectories to completion.
-
-    act_fn(obs, s, w, rows) returns one action per agent. Episodes
-    drain fully per chunk, so no autoreset censoring skews the set.
-    """
+def rollout_loaded(env, w_all, rows_all, act_fn: ActFn) -> list:
     w_all = np.asarray(w_all)
     rows_all = np.asarray(rows_all)
     n_ep = len(w_all)
@@ -137,7 +140,6 @@ class CultivationAbort(pufferlib.PufferEnv):
         obs[:, 6] = t
 
     def load_episodes(self, w: np.ndarray, rows: np.ndarray) -> None:
-        """Replace the current draw with explicit trajectories."""
         w = np.asarray(w, dtype=np.int64)
         rows = np.asarray(rows, dtype=np.int64)
         if w.shape != (self.num_agents,) or rows.shape != (self.num_agents,):

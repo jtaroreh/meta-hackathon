@@ -11,10 +11,11 @@ OBS_SIZE = 7
 HIDDEN_SIZE = 64
 NUM_ACTIONS = 2
 
+PrefixKey = tuple[int, tuple[int, ...]]
+PrefixTable = dict[PrefixKey, bool]
+
 
 class CultivationPolicy(nn.Module):
-    """Two-layer MLP policy over the flat abort observation."""
-
     def __init__(
         self,
         obs_size: int = OBS_SIZE,
@@ -53,7 +54,7 @@ class CultivationPolicy(nn.Module):
 
 
 class TableDecider(NamedTuple):
-    table: dict
+    table: PrefixTable
     fth: int
 
     def __call__(self, k: int, prefix: tuple[int, ...]) -> bool:
@@ -67,12 +68,8 @@ def _obs_row(k: int, vals: tuple, stage_id: int, rate_id: int, t: int) -> list:
 
 def decision_table(
     policy: nn.Module, pre: dict, *, stage_id: int, rate_id: int
-) -> dict:
-    """Map every distinct non-all-zero prefix to the policy action.
-
-    Keys are (k, prefix) with k below T-1 for abort/continue and k of
-    T-1 for final accept/reject. True aborts or accepts.
-    """
+) -> PrefixTable:
+    """Entries below T-1 abort on True; entries at T-1 accept on True."""
     t = pre["T"]
     dev = next(policy.parameters()).device
     keys: list = []
@@ -100,13 +97,7 @@ def decision_table(
     return {key: bool(a) for key, a in zip(keys, acts)}
 
 
-def fit_final_threshold(table: dict, pre: dict, p: float) -> int:
-    """Fit the fw threshold that best matches the table final actions.
-
-    Agreement is weighted by trajectory mass. Ties take the lower
-    threshold. All-zero histories are excluded; eval_exact always
-    accepts them.
-    """
+def fit_final_threshold(table: PrefixTable, pre: dict, p: float) -> int:
     t = pre["T"]
     l1 = pre["L1"]
     n2 = len(pre["fw2"])
@@ -147,7 +138,7 @@ def fit_final_threshold(table: dict, pre: dict, p: float) -> int:
     return best
 
 
-def table_decider(table: dict, *, fth: int) -> TableDecider:
+def table_decider(table: PrefixTable, *, fth: int) -> TableDecider:
     if fth not in (0, 1, 2):
         raise ValueError(f"final threshold must be 0, 1, or 2, got {fth!r}")
     return TableDecider(table, int(fth))

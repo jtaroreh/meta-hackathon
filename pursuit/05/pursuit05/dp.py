@@ -7,7 +7,7 @@ import numpy as np
 
 from pursuit05 import exact, screen
 from pursuit05.exact import ArmResult
-from pursuit05.policy import table_decider
+from pursuit05.policy import PrefixTable, table_decider
 
 LAM_GRID = (0, 500, 1000, 2000, 5000, 10000, 1e9)
 FTH_GRID = (0, 1, 2)
@@ -27,7 +27,7 @@ class ParetoPoint(NamedTuple):
 
 
 class HistoryBest(NamedTuple):
-    table: dict
+    table: PrefixTable
     fth: int
     result: ArmResult
     lam: float
@@ -102,7 +102,7 @@ def _build_tree(pre: dict, p: float) -> _Tree:
 
 
 def _solve_inner(tree: _Tree, pre: dict, theta: float, lam: float,
-                 fth: int) -> dict:
+                 fth: int) -> PrefixTable:
     t = pre["T"]
     vf = pre["Vf"]
     opt = np.zeros(len(tree.keys))
@@ -172,7 +172,7 @@ def _dinkelbach(tree: _Tree, pre: dict, p: float, lam: float,
     return table, point
 
 
-def _static_table(ath: tuple, keys: list) -> dict:
+def _static_table(ath: tuple, keys: list) -> PrefixTable:
     return {(k, vals): vals[k] > ath[k] for (k, vals) in keys
             if any(vals)}
 
