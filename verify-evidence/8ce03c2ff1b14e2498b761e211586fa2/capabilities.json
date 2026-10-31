@@ -1,0 +1,36 @@
+{
+  "bindings": {
+    "config_hash": "b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974",
+    "run_id": "8ce03c2ff1b14e2498b761e211586fa2",
+    "tool_hash": "b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b"
+  },
+  "evidence_file": "receipts/capabilities-raw.json",
+  "evidence_sha256": "449d041eb63ecc5645c888feea9da0d2536c27a820b3210e59c3ec6f73b1ce8d",
+  "kind": "capabilities",
+  "observed_at": 1793383660,
+  "valid_until": 1793412452.318435,
+  "validated_targets": {
+    "advisor": {
+      "model": "muse-wonder-1.0",
+      "options": {
+        "reasoningEffort": "max"
+      },
+      "providerInstanceId": "muse"
+    },
+    "takeover": {
+      "model": "gpt-6.1-sol",
+      "options": {
+        "reasoningEffort": "high",
+        "serviceTier": "default"
+      },
+      "providerInstanceId": "codex-pstack"
+    },
+    "workhorse": {
+      "model": "muse-spark-1.3-contributor",
+      "options": {
+        "reasoningEffort": "xhigh"
+      },
+      "providerInstanceId": "muse"
+    }
+  }
+}

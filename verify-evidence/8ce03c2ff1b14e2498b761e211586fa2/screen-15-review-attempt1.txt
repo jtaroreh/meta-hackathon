@@ -1,0 +1,33 @@
+# Screen-15-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: 8ce03c2ff1b14e2498b761e211586fa2 (fresh budget in the launching run;
+prior run 8d95d5ea attempt-1 REVISE + workhorse fix commit 84675f9)
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: review-repaired-screen-15-8ce03c2f-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+REVIEW 15: PASS
+
+1. Command shape — pass. Exact placeholders, cpu 5400, wall 900, scope research, source_files [src/run15.py]; matches 19 normalized except 15/19.
+2. Runner mirror — pass. run.sh differs from 19's only in screen number; both executable.
+3. Frozen symbols / verdict / guards / skips — pass. 25 constant assignments inventoried (run15.py:17-41); 23 with explicit brief counterparts match (Q 6/8/10, N_INST 3, seeds 1-5, 4 gates/qubit, R 25x8, anneal 100, beam 4x6, CAND_CAP 24, inflation 1.6, MAX_EULER 2, greedy cap 200, guard 300, limit 500, tiny Q4/N4/depth 4, target depth 6, targets [(8,1,0),(8,1,1)], caps 20000/8000, arms F/A/B/C; SA_T0/SA_ALPHA code-only, brief says fixed cooling). 8/8/8 slices + cap 24 (run15.py:182), proxy spiders+4T (run15.py:150), best-plus-4-fallback 5 finals (run15.py:341,394). Verdict always unresolved-with-reason (run15.py:1079); UNRESOLVED reason interpolates NEXT_EXPERIMENT (run15.py:1044). Tiny caller immediate continue on stopped DFS (run15.py:835); target caller continue (run15.py:901).
+4. Blocker libraries — pass. Imports stdlib + numpy + pyzx only (run15.py:9); blocked names in brief exclusion/disclosure + one "no phasepoly" design string (run15.py:1083) only.
+5. All six repairs probed independently: (a) NEXT_EXPERIMENT byte-identical brief.md:97 = code run15.py:45 = runtime reason run15.py:1052 (probe compared brief<->code equal). (b) Every skipped.append (4 via AST) through make_skip (run15.py:48) emitting iters_done/n_evaluated (sites 816,824,872,889), sibling convention counts. (c) dfs_exact(stop=True) -> stopped-guard, 0 nodes; tiny/target callers continue immediately. (d) Real-graph probes: run_A(stop=True) -> (False,"stopped-guard",None) (run15.py:311); run_F(stop=True) -> stopped-guard (run15.py:271); run_B/run_C forced-stop -> stopped-guard; run_R(stop=True) -> stopped=True, empty rollouts (run15.py:434). Module self-tests {'ran': True, 'failed': []} in reviewer's own run. (e) sa_euler_next increments only on accept (run15.py:54, wired 386); 5-forced-reject stub kept allow_euler all-True. (f) R records actual extracted t/depth per rollout (run15.py:424); r_means real means (run15.py:60); R cells append actual means (run15.py:806); probe means matched manual recomputation exactly; no fabricated 0.0/0. Gate/joint-win pools use {F,A,B,C}/{F,B,C} only (run15.py:956) — R control only, never winner.
+6. Three encoded lessons pass: (i) solved requires best is not None (run15.py:484); G3 requires every tiny+target solved (run15.py:1006). (ii) DFS dedupes (graph,depth,allowance) (run15.py:461), terminals zero-unseen-successor/max-depth (run15.py:466), stop threaded through every arm/fallback loop. (iii) Brief beam sentence level-synchronous key (graph,euler-used) (brief.md:33) matches code constant-depth (graph_key,0,euler_used) (run15.py:330).
+7. Live gradient + exact joint-win counting pass. Probed 8q instance twoq varies by arm (F 11, A 17, B 17, C 13); proxy moves off initial. Winning metrics only from gflow-checked extraction (run15.py:235). Joint win: same B/C arm beats F pooled twoq >2SE with pooled T/depth non-regress at >=2 sizes (run15.py:968).
+8. Determinism pass. Seed-derived RNGs (run15.py:157,701); repeated tiny DFS byte-identical JSON (2847 nodes, optimum_twoq 7); only wall_s varies.
+9. Gates match brief, computed from evidence: G1 F strictly beats R per cell + all Q=6 matrix checks (run15.py:940); G2/2t pooled spread >2SE at >=2 sizes (run15.py:952); G3 all tiny + targets solved (run15.py:1013) — probes solved both targets (606 nodes/opt 11; 3536 nodes/opt 19, inside caps); G4 complete cells + wall<500 (run15.py:1023). Cells/gates/skips written to results.json (run15.py:1105).
+10. No real bug found. Enumerate-on-copy moves with re-normalization (run15.py:208); extraction on copies (run15.py:231) — no cross-arm aliasing. No swallowed stops, validity holes, wrong math. Tree clean after review; nothing changed, no supervisor run started. TARGETS advisor target matches this review.
+
+Discrepancies: none.
+
+## Coordinator grounding (same session)
+
+Screen 15 review attempt 1 of max 2 in run 8ce03c2f: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). All six
+attempt-1 REVISE defects verified repaired by independent probes.
+One provider attempt spent, no fallback, no timeout. This PASS opens
+supervised launch of 15-a01 only.

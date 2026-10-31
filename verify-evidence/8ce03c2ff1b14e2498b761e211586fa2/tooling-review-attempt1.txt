@@ -1,0 +1,25 @@
+# Tooling-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: 8ce03c2ff1b14e2498b761e211586fa2
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: tooling-review-8ce03c2f-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, tests, workloads, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary)
+
+TOOLING REVIEW: PASS
+
+1. Hashes/coverage: recomputed config_hash b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974 and tool_hash b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b = envelope. Coverage 31 files via sha256_file (receipts.py:26). stage_gates (run_one.py:38) rejects digest/tool drift + capabilities + tooling review; invoked on launch/select paths (run_one.py:81,197); run_screen/begin_attempt re-check (supervisor.py:309, envelope.py:177).
+2. Frozen targets identical (receipts.py:12, overnight-config.json:2, OVERNIGHT_LAUNCH.md:75): workhorse muse/muse-spark-1.3-contributor xhigh, advisor muse/muse-wonder-1.0 max, takeover codex-pstack/gpt-6.1-sol high/default. load_config fail-closed (run_one.py:28); check_review PASS + exact advisor (receipts.py:73). Raw evidence advertises all three.
+3. Capabilities receipt: bindings = envelope subset (receipts.py:36); validated_targets == TARGETS verified programmatically. observed_at 1793383660 >= created 1793383652.318435; valid_until 1793412452.318435 == deadline (28800 s). Reviewer-computed raw SHA-256 449d041eb63ecc5645c888feea9da0d2536c27a820b3210e59c3ec6f73b1ce8d matches. Enforcement receipts.py:50.
+4. Supervisor/resources: worker closes inherited lock, setsid, owner.json, waits go.json (supervisor.py:282); parent verifies PID/create-time, persists attempt identity, saves before go.json (supervisor.py:348). Identity persisted (supervisor.py:192). wait4 sole reaper, deadline/coordinator/caffeinate checks, session cleanup (supervisor.py:197); identity-checked TERM-then-KILL (supervisor.py:81). finish blocks on missing CPU/unverified cleanup (envelope.py:196); reconcile/recover force crashed, block autonomous launch (supervisor.py:391, envelope.py:213). Policy numbers match: 28800/900 (run_one.py:22), 7200/9000 (run_one.py:94, config:62), 4 GiB RSS, 8/6 GiB disk, 100 MiB/2 GiB/5 MiB (preflight.py:11, supervisor.py:28).
+5. Pilot 18 infrastructure-only: manifest verify first (freeze.py:179 rejects drift/injected/symlinks), fresh exec copy, tiny_proof repeat, n=6 algebra control 5 s/60 s. Disposition hard-coded unresolved, gate3_timeout_claim False, missing baselines (proof.py:16). run_one rejects other scopes/values, repeat pilot, select 18; broader screens need pilot + postpilot PASS (run_one.py:48,74,89,127). Brief never-pursue/never-Gate-3 (screens/18/brief.md:3).
+6. Residuals non-blocking: OVERNIGHT_LAUNCH.md:3 claims 45 files + 58/58 (tool_hash covers 31; tests inspected not executed); handoff:91 lumps advisor/takeover as codex-pstack — cannot mint PASS (fail-closed). This PASS opens preparation + infrastructure pilot only.
+
+## Coordinator grounding (same session)
+
+Tooling review attempt 1 of max 2 for run 8ce03c2f: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). One provider
+attempt spent, no fallback, no timeout. This PASS opens preparation
+and infrastructure pilot only — no broader screen.

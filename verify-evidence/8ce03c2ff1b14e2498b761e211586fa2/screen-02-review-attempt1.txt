@@ -1,0 +1,58 @@
+# Screen-02-review attempt 1 — RAW advisor evidence (SUPERSEDED — INFORMATIONAL ONLY)
+
+Run: 8ce03c2ff1b14e2498b761e211586fa2
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: review screen 02 scale-up (mode wait, completed, no timeout, attempt 1 of 2)
+Child thread: thread:delegated-task:command%3Amcp%3A11e6168f-acce-4321-8509-d02bfe54959a%3Adelegate-task%3A4d9f0b4e-3171-46f3-bbf2-30bec83cd051
+Provider/model verified from thread record: muse/muse-wonder-1.0.
+Review completed 2026-10-30 ~11:39 PDT (during run lifetime). No files changed.
+No supervisor, payload, background processes, or subtasks started.
+
+STATUS: NO binding screen-02-review.json was filed in this run. The run
+expired (deadline 1793412452, ~19:55 PDT 2026-10-30) during the pause before
+select 02 could run (AC-power gate blocked supervisor commands at pause, and
+the deadline passed overnight). Per tools/overnight/receipts.py check_receipt,
+a binding receipt must satisfy time.time() < valid_until <= original_deadline,
+so no valid receipt can be filed in this run after expiry. This file preserves
+the verbatim PASS findings as evidence only. The staged payload
+(screens/02/*, commit 06baea7, screen_files
+fa6d6e8d89332a02c4fbcde1456fdfb86551e36ca2b77528c31fec6096f418c1)
+carries unchanged to the next relay; a FRESH independent review (new 2-attempt
+budget) is required in the launching run before select 02.
+
+## Verbatim verdict (child-thread final message)
+
+REVIEW 02: PASS
+
+1. screens/02/command.json:1 exact shape OK: command=["{python}","-B","{root}/screens/02/src/run02.py","--attempt","{attempt}","--data","{data}"], cpu_limit_sec 5400, wall_limit_sec 900, scope research, source_files ["src/run02.py"].
+
+2. screens/02/run.sh:1 mirrors screens/19/run.sh:1 except screen number (run "02" vs run "19"), both +x (755).
+
+3. Frozen symbols: 37/37 brief-enumerated lines in screens/02/brief.md:88 verified byte-identical in screens/02/src/run02.py:31 SEEDS through EXACT_TOTAL_D3. Verdict always unresolved-with-reason (run02.py:1236 + checkpoint). UNRESOLVED reason embeds NEXT_EXPERIMENT verbatim (code string equals brief line). Every guard exit appends stoppers=True skip with iters_done/n_evaluated (all 11 skipped.append sites probed; entry/truncated/threshold/exact/enum). Exact/enum entry guards return stopped=True (skipped-guard/stopped-guard distinct from cap-hit).
+
+4. No blocker use: code modules only argparse/itertools/json/math/os/random/time + numpy + stim (run02.py:24); zero hits for MILP/SMT/OLSQA/Vandaele/Lau/PhasePoly/torch in code (brief exclusions expected). stim is the physics dep, used as Circuit.generated, compile_sampler, compile_m2d_converter, shortest_graphlike_error; no new deps.
+
+5. Three load-bearing rules (§7.2) — probed live, all hold: (i) transcribe() fidelity True at d=3/5/7 vs independent _stim_layers parse, commute violations 0, hand_differs True (e.g. true slots [2,3] vs naive [0,1]) — test discriminates (run02.py:416); (ii) full-bracket: canonical parse-back gives open…data…close on all 8 stabs, synthetic middle fails is_full_bracket and passes is_middle_bracket, tampered real events flip correctly (run02.py:332); (iii) LER via compile_sampler()+compile_m2d_converter(separate_observables=True) (run02.py:250), width check 57 measurements vs 1 observable at d=3 (169/1, 337/1 at d=5/7) (run02.py:452).
+
+6. d=3 anchor reproduces: probed canonical 120/16 d_eff=3, transfer 72/8 d_eff=3; self_tests failed=[]. Anchor folds into selftest_ok and fails pursue if numbers drift (run02.py:1071). d=3 RNG keeps certified salts 11/13/17/19 with wide=False single-stab moves.
+
+7. d=5/7 honesty: probed canonical 384/48 d_eff=5, 792/96 d_eff=7; transfer 240/24, 504/48 all preserved. Validity via shortest_graphlike_error (ValueError=nondeterministic=invalid, probed). Enum cap-hit is real count to 150; no threshold/depth claim beyond LER tracking.
+
+8. Gradient live: probed LER strictly increasing (d=3 0.023<0.058<0.111, d=5, d=7 similar); grad_ok strict with None/flat controls. Joint-win is per-arm d_eff==d && cnots<canonical counted exactly (run02.py:1163).
+
+9. Determinism: seeded Random(seed*10007+salt) + default_rng, sampler seed 1000+pi, canonical evaluated twice identical; aliasing probes preserve parent.
+
+10. Gates match brief and derive from work/results.json evidence: g1=canon_valid&&exact_valid&&rand<1&&anchor, g2=grad canonical d3&&d5&&d7, g3=exact solved&&enum cap-hit only, g4=complete&&wall<500&&zero skips (run02.py:1096).
+
+11. No real bug found: better() None/tie-break controls pass, mutation operators copy parent (no aliasing), greedy fallback repair probed, stops propagate (batch_stopped/stopped_any), checkpoint best-effort except does not swallow guard stops.
+
+Discrepancies: none.
+
+## Coordinator grounding
+
+Screen 02 scale-up review attempt 1 of max 2 in run 8ce03c2f: PASS,
+reviewer muse/muse-wonder-1.0 max (exact TARGETS advisor match). All three
+§7.2 load-bearing rules probed live; d=3 anchor reproduced; 37/37 frozen
+symbols byte-identical. This PASS opened supervised launch of 02-a01 only
+within run 8ce03c2f; the run expired before select, so the opening lapsed
+with it. Staged files carry to the next relay unchanged (15 precedent).
