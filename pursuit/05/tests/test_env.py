@@ -2,7 +2,7 @@ import numpy as np
 
 from pursuit05 import screen
 from pursuit05.cells import CellRegistry
-from pursuit05.env import CultivationAbort
+from pursuit05.env import CultivationAbort, rollout_loaded
 
 CHUNK = 256
 
@@ -14,44 +14,36 @@ def _roll_all(pre, p, ath, fth):
     trajs = [(1, r) for r in range(l1)] + [(2, r) for r in range(n2)]
     trajs += [(0, 0), (0, 0)]
     env = CultivationAbort(pre, p, num_agents=CHUNK)
-    spent = np.zeros(len(trajs))
-    acc = np.zeros(len(trajs), dtype=bool)
-    log = np.zeros(len(trajs), dtype=bool)
-    for lo in range(0, len(trajs), CHUNK):
-        chunk = trajs[lo : lo + CHUNK]
-        w = np.array([c[0] for c in chunk] + [0] * (CHUNK - len(chunk)))
-        rows = np.array([c[1] for c in chunk] + [0] * (CHUNK - len(chunk)))
-        env.load_episodes(w, rows)
-        ever = np.zeros(CHUNK, dtype=bool)
-        for s in range(t):
-            act = np.zeros(CHUNK, dtype=np.int64)
-            live = ~ever
-            idx = np.nonzero(live)[0]
-            for a in idx.tolist():
-                c, r = (w[a], rows[a])
-                if s < t - 1:
-                    cw = 0
-                    if c == 1:
-                        cw = pre["cw1"][r, s]
-                    elif c == 2:
-                        cw = pre["cw2"][r, s]
-                    act[a] = 1 if cw > ath[s] else 0
-                else:
-                    fw = 0
-                    if c == 1:
-                        fw = pre["fw1"][r]
-                    elif c == 2:
-                        fw = pre["fw2"][r]
-                    act[a] = 1 if fw <= fth else 0
-            _, _, term, _, infos = env.step(act)
-            first = term & ~ever
-            for a in np.nonzero(first)[0].tolist():
-                if a < len(chunk):
-                    spent[lo + a] = infos[a]["spent"]
-                    acc[lo + a] = infos[a]["accepted"]
-                    log[lo + a] = infos[a]["logical"]
-            ever |= term
-        assert bool(ever[: len(chunk)].all())
+
+    def act_fn(obs, s, w, rows):
+        act = np.zeros(CHUNK, dtype=np.int64)
+        for a in range(CHUNK):
+            c, r = (w[a], rows[a])
+            if s < t - 1:
+                cw = 0
+                if c == 1:
+                    cw = pre["cw1"][r, s]
+                elif c == 2:
+                    cw = pre["cw2"][r, s]
+                act[a] = 1 if cw > ath[s] else 0
+            else:
+                fw = 0
+                if c == 1:
+                    fw = pre["fw1"][r]
+                elif c == 2:
+                    fw = pre["fw2"][r]
+                act[a] = 1 if fw <= fth else 0
+        return act
+
+    outs = rollout_loaded(
+        env,
+        np.array([c[0] for c in trajs]),
+        np.array([c[1] for c in trajs]),
+        act_fn,
+    )
+    spent = np.array([o[0] for o in outs])
+    acc = np.array([o[1] for o in outs])
+    log = np.array([o[2] for o in outs])
     return spent, acc, log
 
 

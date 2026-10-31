@@ -335,21 +335,28 @@ def cmd_env_smoke(args) -> int:
         wall = time.perf_counter() - t0
         rate = args.agents * args.steps / wall
         print(f"agent-steps/s = {rate:.0f}")
-        obs, _ = vec.reset(seed=args.seed + 1)
-        spent_list: list = []
-        acc_list: list = []
-        guard = 0
-        while len(spent_list) < MC_EPISODES:
-            obs, _, _, _, infos = vec.step(
-                _scripted_actions(obs, ath, fth, t)
-            )
-            for info in infos:
-                if "spent" in info:
-                    spent_list.append(info["spent"])
-                    acc_list.append(1.0 if info["accepted"] else 0.0)
-            guard += 1
-            if guard * args.agents > 10_000_000:
-                raise RuntimeError("mc rollout exceeded step guard")
+        import numpy as np
+
+        from pursuit05.env import draw_trajectories, rollout_loaded
+
+        mc_env = CultivationAbort(
+            pre,
+            cell.p,
+            stage_id=cell.stage_idx,
+            rate_id=cell.rate_idx,
+            num_agents=args.agents,
+        )
+        w_all, rows_all = draw_trajectories(
+            pre, cell.p, MC_EPISODES, np.random.default_rng(args.seed + 1)
+        )
+        outs = rollout_loaded(
+            mc_env,
+            w_all,
+            rows_all,
+            lambda obs, s, w, rows: _scripted_actions(obs, ath, fth, t),
+        )
+        spent_list = [o[0] for o in outs]
+        acc_list = [1.0 if o[1] else 0.0 for o in outs]
         mc_w, se = _mc_w(spent_list, acc_list, _tail_mass(pre["L1"], cell.p),
                          pre["Vf"])
         ok = abs(mc_w - exact_w) <= MC_SIGMAS * se if se else abs(

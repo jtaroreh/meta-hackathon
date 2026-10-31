@@ -151,10 +151,3 @@ def table_decider(table: dict, *, fth: int) -> TableDecider:
     if fth not in (0, 1, 2):
         raise ValueError(f"final threshold must be 0, 1, or 2, got {fth!r}")
     return TableDecider(table, int(fth))
-
-
-def policy_decider(
-    policy: nn.Module, pre: dict, p: float, *, stage_id: int, rate_id: int
-) -> TableDecider:
-    table = decision_table(policy, pre, stage_id=stage_id, rate_id=rate_id)
-    return table_decider(table, fth=fit_final_threshold(table, pre, p))

@@ -8,6 +8,63 @@ OBS_SIZE = 7
 _EMPTY_INFO: dict = {}
 
 
+def draw_trajectories(pre: dict, p: float, n: int, rng) -> tuple:
+    big_l = float(pre["L1"])
+    p0 = (1.0 - p) ** big_l
+    p1 = big_l * p * (1.0 - p) ** (big_l - 1.0) if pre["L1"] else 0.0
+    p2 = (
+        (big_l * (big_l - 1.0) / 2.0) * p**2 * (1.0 - p) ** (big_l - 2.0)
+        if pre["L1"] >= 2
+        else 0.0
+    )
+    tot = p0 + p1 + p2
+    cumq = np.cumsum([p0 / tot, p1 / tot, p2 / tot])
+    w = np.searchsorted(cumq, rng.random(n), side="right")
+    rows = np.zeros(n, dtype=np.int64)
+    m1 = w == 1
+    m2 = w == 2
+    if m1.any():
+        rows[m1] = rng.integers(0, pre["L1"], size=int(m1.sum()))
+    if m2.any():
+        rows[m2] = rng.integers(0, len(pre["fw2"]), size=int(m2.sum()))
+    return w, rows
+
+
+def rollout_loaded(env, w_all, rows_all, act_fn) -> list:
+    """Step explicit trajectories to completion.
+
+    act_fn(obs, s, w, rows) returns one action per agent. Episodes
+    drain fully per chunk, so no autoreset censoring skews the set.
+    """
+    w_all = np.asarray(w_all)
+    rows_all = np.asarray(rows_all)
+    n_ep = len(w_all)
+    outs: list = [None] * n_ep
+    nag = env.num_agents
+    t = env.pre["T"]
+    for lo in range(0, n_ep, nag):
+        m = min(nag, n_ep - lo)
+        w = np.zeros(nag, dtype=np.int64)
+        rows = np.zeros(nag, dtype=np.int64)
+        w[:m] = w_all[lo : lo + m]
+        rows[:m] = rows_all[lo : lo + m]
+        env.load_episodes(w, rows)
+        ever = np.zeros(nag, dtype=bool)
+        for s in range(t):
+            _, _, term, _, infos = env.step(act_fn(env.observations, s, w, rows))
+            first = term & ~ever
+            for a in np.nonzero(first)[0].tolist():
+                if a < m:
+                    outs[lo + a] = (
+                        infos[a]["spent"],
+                        infos[a]["accepted"],
+                        infos[a]["logical"],
+                    )
+            ever |= term
+    assert all(o is not None for o in outs)
+    return outs
+
+
 class CultivationAbort(pufferlib.PufferEnv):
     """Abort-policy env: one episode is one trajectory draw."""
 
@@ -35,55 +92,27 @@ class CultivationAbort(pufferlib.PufferEnv):
         )
         self.single_action_space = Discrete(2)
         super().__init__(buf)
-        big_l = float(pre["L1"])
-        p0 = (1.0 - p) ** big_l
-        p1 = big_l * p * (1.0 - p) ** (big_l - 1.0) if pre["L1"] else 0.0
-        p2 = (
-            (big_l * (big_l - 1.0) / 2.0) * p**2 * (1.0 - p) ** (big_l - 2.0)
-            if pre["L1"] >= 2
-            else 0.0
-        )
-        tot = p0 + p1 + p2
-        self._cumq = np.cumsum([p0 / tot, p1 / tot, p2 / tot])
-        self._tail = max(0.0, 1.0 - tot)
         self._w = np.zeros(num_agents, dtype=np.int64)
         self._row = np.zeros(num_agents, dtype=np.int64)
         self._k = np.zeros(num_agents, dtype=np.int64)
         self._log = np.zeros(num_agents, dtype=bool)
-        self._fw = np.zeros(num_agents, dtype=np.int64)
         self._rng = np.random.default_rng(seed)
         self.reset()
-
-    @property
-    def tail_mass(self) -> float:
-        return self._tail
 
     def _draw_into(self, idx: np.ndarray) -> None:
         n = len(idx)
         if not n:
             return
-        w = np.searchsorted(self._cumq, self._rng.random(n), side="right")
+        w, row = draw_trajectories(self.pre, self.p, n, self._rng)
         self._w[idx] = w
-        row = np.zeros(n, dtype=np.int64)
         m1 = w == 1
         m2 = w == 2
-        if m1.any():
-            row[m1] = self._rng.integers(0, self.pre["L1"], size=int(m1.sum()))
-        if m2.any():
-            row[m2] = self._rng.integers(
-                0, len(self.pre["fw2"]), size=int(m2.sum())
-            )
         self._row[idx] = row
         log = np.zeros(n, dtype=bool)
         log[m1] = True
         if m2.any():
             log[m2] = self.pre["nt2"][row[m2]]
         self._log[idx] = log
-        fw = np.zeros(n, dtype=np.int64)
-        fw[m1] = self.pre["fw1"][row[m1]]
-        if m2.any():
-            fw[m2] = self.pre["fw2"][row[m2]]
-        self._fw[idx] = fw
         self._k[idx] = 0
 
     def _write_obs(self) -> None:
@@ -128,12 +157,6 @@ class CultivationAbort(pufferlib.PufferEnv):
         m2 = w == 2
         if m2.any():
             self._log[m2] = self.pre["nt2"][rows[m2]]
-        self._fw[:] = 0
-        m1 = w == 1
-        if m1.any():
-            self._fw[m1] = self.pre["fw1"][rows[m1]]
-        if m2.any():
-            self._fw[m2] = self.pre["fw2"][rows[m2]]
         self._k[:] = 0
         self._write_obs()
 
