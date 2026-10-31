@@ -1,20 +1,3 @@
-"""Exact scoring of any decider with the screen's binomial accounting.
-
-Data shape: pre from precompute is the frozen world. cw1 and cw2 hold
-cumulative detector weights per checkpoint, fw1 and fw2 final weights,
-nt2 the logical flag for pairs, spent the volume at each abort point,
-Vf the full volume. A decider maps a prefix (k, cw[0..k]) to abort
-(True) or continue (False); final accept is an fw threshold in
-{0, 1, 2}. The all-zero prefix always continues and is never presented
-to the decider, and neither is a prefix no live trajectory reaches.
-A decider must be pure and deterministic in (k, prefix): rows that
-share a prefix share one call. Policies that condition on the cell
-close over it per cell. Static thresholds match eval_policy exactly
-for non-negative integer thresholds; negatives are rejected because
-the screen aborts all-zero prefixes there while this harness
-continues them. Scoring memoizes a private prefix index on pre.
-"""
-
 from __future__ import annotations
 
 import numbers
@@ -38,6 +21,14 @@ class ArmResult(NamedTuple):
 
 
 class Decider(Protocol):
+    """Abort contract for exact scoring.
+
+    True aborts, False continues. Pure and deterministic in
+    (k, prefix): rows that share a prefix share one call. All-zero
+    prefixes and prefixes no live trajectory reaches are never
+    presented. fth is the final accept threshold in {0, 1, 2}.
+    """
+
     fth: int
 
     def __call__(self, k: int, prefix: tuple[int, ...]) -> bool: ...
@@ -82,6 +73,10 @@ def _prefix_index(pre: dict) -> tuple:
     return hit
 
 
+def _is_all_zero(row) -> bool:
+    return not row.any()
+
+
 def _abort_masks(indexed: list, n_rows: int, decide) -> np.ndarray:
     at = np.full(n_rows, -1)
     alive = np.ones(n_rows, dtype=bool)
@@ -91,7 +86,7 @@ def _abort_masks(indexed: list, n_rows: int, decide) -> np.ndarray:
         present = np.bincount(inv[alive], minlength=len(uniq)) > 0
         abort = np.zeros(len(uniq), dtype=bool)
         for u, row in enumerate(uniq):
-            if present[u] and row.any():
+            if present[u] and not _is_all_zero(row):
                 abort[u] = bool(decide(k, tuple(int(v) for v in row)))
         hit = abort[inv] & alive
         at[hit] = k

@@ -1,9 +1,3 @@
-"""Single import point for the certified screen 05 code.
-
-Nothing else in this package imports run05. The screen directory is
-screens/05/src under the repo root, or PURSUIT05_SCREEN_SRC when set.
-"""
-
 from __future__ import annotations
 
 import os

@@ -1,10 +1,3 @@
-"""Arm tables and pooled joint-win statistics.
-
-pooled mirrors the screen's pooled_stats over any arm set. joint_win
-mirrors the screen's pooled joint rule: the infidelity bar averages
-over the screen's F/G/A trio unless the caller names another set.
-"""
-
 from __future__ import annotations
 
 import math

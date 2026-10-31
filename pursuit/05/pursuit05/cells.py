@@ -1,5 +1,3 @@
-"""Cells, the registry that builds and caches them, and the data split."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
