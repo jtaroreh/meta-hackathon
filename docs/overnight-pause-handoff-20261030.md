@@ -1,12 +1,80 @@
 # PAUSE HANDOFF — overnight continuation, tail relay in progress
 
-Paused: 2026-10-30 ~11:55 PDT. Live run `8ce03c2ff1b14e2498b761e211586fa2`
-is idle and safe: no active screen, all attempts finished exit 0
-(prepare-a01, 18-a01, 15-a01), CPU 7800/28800 reserved, envelope intact,
-working tree clean (tracked). Deadline ~19:55 PDT (epoch 1793412452).
+**SUPERSEDED STATE (use this section; older sections below are history).**
+Final pause: user left 2026-10-30 ~12:00 PDT. Live run
+`8ce03c2ff1b14e2498b761e211586fa2` is idle and safe: no active screen,
+all attempts finished exit 0 (prepare-a01, 18-a01, 15-a01), CPU
+7800/28800 reserved, envelope intact, tracked tree clean (through
+commit `06baea7` + this handoff update). Deadline ~19:55 PDT
+(epoch 1793412452).
 
-## How to resume in a new thread
+## Next action on resume (in order)
 
+1. **Plug into AC power.** Supervisor gates (`select`/`run`/`prepare`)
+   refuse on battery — observed `{"blocked": "AC power required"}` at
+   12:00 PDT (80%, discharging). Until AC returns, supervisor commands
+   will refuse; review delegates and staging work offline fine.
+2. Verify: `.venv/bin/python -B -m tools.overnight.run_one status`
+   (expect run 8ce03c2f, cpu 7800/28800, active None).
+3. **Screen 02 scale-up is STAGED + REVIEWED-PASS; finish the sprint:**
+   - Payload committed `06baea7` (`screens/02/brief.md` +
+     `src/run02.py` replaced; md5-verified byte-identical to worktree
+     `/Users/joeltaroreh/.t3/worktrees/meta-hackathon/t3-8a788225`;
+     `command.json`/`run.sh` unchanged and compliant; `__pycache__`
+     removed). Dry-run: wall ~157 s, 0 skips, d=3 anchor reproduced
+     exactly (canonical 120/16 vs exact 72/8, greedy 4/5, random valid
+     fraction 0.0067), d=5 transfer 240/24, d=7 transfer 504/48.
+   - Review attempt-1 (Wonder max) returned **REVIEW 02: PASS** on
+     delegate task
+     `node:delegated-task:command%3Amcp%3A11e6168f-acce-4321-8509-d02bfe54959a%3Adelegate-task%3A4d9f0b4e-3171-46f3-bbf2-30bec83cd051`
+     (key evidence: 37/37 frozen symbols byte-identical; all three
+     §7.2 load-bearing rules probed live — transcribe-fidelity with
+     hand-tiling discriminator, full-bracket parse-back with middle
+     controls, sampler 57 vs converter 1 widths; d=3 salts 11/13/17/19,
+     anchor folded into selftest_ok; stoppers=True skips at all 11
+     sites; no blocker libs; determinism seeded). **Receipt NOT yet
+     filed** — write `receipts/screen-02-review-attempt1.txt` (raw
+     evidence, verbatim PASS findings; re-read them via `t3_thread_read`
+     on the child thread above if needed) +
+     `receipts/screen-02-review.json` (bindings run/config/tool/input:
+     run 8ce03c2f / b114e0fd4109213a / b6b50ec6fd454f8b /
+     0ebe0adecc95c510; artifacts = preparation `3dd3ca33…` / pilot
+     `ba557330…` / `screen_files` from
+     `tools.overnight.receipts.screen_artifacts(abspath,'02')`;
+     valid_until 1793412452.318435), THEN:
+   - `.venv/bin/python -B -m tools.overnight.run_one select 02`
+     (starts the ~891 s select→launch clock — do it only with the
+     receipt ready and AC connected), then `sh screens/02/run.sh`,
+     then classify 02 from `work/results.json` into
+     `results/verdicts.md` (extend the 02(d=3) PURSUE only if the
+     supervised d=7 evidence preserves the advantage, per §7.2; else
+     keep `PURSUE (d=3-bounded)` and do not downgrade the certified win).
+4. **01**: autopsy-first staging workhorse (read f5ac1866 01 evidence
+   first; handoff §6 + tail detail). Stage → select → review → run →
+   classify.
+5. **06**: autopsy-first staging workhorse (Gate-1 autopsy: why random
+   beats greedy A* in 9/15 cells; physical-cost-aware objective; harder
+   exact instances until z3 unknown/timeout; re-stage at 600/3600 per
+   handoff §6 tail detail). Stage → select → review → run → classify.
+6. **10** only if corpus frozen (Tan et al. OLSQA 20/40/60 figure tables
+   with provenance + SHA-256) — otherwise stays BLOCKED.
+7. **Phase 6** (§8): synthesis / decision matrix / final report across
+   all 24 paths; close any tail ID from existing evidence rather than
+   opening a further relay by default.
+
+Budget left in run: 21000 CPU (≈3 screens at 5400 + margin) — 02+01+06
+fit. If a select window expires or budget runs out, seal the run
+(recover; copy envelope to `overnight-envelope.<runid>-sealed.json`;
+move live envelope + `.lock` aside) and relay through full bootstrap
+(capabilities 3/3 → tooling review → prepare → pilot 18 → postpilot
+review → verdicts.md). Max 2 review attempts per screen per run;
+PASS-only receipts; payloads always unresolved-with-reason.
+
+---
+
+## History (pre-pause state, do not re-execute)
+
+Paused earlier 2026-10-30 ~11:55 PDT at the same safe state.
 1. `cd /Users/joeltaroreh/projects/challenges/meta-hackathon`
 2. Verify: `.venv/bin/python -B -m tools.overnight.run_one status`
    (expect run 8ce03c2f, cpu 7800/28800, active None).
@@ -14,7 +82,7 @@ working tree clean (tracked). Deadline ~19:55 PDT (epoch 1793412452).
    + live verdicts `overnight-data/8ce03c2ff1b14e2498b761e211586fa2/results/verdicts.md`.
 4. Collect the 02 scale-up delivery (below), then continue the tail.
 
-## In-flight work (left running, safe)
+## In-flight work (left running, safe — DELIVERED, see §Next action)
 
 Screen 02 scale-up staging workhorse (muse-spark-1.3-contributor xhigh):
 - Child thread: `thread:delegated-task:command%3Amcp%3A11e6168f-acce-4321-8509-d02bfe54959a%3Adelegate-task%3A5ae84ff8-0063-4527-8c25-30783b0656af`
