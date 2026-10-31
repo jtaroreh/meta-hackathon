@@ -1,0 +1,33 @@
+# Tooling-review attempt 2 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: b8b625b200064005b89bcf9381a68418
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: tooling-review-b8b625b2-attempt2 (mode wait, completed, no timeout, attempt 2 of 2)
+Child thread: thread:delegated-task:command%3Amcp%3A24767ffa-498d-4af1-9b2b-5954c90db8ae%3Adelegate-task%3Aded557aa-5206-4f79-828c-260ba2ed4de3
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, tests, workloads, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary; markdown links flattened to path:line)
+
+TOOLING REVIEW: PASS
+
+1. Hashes recomputed — match. With .venv/bin/python, tools/overnight/receipts.py:26 tool_hash and tools/overnight/envelope.py:30 digest give config_hash=b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974 and tool_hash=b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b, both equal to overnight-envelope.json:6 (tool hash at line 20). Coverage at tools/overnight/receipts.py:28 is 31 files: all tools/**/*.py, all tests/**/*.py, all screens/18/*, plus OVERNIGHT_LAUNCH.md:1, the receipt contract, and the scientific plan; config bytes are bound separately by config_hash, and receipts stay outside coverage. Drift is refused at tools/overnight/run_one.py:41. No defect.
+
+2. Frozen targets identical and fail-closed. tools/overnight/receipts.py:12 TARGETS, overnight-config.json:2, and OVERNIGHT_LAUNCH.md:75 all fix workhorse muse/muse-spark-1.3-contributor xhigh, advisor muse/muse-wonder-1.0 max, takeover codex-pstack/gpt-6.1-sol high/default; programmatic config.targets == TARGETS is true. tools/overnight/run_one.py:28 load_config rejects any drift, and tools/overnight/receipts.py:73 check_review requires verdict=="PASS" plus exact advisor match. The repaired overnight-data/b8b625b200064005b89bcf9381a68418/receipts/capabilities-raw.json:1 now parses via json.loads (10 providers) and advertises all three targets with the required option values (xhigh, max, high+default). The attempt-1 bracket defect is cured. No defect.
+
+3. Capabilities receipt sound. overnight-data/b8b625b200064005b89bcf9381a68418/receipts/capabilities.json:1 bindings equal the envelope subset (run_id, config_hash, tool_hash per tools/overnight/receipts.py:36); programmatic validated_targets == TARGETS is true per tools/overnight/receipts.py:66. observed_at=1793441139 lies within [created_at=1793441116.055431, now=1793441530], valid_until=1793469916.055431 equals the run deadline at overnight-envelope.json:12, and recomputed SHA-256 19534c0e076322807daa82f365bafd827c10aab8d828e6eac5993c1c0ab80da5 matches evidence_sha256; check_capabilities(env) returns OK under tools/overnight/receipts.py:50. No defect.
+
+4. Supervisor and resource safety pass. Exclusive non-blocking lock at tools/overnight/envelope.py:112; worker closes the inherited lock descriptor then setsid at tools/overnight/supervisor.py:282; owner.json/go.json handshake with parent persisting PID/create-time before go.json at tools/overnight/supervisor.py:348; create-time identity at tools/overnight/supervisor.py:46, session enumeration skipping PID 0/zombies at tools/overnight/supervisor.py:55; sole wait4 reaping at tools/overnight/supervisor.py:221; identity-checked TERM-then-KILL at tools/overnight/supervisor.py:81; fail-closed finish/recover/reconcile at tools/overnight/envelope.py:196, tools/overnight/envelope.py:213, tools/overnight/supervisor.py:391, plus incomplete-publication blocking at tools/overnight/run_one.py:151. Policy numbers match the contract: 28800/900 run at tools/overnight/run_one.py:22, 7200/9000 per-screen caps at tools/overnight/run_one.py:94, 4 GiB RSS, 8/6 GiB disk, 100 MiB attempt, 2 GiB global at tools/overnight/preflight.py:11, 5 MiB stdout cap at tools/overnight/supervisor.py:28, thread pinning at tools/overnight/supervisor.py:38. No defect.
+
+5. Pilot 18 is infrastructure-only. tools/overnight/pilot_18.py:17 verifies the manifest first, makes a fresh exec copy, repeats tiny_proof per tools/overnight/proof.py:61, then runs the algebra control --n 6 --time-limit 5 with a 60s outer timeout; disposition is hard-coded unresolved with gate3_timeout_claim=False, also forced at tools/overnight/run_one.py:107. tools/overnight/run_one.py:69 rejects repeat pilot, out-of-queue, already-finished, wrong-scope, and unselected screens, and tools/overnight/run_one.py:197 rejects select 18; broader screens require pilot plus postpilot and screen PASS at tools/overnight/run_one.py:38. screens/18/brief.md:3 states never-pursue/never-Gate-3. No defect.
+
+6. Residuals, none blocking launch beyond the pending gate. (a) No tooling-review.json exists yet; prepare/pilot stay correctly blocked until the coordinator writes a PASS bound to the current hashes — expected workflow state, not a defect. (b) Tests under tests/test_stage_run.py:1 were inspected only and not executed per instructions, so the 58/58 claim at OVERNIGHT_LAUNCH.md:3 is unverified here. (c) Host AC/disk/memory preflight was not re-probed in this read-only review; it is enforced at launch by tools/overnight/preflight.py:76, and the live envelope has zero attempts. (d) Sampled (non-hard) RSS/disk/output enforcement and incomplete wait4 descendant accounting are disclosed design limits at docs/overnight-contract.md:13. (e) Narrative wording at docs/cloud-swarm-readiness-plan.md:19 loosely groups advisor under Codex, but the enforced TARGETS/load_config/check_review gates and the literal prompt govern, so it does not block. (f) valid_until equals the deadline exactly; the run clock is already ticking, so launch promptly within the cutoff.
+
+## Coordinator grounding (same session)
+
+Tooling review attempt 2 of max 2 for run b8b625b2: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). Attempt-1 REVISE
+defect (malformed capabilities-raw.json) verified cured by independent
+re-parse + option re-check. Two provider attempts spent (1 REVISE + 1
+PASS), no fallback, no timeout. This PASS opens preparation and
+infrastructure pilot only — no broader screen.

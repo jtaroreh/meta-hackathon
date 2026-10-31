@@ -1,0 +1,46 @@
+# Screen-02-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: b8b625b200064005b89bcf9381a68418 (fresh review of carried staging 06baea7;
+prior run 8ce03c2f attempt-1 PASS lapsed with that run's expiry)
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: review-screen-02-scale-up-b8b625b2 (mode wait, completed, no timeout, attempt 1 of 2)
+Child thread: thread:delegated-task:command%3Amcp%3A24767ffa-498d-4af1-9b2b-5954c90db8ae%3Adelegate-task%3A0b24d72e-3ac9-4ae7-a33b-2c0cdf211722
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary; markdown links flattened to path:line)
+
+REVIEW 02: PASS
+
+1. command.json (item 1) — exact. screens/02/command.json:1 is {"command": ["{python}", "-B", "{root}/screens/02/src/run02.py", "--attempt", "{attempt}", "--data", "{data}"], "cpu_limit_sec": 5400, "scope": "research", "source_files": ["src/run02.py"], "wall_limit_sec": 900} — all four placeholders, 5400/900, research scope. Matches screens/19/command.json:1 modulo screen number.
+
+2. run.sh (item 2) — mirrors sibling. Byte-identical to screens/19/run.sh:1 after 19→02 substitution (verified by diff); both -rwxr-xr-x (+x confirmed).
+
+3. Frozen symbols (item 3) — 37/37 byte-identical. Reviewer extracted the screens/02/brief.md:88 frozen block (lines 88–124) and the constant block in screens/02/src/run02.py:31: all 37 symbols (SEEDS through EXACT_TOTAL_D3, incl. salts 11/13/17/19, 21/23/27/29, 31/33/37/39, guards 300.0/500.0) match byte-for-byte, zero mismatches. Verdict is hardcoded unresolved-with-reason at run02.py:1236 (checkpoints likewise, L895); the UNRESOLVED reason interpolates NEXT_EXPERIMENT (L1200–1205), and the assembled code string equals the brief's line 195 verbatim. Guard probing with stop()=True and a mid-run stop confirmed every exit (random/greedy/SA per-seed and truncated, exact entry exact-remaining L759–763, enum entry enum-d5-remaining L792–797, threshold per-point L838–847) appends a skip with iters_done/n_evaluated/stopped: True and propagates stopped=True.
+
+4. No blocker libraries (item 4). Zero occurrences of MILP/SMT/OLSQA/Vandaele/Lau/PhasePoly/torch in run02.py:1 (brief exclusion prose only). Imports are stim + numpy + stdlib only — same physics dep as the d=3 payload, no new deps.
+
+5. Load-bearing rules (item 5) — all three probed live. (i) layout() → transcribe() → stim.Circuit.generated("surface_code:rotated_memory_x") (L73–101, L1293–1331); self_tests() ran with failed: [], commute holds at 9/8, 25/24, 49/48, per-layer fidelity against _stim_layers passes, and the hand-tiling discriminator genuinely fires (d=3 ancillas 13/25 occupy slots [2,3], ≠ naive [0,1]). (ii) Parse-back bracket_events_from_circuit (L270–329) confirms canonical is full-bracket/not-middle on all 8 stabs; synthetic controls discriminate (synth_middle: full=False, middle=True; clean full-bracket: full=True, middle=False). (iii) threshold_ler uses compile_sampler() + convert(separate_observables=True) (L250–261); measured d=3 canonical widths are 57 measurements vs 1 observable (32 detectors), exactly as the brief states.
+
+6. d=3 anchor (item 6) — reproduces exactly. Live calls: canonical 120/16 d_eff=3; run_exact_d3 solved 256/256 with best 72/8 (9.4 s); greedy 4/5 seeds hit 72/8 (seed 4: 78/9); random pooled valid fraction 2/300 = 0.0067; canonical LER 0.0256 < 0.0619 < 0.1146 over the p grid. anchor_ok (L1071–1081) folds into selftest_ok (L1082–1083) and Gate 1, so non-reproduction fails the payload. d=3 arms run with wide=False (single-stab moves only) under salts 11/13/17/19 — the certified hit pattern is itself the stream fingerprint.
+
+7. d=5/d=7 honesty (item 7). Live evaluation: canonical 384/48 (d_eff=5) and 792/96 (d_eff=7); transfer 240/24 and 504/48, both genuinely valid (shortest_graphlike_error, ValueError→invalid at L158–163). run_enum_d5 really evaluated 150 circuits to a clean cap-hit (23.8 s, no skip). No depth metric or threshold-crossing value is computed anywhere; claims stop at CNOT overhead + LER tracking, per §7.2 of docs/overnight-continuation-handoff.md:205.
+
+8. Gradient-live / joint wins (item 8). Canonical LER strictly increases at every size (d=5: 0.0452 < 0.1064 < 0.1900; d=7: 0.0686 < 0.1515 < 0.2559) — no tied/degenerate regime. Joint-win counting is exact per arm (L1163–1178): d_eff == d and strictly fewer CNOTs than canonical, pursue_d3 = wins3≥1 ∧ g1∧g2∧g3∧g4∧selftest_ok, extended_d7 additionally needs a d=7 win (transfer counts), matching the brief's acceptance text.
+
+9. Determinism (item 9). Same-seed threshold_ler identical, evaluate identical on repeat, and a full greedy rerun reproduced best_sched byte-identically. All RNG derives from frozen salts; only wall fields vary.
+
+10. Gates from evidence (item 10). G1 all-canon-valid && exact_valid && rand_frac_d3<1.0 && anchor_ok (L1096–1097), G2 canonical strict-gradient at all sizes (L1099–1107), G3 exact solved && enum_d5=="cap-hit" only (L1108–1109, solved/stopped/skipped all fail), G4 complete && wall<500 && zero skips (L1161) with full cell-count checks (L1111–1155) — all computed from the serialized cells/gate3/gate2 structures written to work/results.json.
+
+11. Bug scan (item 11) — no real defect. Aliasing is copy-on-mutate throughout (self-test probes pass); better() None/tie-break and greedy fallback repair paths are self-tested and behave; truncated runs cannot pass G4 clean (missing cells, skip log, None-LER rows each independently block). Non-defects noted only: the unused wide argument in run_random (brief assigns pair structure to greedy/SA only) and the discarded stopped flag from run_threshold in main (skip records + None rows already block G2/G4). Workspace left untouched (probe bytecode cache removed; screens/02 clean).
+
+Discrepancies: none.
+
+## Coordinator grounding (same session)
+
+Screen 02 scale-up review attempt 1 of max 2 in run b8b625b2: PASS,
+reviewer muse/muse-wonder-1.0 max (exact TARGETS advisor match). Fresh
+independent verification of carried staging (37/37 symbols, all three
+§7.2 rules probed live, d=3 anchor reproduced exactly). One provider
+attempt spent, no fallback, no timeout. This PASS opens supervised
+launch of 02-a01 only.

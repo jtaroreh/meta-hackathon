@@ -1,0 +1,31 @@
+# Postpilot-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: b8b625b200064005b89bcf9381a68418
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: postpilot-review-b8b625b2-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Child thread: thread:delegated-task:command%3Amcp%3A24767ffa-498d-4af1-9b2b-5954c90db8ae%3Adelegate-task%3A1e0d8c57-d4be-4598-9493-8d02df61cdca
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, tests, workloads, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary; markdown links flattened to path:line)
+
+POSTPILOT REVIEW: PASS
+
+1. Hash chain recomputed with repo code (sha256_file) — all equal. Envelope input_hash=c9fcadda961ac05b60ba1646d3b0429df24fc6340b7039097c9a7c31cd9f4a2a = prepare-b041caeab39c424da506294fd6769351/work/frozen-source/SOURCES.md = prepare-.../work/exec/SOURCES.md = 18-54f1d70b2cdc466681caf7eef1a16104/work/exec/SOURCES.md. Envelope preparation_hash=a18895c7410aa5bb03d28df6c2e65ea3f43177a96d39123479637ca7a01add68 = bytes of preparation.json = prepare receipt.json:artifact_hashes[preparation.json]. Envelope pilot_hash=15b9599fc4f2e8107bcb6dfec3277181d7b752ebcedb6d418a6c9f6607cb9bb6 = bytes of pilot receipt.json. Pilot pilot.json bytes a782845d130482f3d0da7409b591330698cd6a8934b99029ab36e1cdc9fec694 = pilot receipt pilot_artifact_sha256 = artifact_hashes[pilot.json]. Live envelope is repo-root overnight-envelope.json for run b8b625b200064005b89bcf9381a68418; envelope entries point to exactly these two attempt dirs.
+
+2. Both attempts clean. Prepare prepare-a01: execution_status=finished, execution_reason=exit:0, disposition=unresolved, cleanup_verified=true; receipt scope=infrastructure, gate3_timeout_claim=false. Pilot 18-a01: finished/exit:0, disposition=unresolved, cleanup_verified=true; receipt scope=infrastructure, gate3_timeout_claim=false, pilot_ok=true. Envelope attempts[] mirrors both.
+
+3. verify_artifacts (exact-set, tools/overnight/receipts.py:110) passes on both receipt.json files. verify_manifest (tools/overnight/freeze.py:179) passes on prepare frozen root .../work. preparation.json:evidence hashes match on-disk bytes: execution.json=e6a61860e38f4e2bb39e9b7a1683f797be4dc1949251e817c5df20c560afc26d, stdout.log=16ded8db762d319ee2a228d86158336f71087678d816e30e1407b93a90e3f566, worker-result.json=34ce0455ee04be2cd77cb7bf5a912ffcfa89ec9f2e6a4cee00637e92f3394f38.
+
+4. Prepare proof present. preparation.json:ok=true, proof.ok=true, proof.steps={make_shared:true, native_load:true, native_checks:true, tiny_baselines:true}. Prepare stdout.log shows native build (cc ... -o build/libphasepoly.dylib), PASS: 45 checks, 0 failures, graysynth tiny ok: 8 gates, pmh tiny ok: 3 gates, pyzx tiny ok. Four blockers named unresolved; scope=infrastructure only.
+
+5. Pilot used a fresh exec copy. tools/overnight/pilot_18.py:17 calls verify_manifest before make_exec_copy; no symlinks in pilot work/exec or prepare frozen-source; all 28 frozen files hash-identical in pilot exec, sole addition build/libphasepoly.dylib (same in prepare exec). Pilot repeats proof markers (proof.ok=true, same four steps ok; stdout repeats build + PASS: 45 checks + three tinies). Algebra control --n 6 --time-limit 5 under 60 s outer (tools/overnight/pilot_18.py:26): pilot.json:algebra_control.ok=true, work/control-output/algebra.json:explicit_run_n6={status:OPTIMAL, timeout_is_proof:false, time_limit_s:5.0, elapsed_s:0.84, primal:12, dual:12.0, gap:0.0}, total runtime_s=3.476.
+
+6. Postpilot bindings confirmed for filing. bindings(env, inputs=True) (tools/overnight/receipts.py:36) = {run_id:b8b625b200064005b89bcf9381a68418, config_hash:b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974, tool_hash:b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b, input_hash:c9fcadda961ac05b60ba1646d3b0429df24fc6340b7039097c9a7c31cd9f4a2a} (all from live envelope); pilot receipt already carries these, prepare receipt input_hash="" is launch sequencing only. Required artifacts exactly {preparation:a18895c7410aa5bb03d28df6c2e65ea3f43177a96d39123479637ca7a01add68, pilot:15b9599fc4f2e8107bcb6dfec3277181d7b752ebcedb6d418a6c9f6607cb9bb6} per docs/overnight-contract.md:54 and tools/overnight/run_one.py:59 — no postpilot-review.json filed yet, as expected pending this review. No pursue recommendation; scope infrastructure/control only (pilot.json:scope, screens/18/brief.md), gate3_timeout_claim=false everywhere, never Gate 3. Read-only; nothing changed, started, or tested.
+
+## Coordinator grounding (same session)
+
+Postpilot review attempt 1 of max 2 for run b8b625b2: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). One provider
+attempt spent, no fallback, no timeout. This PASS opens broader
+screens with artifacts exactly {preparation, pilot}.

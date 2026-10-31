@@ -1,0 +1,43 @@
+# Screen-01-review attempt 2 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: b8b625b200064005b89bcf9381a68418
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: review-screen-01-autopsy-attempt2 (mode wait, completed, no timeout, attempt 2 of 2)
+Child thread: thread:delegated-task:command%3Amcp%3A24767ffa-498d-4af1-9b2b-5954c90db8ae%3Adelegate-task%3A3af46a1a-8a2f-402d-a2c7-3d33669edfaa
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary; markdown links flattened to path:line)
+
+REVIEW 01: PASS
+
+1. command.json exact shape — PASS. Verified programmatically: command == ["{python}","-B","{root}/screens/01/src/run01.py","--attempt","{attempt}","--data","{data}"], cpu_limit_sec=5400, wall_limit_sec=900, scope="research", source_files=["src/run01.py"] (screens/01/command.json:1).
+
+2. run.sh mirror — PASS. screens/01/run.sh:1 is byte-identical to screens/19/run.sh:1 after substituting "19"→"01" (verified by string comparison); both are 0755 (+x).
+
+3. Frozen symbols, verdict, stopped propagation, skip schema — PASS. 21/21 programmatic checks (17 named constants — PHENO_D/P/N, SEEDS, CIRCUIT_D/P/N, ARMS, MAX_ITER, LAT_CAP_US, MLD_D3_LIMIT, MLD_FRONTIER_LIMIT, MLD_D7/D9/D11_COUNT, WALL_GUARD_S, WALL_LIMIT_S — plus BP_CONF A/B1/B2/B3), BP_CONF C (bposd/osd_cs/2) and rounds=d also match; 17/17 brief symbol strings present verbatim. NEXT_EXPERIMENT brief<->code verified byte-identical programmatically, and the only verdict values in code are unresolved-with-reason (run01.py:497 checkpoint, run01.py:773 final, carrying NEXT_EXPERIMENT verbatim); no pursue/reject self-classification. tripped() latches stop["flag"] (run01.py:480) and every guard exit appends a record: pheno cell/arm (run01.py:509, run01.py:519), circuit arm (run01.py:573), gate3 d3/frontier (run01.py:599, run01.py:620). Attempt-1 defect 1 confirmed fixed: make_blocked_tally (run01.py:194) carries iters_done/n_evaluated on the skip schema, both call sites use it (run01.py:585, run01.py:591), no hand-rolled blocked records exist, and the blocked_schema regression probe ran green in self_tests().
+
+4. Libraries and solver reads — PASS. No torch/Vandaele/Lau/PhasePoly/OLSQA/MILP/SMT/ldpc.ckt_noise anywhere (grep hits for "z3" are the Hz3 variable only); imports are stdlib + numpy + ldpc + stim + pulp. pulp.COIN_CMD(msg=0, threads=1, timeLimit=...) (run01.py:409); status read via LpSolveStatus name and compared exactly to "Optimal"/"TimeLimit" (run01.py:737). Probed live: mld_decode on a d=3 syndrome returns status="Optimal", has_solution=True. normalize_mld_result None-guard plus forced-None/malformed probes pass (run01.py:145). BP schedule is genuinely honored, not attribute theater: ldpc 2.4.1's schedule property writes the C++ decoder, and parallel-vs-serial decoders produced different estimates on 22/200 probed syndromes (scale 1.0-vs-1.25: 18/200).
+
+5. §6.1 fidelity — PASS. The pheno autopsy is the boosted over-relaxed family (B2 parallel/1.25, B3 serial/1.25) with per-arm per-size converge_share and recovered_frac in pooled (run01.py:681); the brief explicitly freezes the pheno pursue bar with no silent circuit-only re-scope (brief.md:50). Frontier is d7x12/d9x8/d11x8 at 10 s, counting only the solver's own exact TimeLimit; an all-Optimal frontier fails Gate 3 honestly (solver-sufficiency), never a fabricated timeout.
+
+6. Per-arm pursue counting — PASS. Same arm b at ≥2 sizes, gap_d>0, recovered≥0.25, pooled mean latency ≤5000 µs (run01.py:708); no cross-arm pooling. Attempt-1 defect 2 confirmed fixed: pooled_circuit_gap_sizes (run01.py:203) pools fail/n over all seeds before the sign test, and its probe is discriminating — seed-1-only positive gap at d3 (pooled negative) is correctly excluded, asserting exactly ["rotmemx_d5"]; ran green.
+
+7. Circuit observable exactness — PASS. compile_detector_sampler(seed=seed) + sample(..., separate_observables=True) (run01.py:556); stim-only DEM parse (is_relative_detector_id/is_logical_observable_id, no ckt_noise); logical fail = non-convergence OR L_obs @ estimate != true observable (run01.py:384). Probed end-to-end: d=3 Hd(24,291), d=5 Hd(120,1958), dropped=0, per-mechanism priors exactly match mechanism count, arm A tallies produced (17 and 75 fails). Named-blocker path records blocked tallies instead of fabricating metrics.
+
+8. Gradient-live and determinism — PASS. Gate 2 is computed from the run's own pooled tallies; corpus is seeded per (seed, d), the circuit sampler is seeded, CBC runs threads=1, and a repeat-decode determinism check is written to witnesses. Rerun byte-identical except the disclosed wall/timing fields is feasible.
+
+9. Gates match brief codings — PASS. G1 all A<R over 25 pheno cells (run01.py:720); G2 nonflat>=2 with pooled max−min > 2×binomial-SE (run01.py:724); G3 d3 Optimal && ≥1 frontier TimeLimit (run01.py:737); G4 planned = 210 cells, n==300 count == planned && wall < 500 && n_skips == 0 including gate3 skips (run01.py:739). All gates are computed from cells/gate3 evidence that lands in results.json. Non-blocking observation: determinism/corpus evidence is reported as a separate control_determinism gate rather than ANDed into gate2_nonflat.pass; the coded G2 rule matches the brief literally and the coordinator sees both keys, so this does not overclaim.
+
+10. Real bugs — none found. Two harmless observations, neither classification-affecting: the circuit phase parses the DEM/samples before the per-arm guard check (bounded extra work after a trip; records still skips, pheno checkpoint already written), and a mid-seed circuit exception appends duplicate blocked tallies for completed seeds (lookup is first-match and Gate 4 counting still fails honestly, so no false pass is reachable). Read-only review; nothing changed, no supervisor runs started.
+
+Discrepancies: none.
+
+## Coordinator grounding (same session)
+
+Screen 01 review attempt 2 of max 2 in run b8b625b2: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). Both attempt-1
+REVISE defects verified fixed by independent re-probe (blocked schema
++ discriminating pooled-gap probe, both green in self_tests). Two
+provider attempts spent (1 REVISE + 1 PASS), no fallback, no timeout.
+This PASS opens supervised launch of 01-a01 only.

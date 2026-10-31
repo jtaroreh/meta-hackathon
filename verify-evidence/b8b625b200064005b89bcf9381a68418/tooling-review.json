@@ -1,0 +1,24 @@
+{
+  "artifacts": {
+    "config_hash": "b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974",
+    "tool_hash": "b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b"
+  },
+  "bindings": {
+    "config_hash": "b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974",
+    "run_id": "b8b625b200064005b89bcf9381a68418",
+    "tool_hash": "b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b"
+  },
+  "evidence_file": "receipts/tooling-review-attempt2.txt",
+  "evidence_sha256": "975a05451d686ef88375fd92b8be50e136a40216d0d8235d456b8b30077f52cd",
+  "kind": "tooling-review",
+  "observed_at": 1793441600,
+  "reviewer": {
+    "model": "muse-wonder-1.0",
+    "options": {
+      "reasoningEffort": "max"
+    },
+    "providerInstanceId": "muse"
+  },
+  "valid_until": 1793469916.055431,
+  "verdict": "PASS"
+}

@@ -1,0 +1,39 @@
+# Tooling-review attempt 1 — RAW advisor evidence (REVISE; superseded by attempt 2)
+
+Run: b8b625b200064005b89bcf9381a68418
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: tooling-review-b8b625b2-attempt1 (mode wait, completed, no timeout, attempt 1 of 2)
+Child thread: thread:delegated-task:command%3Amcp%3A24767ffa-498d-4af1-9b2b-5954c90db8ae%3Adelegate-task%3Ac95ae1c7-a243-48cd-87d4-2536a2420bdd
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, tests, workloads, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary; markdown links flattened to path:line)
+
+TOOLING REVIEW: REVISE
+
+1. Hashes recomputed — match. Reviewer recomputation with .venv/bin/python (via tools/overnight/receipts.py:26 tool_hash and tools/overnight/envelope.py:30 digest) gives config_hash=b114e0fd4109213a44b417dc1ea9c9adaaacc76465b52c993496d6393fa1a974 and tool_hash=b6b50ec6fd454f8bbb0432e395e2212dfae18b1a266f6cafdc05708b07a52d9b, both equal to overnight-envelope.json:6. Coverage at tools/overnight/receipts.py:28 is 31 files: all tools/**/*.py, all tests/**/*.py, all screens/18/* files, plus OVERNIGHT_LAUNCH.md:1, the receipt contract, and the scientific plan; config bytes are covered separately by config_hash. No defect.
+
+2. Frozen targets — REVISE defect in raw evidence. Targets are byte-identical across tools/overnight/receipts.py:12 TARGETS, overnight-config.json:2, and OVERNIGHT_LAUNCH.md:75: workhorse muse/muse-spark-1.3-contributor xhigh; advisor muse/muse-wonder-1.0 max; takeover codex-pstack/gpt-6.1-sol high/default; programmatic config.targets == TARGETS is true. Fail-closed checks hold: tools/overnight/run_one.py:28 load_config rejects any target drift, and tools/overnight/receipts.py:73 check_review requires verdict=="PASS" plus exact advisor match. However overnight-data/b8b625b200064005b89bcf9381a68418/receipts/capabilities-raw.json:1 is not valid JSON: json.loads fails at char 5218 (Expecting ',' delimiter) due to one extra ] after the Cursor gemini-4-argon entry; deleting that single byte makes it parse and then all three targets advertise the required option values (xhigh, max, high+default). As saved it cannot be the unmodified orchestrator_capabilities output required by docs/overnight-contract.md:50, and the CLI hash-only check at tools/overnight/receipts.py:58 would not catch this corruption. Fix: re-save the verbatim capabilities JSON, update evidence_sha256 in the capabilities receipt, and re-verify bindings before any tooling PASS is written. Blocks launch: yes.
+
+3. Capabilities receipt bindings — pass, subject to item 2. overnight-data/b8b625b200064005b89bcf9381a68418/receipts/capabilities.json:1 bindings equal the envelope subset (run_id, config_hash, tool_hash); programmatic validated_targets == TARGETS (tools/overnight/receipts.py:12) is true; observed_at=1793441139 lies within [created_at=1793441116.055431, now]; valid_until=1793469916.055431 equals the run deadline exactly; reviewer-recomputed SHA-256 of the raw file 43e086f92e36db271c9382a4e309f3f269e3f05d99e0a992acb1bcfd39888f16 matches evidence_sha256. The hash binds the malformed bytes, so this passes mechanically but does not cure item 2.
+
+4. Supervisor/resource safety — pass. Lock via non-blocking flock at tools/overnight/envelope.py:112; worker closes inherited lock fd then setsid at tools/overnight/supervisor.py:282; owner.json/go.json handshake with parent persisting PID/create-time before go.json at tools/overnight/supervisor.py:348; create-time identity check at tools/overnight/supervisor.py:46 and session enumeration skipping PID 0/zombies at tools/overnight/supervisor.py:55; sole wait4 reaping at tools/overnight/supervisor.py:221; identity-checked TERM-then-KILL at tools/overnight/supervisor.py:81; finish blocks on missing CPU/cleanup at tools/overnight/envelope.py:196, recover/reconcile fail closed at tools/overnight/envelope.py:213 and tools/overnight/supervisor.py:391, plus incomplete-publication block at tools/overnight/run_one.py:151. Policy numbers match the contract: 28800/900 run at tools/overnight/run_one.py:22, 7200/9000 per-screen cap at tools/overnight/run_one.py:94, 4 GiB RSS / 8 GiB start / 6 GiB stop disk / 100 MiB attempt / 2 GiB global at tools/overnight/preflight.py:11, 5 MiB stdout cap at tools/overnight/supervisor.py:28. No defect.
+
+5. Pilot 18 infrastructure-only — pass. tools/overnight/pilot_18.py:17 verifies the manifest first, makes a fresh exec copy, repeats tiny_proof (tools/overnight/proof.py:61: make shared, native load/checks, GraySynth/PMH/pyzx), then runs the algebra control --n 6 --time-limit 5 with 60s outer timeout; disposition is hard-coded unresolved with gate3_timeout_claim=False, also forced in receipts at tools/overnight/run_one.py:107. tools/overnight/run_one.py:74 rejects repeat pilot, wrong scope, unselected or finished screens, and tools/overnight/run_one.py:197 rejects select 18; broader screens require pilot plus postpilot PASS at tools/overnight/run_one.py:48. screens/18/brief.md:3 states never-pursue/never-Gate-3. No defect.
+
+6. Residuals. Blocking: only item 2 (malformed raw evidence; no code change needed, hashes unaffected since receipts are outside tool_hash coverage). Non-blocking pending state, not defects: no tooling-review.json exists yet (this review is that gate, so prepare/pilot remain correctly blocked until a PASS bound to current hashes is written after item 2 is fixed); envelope has zero attempts and host AC/disk/memory preflight was not re-probed in this read-only review — it is enforced at launch by tools/overnight/preflight.py:76; tests under tests/test_stage_run.py:1 were inspected only and not executed per instructions, so the 58/58 claim in OVERNIGHT_LAUNCH.md:3 is unverified here; sampled (non-hard) RSS/disk/output enforcement and incomplete wait4 descendant accounting are disclosed design limits at docs/overnight-contract.md:13, accepted and not launch-blocking beyond that disclosure.
+
+## Coordinator grounding (same session)
+
+Tooling review attempt 1 of max 2 for run b8b625b2: REVISE on a real
+coordinator-side defect (malformed capabilities-raw.json transcription,
+missing model-object close in the Cursor entry region). All other items
+passed. One provider attempt spent, no fallback, no timeout.
+
+Coordinator fix (no frozen-tooling change; receipts are outside tool_hash):
+repaired the raw JSON to byte-faithful capabilities output (json parses,
+10 providers, cursor omittedModels 40, all 3 frozen targets advertise
+required options), updated evidence_sha256 in capabilities.json to
+19534c0e076322807daa82f365bafd827c10aab8d828e6eac5993c1c0ab80da5, and
+re-verified check_capabilities OK programmatically. Attempt 2 dispatched
+fresh.

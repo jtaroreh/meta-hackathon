@@ -1,0 +1,52 @@
+# Screen-01-review attempt 1 — RAW advisor evidence (REVISE; superseded by attempt 2)
+
+Run: b8b625b200064005b89bcf9381a68418
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: review-screen-01-autopsy-b8b625b2 (mode wait, completed, no timeout, attempt 1 of 2)
+Child thread: thread:delegated-task:command%3Amcp%3A24767ffa-498d-4af1-9b2b-5954c90db8ae%3Adelegate-task%3A3e1e2748-f210-40ec-a7cc-e5d6eabdc537
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary; markdown links flattened to path:line)
+
+REVIEW 01: REVISE
+
+1. Item 1 — command.json: PASS. Exact required shape in screens/01/command.json:1: command=["{python}","-B","{root}/screens/01/src/run01.py","--attempt","{attempt}","--data","{data}"], cpu_limit_sec=5400, scope="research", source_files=["src/run01.py"], wall_limit_sec=900. Verified by parsing both 01 and 19 JSON.
+
+2. Item 2 — run.sh: PASS. screens/01/run.sh:1 differs from screens/19/run.sh:1 only in the screen number ("01" vs "19", diff line 6); both mode 755 (+x).
+
+3. Item 3 — frozen symbols / verdict / stop propagation: PASS except blocked-schema defect in Finding 4. Programmatically verified 21/21 constants/configs byte-identical brief<->code (PHENO_D/P/N, SEEDS, CIRCUIT_D/P/N, ARMS, MAX_ITER=30, LAT_CAP_US=5000.0, MLD_D3_LIMIT=30, MLD_FRONTIER_LIMIT=10, counts 12/8/8, WALL_GUARD_S=300.0, WALL_LIMIT_S=500.0, BP_CONF A/B1/B2/B3 in run01.py:49); C ("bposd","osd_cs",2) and CIRCUIT_ROUNDS="d" are encoded semantically (make_bposd osd_cs/order 2, rounds=d), not as literal names. NEXT_EXPERIMENT in code equals the brief sentence byte-identically (programmatic equality: True), and the verdict at run01.py:728 is unconditionally unresolved-with-reason carrying it verbatim. tripped()/stop flag propagates to pheno, circuit, d3-MLD (checked first, line 552) and every frontier solve (line 573); all wall-guard skip records via make_skip_tally and both MLD skip records carry iters_done/n_evaluated.
+
+4. Item 3 defect — REVISE: blocked circuit records at run01.py:536 and run01.py:543 lack iters_done/n_evaluated (and any skipped key), yet are counted as skips at line 695. Fix: build them through the same skip schema (add iters_done: 0, n_evaluated: 0) while keeping the blocked named-blocker field.
+
+5. Item 4 — blockers / pulp: PASS. No MILP/SMT/OLSQA/Vandaele/Lau/PhasePoly/torch use in code (exclusion statements only in the brief; imports are stdlib+numpy+ldpc+stim+pulp). pulp.COIN_CMD(msg=0, threads=1, timeLimit=...) at run01.py:360; statuses compared exactly to "Optimal"/"TimeLimit" (line 692). Probes: MLD matched brute-force min-weight on 5/5 d3 syndromes with status Optimal; a forced 0.001 s d11 probe returned exactly TimeLimit; forced-None and {"status": None} self-test probes return NONE_RESULT (lines 145–153).
+
+6. Item 5 — §6.1 fidelity: PASS. (a) Boosted autopsy family B2/B3 frozen at scale 1.25 with per-arm-per-size converge_share plus recovery fractions in pooled (lines 658–669); brief explicitly keeps the pheno pursue bar unchanged (no silent circuit re-scope). (b) Frontier d7x12 + d9x8 + d11x8 @10 s present; only the solver's own TimeLimit counts (BUILD_ERROR/NONE_RESULT/SKIPPED_WALL_GUARD excluded), so a fast CBC solve is honestly recorded as Optimal, never a fabricated timeout.
+
+7. Item 6 — per-arm pursue counting: REVISE. Pheno counting is exact (same arm pooled over seeds, gap>0, recovered_frac>=0.25, lat<=5000, collected per arm in per_arm_sizes, lines 661–669; REJECT precondition is coordinator-derivable since the payload never self-classifies). Defect: circuit_gap_sizes at run01.py:671 is derived from per-seed gap rows (gaps rows are per (size,seed), lines 621–632), so one positive seed lists a size even if the brief's pooled circuit gap (fail_A−fail_C pooled over seeds) is ≤0 — contradicting the brief and the payload's own acceptance.rule text. Fix: pool A/C fails over seeds per circuit size first, then test gap>0.
+
+8. Item 7 — circuit observable: PASS. Syndromes and true flips from compile_detector_sampler(seed=seed) with separate_observables=True (line 507); DEM parsed with stim handles only (line 264, no ldpc.ckt_noise); logical fail = syndrome mismatch (via decode_with) OR L_obs @ estimate mod 2 != true observable (lines 335–339); parse/sampler failure records the named circuit_blocker instead of any proxy metric.
+
+9. Item 8 — gradient-live / determinism: PASS. Probes on the real decoders: legacy make_bp estimates byte-match the true BpDecoder(schedule=...) for both schedules (15/300 differing syndromes parallel-vs-serial at d3; scale 1.25 changes 31–39/300 estimates at d5), so no all-arms-tied degeneracy. All RNG is seeded (1000*seed+d, stim seed=seed, CBC threads=1); rerun byte-identity is feasible except the disclosed wall/timing fields.
+
+10. Item 9 — gates: PASS. G1 strict A<R over all 25 pheno cells (line 675); G2 nonflat>=2 with pooled rates vs 2× binomial SE (lines 679–690); G3 d3 Optimal && any frontier TimeLimit (line 692); G4 planned=210 with n=300 tallies, elapsed()<500, zero skips including gate3 skips (lines 694–699) — all computed from cells/gate3 evidence in results.json.
+
+11. Item 10 — other bugs: none found. MLD parity constraints verified exact against brute force; no aliasing across distinct storage roles, no swallowed stops (guard trips fail G1/G4 honestly), no unseeded RNG. Reviewer target in tools/overnight/receipts.py:12 TARGETS["advisor"] (muse/muse-wonder-1.0, max) matches this review. Read-only: no files changed (probe __pycache__ removed; git status clean for all reviewed paths), no supervisor runs started.
+
+## Coordinator grounding (same session)
+
+Screen 01 review attempt 1 of max 2 in run b8b625b2: REVISE on two
+real defects (blocked-record skip schema; per-seed vs pooled circuit
+gap). All other items passed. One provider attempt spent, no fallback,
+no timeout.
+
+Coordinator fix (no frozen-symbol change; brief already required the
+fixed behavior): (1) make_blocked_tally helper on the skip schema
+(iters_done/n_evaluated + blocked field) used at both blocked sites;
+(2) pooled_circuit_gap_sizes helper (pool A/C fails over seeds, then
+gap>0) replacing the per-seed derivation; (3) discriminating
+regression probes for both in self_tests (fail-pre/pass-post verified:
+old logic lists d3 on the synthetic case, new logic correctly yields
+[rotmemx_d5] only). Post-fix dry-run green: 210 cells, 0 skips,
+wall 27 s, circuit_gap_sizes both sizes, B3 per-arm hits at 4 sizes.
+Attempt 2 dispatched fresh.

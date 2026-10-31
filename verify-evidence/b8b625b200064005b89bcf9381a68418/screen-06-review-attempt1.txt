@@ -1,0 +1,44 @@
+# Screen-06-review attempt 1 — RAW advisor evidence (binding PASS receipt filed separately)
+
+Run: b8b625b200064005b89bcf9381a68418
+Reviewer target: muse/muse-wonder-1.0 reasoningEffort=max
+Task: review-screen-06-autopsy-b8b625b2 (mode wait, completed, no timeout, attempt 1 of 2)
+Child thread: thread:delegated-task:command%3Amcp%3A24767ffa-498d-4af1-9b2b-5954c90db8ae%3Adelegate-task%3A97cd3d2b-2ff3-453b-9c6e-44937896ec30
+Provider/model/options verified from delegate result: muse/muse-wonder-1.0 reasoningEffort=max.
+No files changed. No supervisor, payload, background processes, or subtasks started.
+
+## Verbatim verdict (delegate_task summary; markdown links flattened to path:line)
+
+REVIEW 06: PASS
+
+1. Command shape — pass. screens/06/command.json:1 has exactly the five required keys with command [{python}, -B, {root}/screens/06/src/run06.py, --attempt, {attempt}, --data, {data}], cpu_limit_sec 3600, wall_limit_sec 600, scope research, source_files [src/run06.py] — the frozen 06 allowance, not sibling 19's 900/5400. The advisor entry in tools/overnight/receipts.py:12 TARGETS matches this reviewer role.
+
+2. run.sh parity — pass. 06/run.sh:6 vs 19/run.sh:6: only the run "06" vs run "19" token differs; both executable.
+
+3. Frozen symbols, verdict, guards — pass. 32/32 brief-enumerated symbols verified identical by AST plus evaluated import (including the NPATCH = W * H = 25 and FACTORIES = (0, NPATCH - 1) = (0, 24) expressions and neighbour order) against screens/06/brief.md:144. The only verdict literals in run06.py:984 are unresolved-with-reason (normal + fallback publish). Code NEXT_EXPERIMENT equals the brief string byte-for-byte, and the unresolved branch embeds it; executable self_tests() passed all probes (skip schema, stopped guard, forced-None/exception/good solver guard, joint cost, determinism, 40-op scale builder). AST audit: the sole records.append is inside SkipLog.add, all 12 LOG.add guard exits (cell entry/mid-cell/phase fill-in, tiny/target entry, tiny/target T-solves, tiny/target Tbelow, solver--none, main exception) carry iters_done/n_evaluated and set stopped=True via make_skip_record; both blocked-* returns use blocked_solve_record. Gate/cell appends are ordinary evidence records, not skip/blocked records.
+
+4. No blocker libraries — pass. Imports are stdlib + numpy + lazily imported z3 only; blocker names occur solely in exclusion disclosures (e.g. run06.py:963). z3 uses Solver() with set('timeout', ms) and verbatim reason_unknown(); probes observed 1 ms expiry → unknown/'timeout' and an unsat case → '', so only exact timeout-reason unknowns can count toward Gate 3.
+
+5. §6.2 fidelity — pass. The brief freezes the 9/15 table, route-0 pile-up (dominant), orientation (contributory), co-location (rejected), and identical-phys floor proof. Arms map exactly to the frozen reformulation: A/B use J_place joint placement, C selects by J_prog with LAMBDA = 0.5, R keeps its random decode. Scale probe verified: 40 stacked ops, horizons scale_horizon(27)=23 and capped 28, target lengths 6/20/20/40; a no-timeout outcome honestly fails the timeout leg instead of fabricating expiry.
+
+6. Pursue counting — pass. Makespan and physical legs use distinct pool/SE variables and counters (win_n/winp_n, strict_n/strictp_n) with the same best(B,C) - A > 2*SE rule at ≥2 sizes; PURSUE additionally requires Gates 1/2/2p/4, full tiny 4/4, self-tests, and a target timeout. REJECT requires completeness, tiny 4/4, Gate 1, clean, and zero strict wins on either metric at any size.
+
+7. z3 encoding honesty — pass. One Boolean per (route, orientation) pair with sum exactly 1 (no group selector can activate both orientations), chosen-orientation edge/vertex linking, ≤1 capacities, factory separation ≥2, and start + length <= T; the oversize guard returns a blocked record without shrinking the instance, and sat witnesses store the selected [route, orientation] pair. Candidate-route/horizon relativity is disclosed in brief and payload design fields.
+
+8. Diagnostics and determinism — pass. Per-cell detour/flip/wait diagnostics are recorded; no random module and no unseeded RNG exist (all generators are hash/formula-seeded), the determinism self-test passed, and an independent arm-A rerun was byte-identical.
+
+9. Gate codings — pass. G1 strict 15-cell, G2/G2p pooled spread with separately recomputed SEs, G3 tiny sat/unsat pairs plus timeout-only targets, and G4 completeness-on-both-metrics + wall < 500 + zero skips (clean) all match the brief and are computed from the collected cell/solve evidence in results.json.
+
+10. Bug hunt — no defect found. No wrong-metric aliasing, swallowed guard stop, unseeded randomness, or feasibility hole was found. Observations only (not REVISE grounds): the brief's "Vandaere" spelling on line 15 is a cosmetic typo, and the unresolved reason renders a doubled final period after the verbatim NEXT_EXPERIMENT text.
+
+Discrepancies: none.
+
+## Coordinator grounding (same session)
+
+Screen 06 review attempt 1 of max 2 in run b8b625b2: PASS, reviewer
+muse/muse-wonder-1.0 max (exact TARGETS advisor match). Fresh
+independent verification of re-staged v4 (32/32 symbols, all 12 guard
+exits + both blocked returns through shared helpers, z3 encoding
+one-hot verified, scale probe verified). One provider attempt spent,
+no fallback, no timeout. This PASS opens supervised launch of 06-a01
+only.
