@@ -1,0 +1,16 @@
+[project]
+name = "pursuit05"
+version = "0.1.0"
+description = "Exact-evaluation harness and abort-policy program for magic-state cultivation (screen 05)"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pufferlib==3.0.0",
+    "torch==2.15.0",
+    "numpy==1.26.4",
+    "gymnasium==0.29.1",
+    "pytest>=8.3",
+    "ruff>=0.8",
+]
+
+[tool.ruff]
+target-version = "py312"
