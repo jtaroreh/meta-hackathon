@@ -43,6 +43,19 @@ Score the test seeds only:
 .venv/bin/python -m pursuit05 baselines --seeds 4,5
 ```
 
+Smoke the abort env on one cell:
+
+```sh
+.venv/bin/python -m pursuit05 env-smoke --cell 12/0.002/1 --agents 4096 --steps 200
+```
+
+Score the exact static optimum S and the exact history-dependent
+optimum H on all cells:
+
+```sh
+.venv/bin/python -m pursuit05 optimum
+```
+
 Run the checks:
 
 ```sh
