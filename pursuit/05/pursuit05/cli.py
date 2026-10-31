@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -26,6 +27,11 @@ def repo_root() -> Path:
 
 
 def resolve_record_path() -> Path:
+    override = os.environ.get("PURSUIT05_RECORD")
+    if override:
+        if Path(override).is_file():
+            return Path(override)
+        raise FileNotFoundError(f"reproduction record not found: {override}")
     cands = [repo_root() / RECORD_REL, RECORD_FALLBACK_ROOT / RECORD_REL]
     for cand in cands:
         if cand.is_file():
@@ -57,6 +63,23 @@ def run_screen_arms(screen, pre: dict, cell: Cell) -> dict:
     return {"F": f, "G": g, "A": a}
 
 
+def _record_entries(record_path: Path, targets) -> dict:
+    try:
+        cells = json.loads(record_path.read_text())["cells"]
+    except (KeyError, TypeError) as exc:
+        raise ValueError(f"bad record {record_path}: {exc}") from None
+    entries = {}
+    for cell in targets:
+        for arm in ("F", "G", "A"):
+            key = record_key(cell.n, cell.p, cell.seed, arm)
+            try:
+                rec = cells[key]
+                entries[key] = (rec["mean"], rec["inf"]["mean"])
+            except (KeyError, TypeError) as exc:
+                raise ValueError(f"bad record {record_path}: {key}: {exc}") from None
+    return entries
+
+
 def cmd_reproduce(args) -> int:
     try:
         from pursuit05 import screen
@@ -67,8 +90,8 @@ def cmd_reproduce(args) -> int:
             targets = [reg.find(args.cell)]
         else:
             targets = reg.all_cells()
-        record = json.loads(resolve_record_path().read_text())["cells"]
-    except (ImportError, FileNotFoundError, ValueError) as exc:
+        entries = _record_entries(resolve_record_path(), targets)
+    except (ImportError, OSError, ValueError) as exc:
         print(f"pursuit05: {exc}", file=sys.stderr)
         return 1
     ok = 0
@@ -78,31 +101,31 @@ def cmd_reproduce(args) -> int:
         pre = reg.pre(cell)
         outs = run_screen_arms(screen, pre, cell)
         cell_ok = True
+        worst = None
         for arm, out in outs.items():
-            rec = record.get(record_key(cell.n, cell.p, cell.seed, arm))
-            if rec is None:
-                print(
-                    f"pursuit05: record lacks "
-                    f"{record_key(cell.n, cell.p, cell.seed, arm)}",
-                    file=sys.stderr,
-                )
-                return 1
-            dw = abs(out["W"] - rec["mean"])
-            dinf = abs(out["inf"] - rec["inf"]["mean"])
+            mean, infmean = entries[record_key(cell.n, cell.p, cell.seed, arm)]
+            dw = abs(out["W"] - mean)
+            dinf = abs(out["inf"] - infmean)
             max_dw = max(max_dw, dw)
             max_dinf = max(max_dinf, dinf)
             if dw > 1e-9 or dinf > 1e-9:
                 cell_ok = False
+                if worst is None or dw + dinf > worst[1] + worst[2]:
+                    worst = (arm, dw, dinf)
             if args.cell:
                 print(
                     f"{cell.cell_id} {arm} W={out['W']:.12f} "
-                    f"record={rec['mean']:.12f} dW={dw:.3e} "
+                    f"record={mean:.12f} dW={dw:.3e} "
                     f"inf={out['inf']:.12e} dinf={dinf:.3e}"
                 )
         if cell_ok:
             ok += 1
         elif not args.cell:
-            print(f"{cell.cell_id} MISMATCH dW={dw:.3e} dinf={dinf:.3e}")
+            arm, dw, dinf = worst
+            print(
+                f"{cell.cell_id} MISMATCH {arm} dW={dw:.3e} dinf={dinf:.3e}",
+                file=sys.stderr,
+            )
     print(
         f"reproduced {ok}/{len(targets)} cells, max |dW| = {max_dw:.3e}, "
         f"max |dinf| = {max_dinf:.3e}"
@@ -138,6 +161,9 @@ def _pooled_section(screen, table, rows, seeds, label) -> list[str]:
     wins = 0
     for p in screen.P_ERRS:
         slot = by_rate.get(p, {})
+        if not slot:
+            lines.append(f"p={p} n=0")
+            continue
         pools_w = {a: table.pooled(slot[a][0]) for a in ARMS if a in slot}
         pools_i = {a: table.pooled(slot[a][1]) for a in ARMS if a in slot}
         lines.append(table.render_regime(p, ARMS, pools_w, pools_i))
@@ -158,7 +184,10 @@ def cmd_baselines(args) -> int:
     except (ImportError, ValueError) as exc:
         print(f"pursuit05: {exc}", file=sys.stderr)
         return 1
-    label = split_label(seeds)
+    if set(seeds) == set(screen.SEEDS):
+        label = "all"
+    else:
+        label = split_label(seeds)
     print(f"# baselines ({label} seeds {','.join(str(s) for s in seeds)})")
     rows = []
     for cell in targets:

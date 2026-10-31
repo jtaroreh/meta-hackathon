@@ -4,7 +4,8 @@ This program trains an adaptive abort policy for magic-state cultivation
 on modeled ring-plus-chord cells and scores it exactly against the
 certified screen 05 search arms. The cells are models, not device maps.
 The weight-3 tail stays censored and disclosed. No hardware claim, no
-threshold claim. Policy numbers cover held-out cells only.
+threshold claim. This harness prints train and test seeds separately;
+later policy numbers cover held-out cells only.
 
 ## Setup
 
@@ -59,13 +60,27 @@ abort point, `Vf` the full volume. A policy maps a prefix
 
 `eval_exact` scores any decider with the screen's binomial accounting.
 `best_static` enumerates every static policy and returns the lowest-W
-policy within the F-anchored infidelity bound. Train seeds are 1, 2, 3
-and test seeds are 4, 5. Stage transfer holds out `n = 12`.
+policy within the F-anchored infidelity bound; its `inference_cost_s`
+is the enumeration wall time. `joint_win` judges every arm against the
+screen's F/G/A infidelity bar. Train seeds are 1, 2, 3 and test seeds
+are 4, 5. The registry holds out `n = 12` for stage transfer in a
+later step.
+
+## Decider protocol
+
+A decider answers `decide(k, prefix)` with True to abort or False to
+continue, and carries `fth` in {0, 1, 2} for the final accept rule.
+It must be pure and deterministic in `(k, prefix)`: rows that share a
+prefix share one call. The all-zero prefix always continues and is
+never presented, and neither is a prefix no live trajectory reaches.
+A policy that conditions on the cell closes over it per cell and
+reuses one decider object per cell.
 
 ## Environment
 
 `PURSUIT05_SCREEN_SRC` overrides the screen source directory, which
-defaults to `screens/05/src` under the repo root.
+defaults to `screens/05/src` under the repo root. `PURSUIT05_RECORD`
+overrides the screen record file below.
 
 `reproduce` reads the screen record from
 `overnight-data/cfc1d43d7de946e6988f0158b5508e28/attempts/05-3ca8e6aa423c4275a9919edb9ccb7344/work/results.json`

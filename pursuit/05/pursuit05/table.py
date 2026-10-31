@@ -1,7 +1,8 @@
 """Arm tables and pooled joint-win statistics.
 
-pooled mirrors the screen's pooled_stats; joint_win mirrors its pooled
-joint rule, generalized from the fixed F/G/A trio to any arm set.
+pooled mirrors the screen's pooled_stats over any arm set. joint_win
+mirrors the screen's pooled joint rule: the infidelity bar averages
+over the screen's F/G/A trio unless the caller names another set.
 """
 
 from __future__ import annotations
@@ -24,16 +25,22 @@ def pooled(vals) -> dict:
     return {"n": int(a.size), "mean": m, "std": sd, "se": sd / math.sqrt(a.size)}
 
 
-def joint_win(pools_w: dict, pools_inf: dict, arm: str, base: str = "F") -> bool:
-    arms = sorted(pools_w)
-    if arm not in pools_w or base not in pools_w:
+def joint_win(
+    pools_w: dict,
+    pools_inf: dict,
+    arm: str,
+    base: str = "F",
+    sse_arms: tuple = ("F", "G", "A"),
+) -> bool:
+    need = {arm, base} | set(sse_arms)
+    for pools in (pools_w, pools_inf):
+        for name in need:
+            if name not in pools:
+                raise KeyError(f"arm {name!r} missing from pools")
+    if any(pools_w[a]["se"] is None or pools_w[a]["mean"] is None for a in need):
         return False
-    if arm not in pools_inf or base not in pools_inf:
-        return False
-    if any(pools_w[a]["se"] is None or pools_w[a]["mean"] is None for a in arms):
-        return False
-    if all(pools_inf[a]["se"] is not None for a in arms):
-        sse = math.sqrt(sum(pools_inf[a]["se"] ** 2 for a in arms) / len(arms))
+    if all(pools_inf[a]["se"] is not None for a in sse_arms):
+        sse = math.sqrt(sum(pools_inf[a]["se"] ** 2 for a in sse_arms) / len(sse_arms))
     else:
         sse = None
     fmean = pools_w[base]["mean"]
@@ -55,7 +62,7 @@ def joint_win(pools_w: dict, pools_inf: dict, arm: str, base: str = "F") -> bool
 
 
 def render_arm_table(rows: list, arms: tuple) -> str:
-    width = max(len("cell"), max(len(cid) for cid, _ in rows))
+    width = max([len("cell")] + [len(cid) for cid, _ in rows])
     head = [f"{'cell':<{width}}"]
     for arm in arms:
         head.append(f"{arm}_W".rjust(16))

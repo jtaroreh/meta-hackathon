@@ -3,13 +3,21 @@
 Data shape: pre from precompute is the frozen world. cw1 and cw2 hold
 cumulative detector weights per checkpoint, fw1 and fw2 final weights,
 nt2 the logical flag for pairs, spent the volume at each abort point,
-Vf the full volume. A decider maps a prefix (k, cw[0..k]) to abort or
-continue; final accept is an fw threshold in {0, 1, 2}. The all-zero
-prefix always continues and is never presented to the decider.
+Vf the full volume. A decider maps a prefix (k, cw[0..k]) to abort
+(True) or continue (False); final accept is an fw threshold in
+{0, 1, 2}. The all-zero prefix always continues and is never presented
+to the decider, and neither is a prefix no live trajectory reaches.
+A decider must be pure and deterministic in (k, prefix): rows that
+share a prefix share one call. Policies that condition on the cell
+close over it per cell. Static thresholds match eval_policy exactly
+for non-negative integer thresholds; negatives are rejected because
+the screen aborts all-zero prefixes there while this harness
+continues them. Scoring memoizes a private prefix index on pre.
 """
 
 from __future__ import annotations
 
+import numbers
 import time
 from typing import NamedTuple, Protocol
 
@@ -17,7 +25,7 @@ import numpy as np
 
 from pursuit05 import screen
 
-_INDEX_KEY = "_pursuit05_prefix_index"
+_INDEX_KEY = object()
 
 
 class ArmResult(NamedTuple):
@@ -50,7 +58,12 @@ class StaticBest(NamedTuple):
 
 
 def static_decider(ath: list[int] | tuple[int, ...], fth: int) -> StaticDecider:
-    return StaticDecider(tuple(ath), int(fth))
+    vals = tuple(ath)
+    if any(not isinstance(v, numbers.Integral) or v < 0 for v in vals):
+        raise ValueError(f"abort thresholds must be non-negative ints, got {vals!r}")
+    if fth not in (0, 1, 2):
+        raise ValueError(f"final threshold must be 0, 1, or 2, got {fth!r}")
+    return StaticDecider(tuple(int(v) for v in vals), int(fth))
 
 
 def _index_rows(cw: np.ndarray) -> list:
@@ -75,9 +88,10 @@ def _abort_masks(indexed: list, n_rows: int, decide) -> np.ndarray:
     for k, (uniq, inv) in enumerate(indexed):
         if not alive.any():
             break
+        present = np.bincount(inv[alive], minlength=len(uniq)) > 0
         abort = np.zeros(len(uniq), dtype=bool)
         for u, row in enumerate(uniq):
-            if row.any():
+            if present[u] and row.any():
                 abort[u] = bool(decide(k, tuple(int(v) for v in row)))
         hit = abort[inv] & alive
         at[hit] = k
@@ -89,6 +103,10 @@ def eval_exact(decide, pre: dict, p: float) -> dict:
     fth = getattr(decide, "fth", None)
     if fth not in (0, 1, 2):
         raise ValueError(f"decider final threshold must be 0, 1, or 2, got {fth!r}")
+    if isinstance(decide, StaticDecider) and len(decide.ath) != pre["T"] - 1:
+        raise ValueError(
+            f"abort thresholds need {pre['T'] - 1} entries, got {len(decide.ath)}"
+        )
     Vf = pre["Vf"]
     L1 = pre["L1"]
     idx1, idx2 = _prefix_index(pre)
@@ -126,7 +144,8 @@ def best_static(pre: dict, p: float, f_inf: float) -> StaticBest:
         if out["inf"] <= bound and (best is None or out["W"] < best[0]):
             best = (out["W"], out["inf"], out["pacc"], tuple(ath), fth)
     cost = time.perf_counter() - start
-    assert best is not None
+    if best is None:
+        raise ValueError(f"no static policy within infidelity bound {bound}")
     W, inf, pacc, ath, fth = best
     return StaticBest(
         ath=ath,

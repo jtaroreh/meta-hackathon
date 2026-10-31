@@ -30,7 +30,7 @@ class Cell:
 
 
 def _full_checks(n: int) -> int:
-    return n + (n // 4 + (1 if n % 4 else 0))
+    return len(screen.cell_edges(n))
 
 
 def parse_cell_id(cell_id: str) -> Cell:
@@ -42,7 +42,7 @@ def parse_cell_id(cell_id: str) -> Cell:
         rate_idx = screen.P_ERRS.index(p)
         if seed not in screen.SEEDS:
             raise ValueError(seed)
-    except (ValueError, AttributeError):
+    except (ValueError, AttributeError, KeyError):
         raise ValueError(f"unknown cell {cell_id!r}") from None
     return Cell(stage_idx, n, screen.T_OF[n], rate_idx, p, seed)
 
@@ -72,12 +72,12 @@ class CellRegistry:
     def select(
         self,
         seeds: tuple[int, ...] | None = None,
-        stages: tuple[int, ...] | None = None,
+        sizes: tuple[int, ...] | None = None,
     ) -> list[Cell]:
         return [
             c
             for c in self._cells
-            if (seeds is None or c.seed in seeds) and (stages is None or c.n in stages)
+            if (seeds is None or c.seed in seeds) and (sizes is None or c.n in sizes)
         ]
 
     def find(self, cell_id: str) -> Cell:
