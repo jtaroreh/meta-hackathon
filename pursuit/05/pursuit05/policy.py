@@ -7,7 +7,8 @@ import pufferlib.pytorch
 import torch
 from torch import nn
 
-OBS_SIZE = 7
+from pursuit05.env import CW_COLS, OBS_SIZE, binomial_masses
+
 HIDDEN_SIZE = 64
 NUM_ACTIONS = 2
 
@@ -62,15 +63,17 @@ class TableDecider(NamedTuple):
 
 
 def _obs_row(k: int, vals: tuple, stage_id: int, rate_id: int, t: int) -> list:
-    return [float(k), *[float(v) for v in vals], *[0.0] * (3 - len(vals)),
+    return [float(k), *[float(v) for v in vals], *[0.0] * (CW_COLS - len(vals)),
             float(stage_id), float(rate_id), float(t)]
 
 
 def decision_table(
     policy: nn.Module, pre: dict, *, stage_id: int, rate_id: int
 ) -> PrefixTable:
-    """Entries below T-1 abort on True; entries at T-1 accept on True."""
+    """Lower entries abort on True; T-1 entries are accept votes for fitting."""
     t = pre["T"]
+    if t - 1 > CW_COLS:
+        raise ValueError(f"T={t} exceeds {CW_COLS} cw columns")
     dev = next(policy.parameters()).device
     keys: list = []
     rows: list = []
@@ -97,17 +100,19 @@ def decision_table(
     return {key: bool(a) for key, a in zip(keys, acts)}
 
 
+def _survives(table: PrefixTable, cw: np.ndarray, r: int, t: int) -> bool:
+    for k in range(t - 1):
+        vals = tuple(int(v) for v in cw[r, : k + 1])
+        if any(vals) and table[(k, vals)]:
+            return False
+    return True
+
+
 def fit_final_threshold(table: PrefixTable, pre: dict, p: float) -> int:
     t = pre["T"]
     l1 = pre["L1"]
     n2 = len(pre["fw2"])
-    big_l = float(l1)
-    p1 = big_l * p * (1.0 - p) ** (big_l - 1.0) if l1 else 0.0
-    p2 = (
-        (big_l * (big_l - 1.0) / 2.0) * p**2 * (1.0 - p) ** (big_l - 2.0)
-        if l1 >= 2
-        else 0.0
-    )
+    _, p1, p2, _ = binomial_masses(l1, p)
     acc: list = []
     fw: list = []
     wt: list = []
@@ -121,6 +126,8 @@ def fit_final_threshold(table: PrefixTable, pre: dict, p: float) -> int:
         for r in range(n):
             vals = tuple(int(v) for v in cw[r])
             if not any(vals):
+                continue
+            if not _survives(table, cw, r, t):
                 continue
             acc.append(table[(t - 1, vals)])
             fw.append(int(fw_arr[r]))

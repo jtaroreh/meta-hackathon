@@ -66,3 +66,31 @@ def test_corrupt_record_fails_with_one_line_error(tmp_path):
         {"PURSUIT05_RECORD": str(bad)},
     )
     _assert_one_line_error(proc, "bad record")
+
+
+def test_env_smoke_bad_cell_fails_with_one_line_error():
+    proc = _run(["env-smoke", "--cell", "99/0.001/1"])
+    _assert_one_line_error(proc, "unknown cell")
+
+
+def test_env_smoke_bad_args_fail_with_one_line_error():
+    proc = _run(["env-smoke", "--agents", "0"])
+    _assert_one_line_error(proc, "bad --agents")
+    proc = _run(["env-smoke", "--seed", "-1"])
+    _assert_one_line_error(proc, "bad --seed")
+    proc = _run(["env-smoke", "--agents", "100", "--workers", "3"])
+    _assert_one_line_error(proc, "not divisible")
+
+
+def test_optimum_bad_seeds_fails_with_one_line_error():
+    proc = _run(["optimum", "--seeds", "7"])
+    _assert_one_line_error(proc, "bad --seeds")
+
+
+def test_env_smoke_small_passes():
+    proc = _run(
+        ["env-smoke", "--cell", "6/0.001/1", "--agents", "32", "--steps", "2"]
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert "agent-steps/s = " in proc.stdout
+    assert "within MC error" in proc.stdout

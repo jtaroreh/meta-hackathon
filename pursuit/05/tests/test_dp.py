@@ -20,7 +20,26 @@ def test_best_history_at_least_best_static():
         assert h.result.arm == "H"
         assert not h.fallback, cell.cell_id
         assert h.nodes <= 100_000, cell.cell_id
-        assert all(pt.gap >= 0.0 for pt in h.pareto), cell.cell_id
+        for pt in h.pareto:
+            assert pt.iters < dp.DINKELBACH_CAP, (cell.cell_id, pt.lam, pt.fth)
+            scale = max(1.0, abs(pt.W) + pt.lam * abs(pt.inf))
+            assert pt.gap <= 1e-9 * scale, (cell.cell_id, pt.lam, pt.fth)
+
+
+def test_best_history_fallback_matches_static(monkeypatch, capsys):
+    monkeypatch.setattr(dp, "NODE_CAP", 0)
+    reg = CellRegistry()
+    cell = reg.find("12/0.002/1")
+    pre = reg.pre(cell)
+    f = screen.run_F(pre, cell.p)
+    s = exact.best_static(pre, cell.p, f["inf"])
+    h = dp.best_history(pre, cell.p, f["inf"])
+    assert h.fallback
+    assert h.result.W == s.result.W
+    assert h.result.inf == s.result.inf
+    assert h.pareto == ()
+    assert h.lam == -1.0
+    assert "fallback" in capsys.readouterr().err
 
 
 def _node_index(pre):
@@ -99,6 +118,22 @@ def _brute_force_min(pre, p, bound):
 def test_best_history_matches_brute_force_on_tiny():
     tiny = screen.build_cell(6, tiny=True, drop=())
     pre = screen.precompute(tiny, list(range(tiny["C"])), 3)
+    nodes, _ = _node_index(pre)
+    assert len(nodes) <= 20, len(nodes)
+    for p in screen.P_ERRS:
+        f = screen.run_F(pre, p)
+        bound = f["inf"] * (1.0 + screen.INF_REL) + screen.INF_ABS
+        h = dp.best_history(pre, p, f["inf"])
+        floor = _brute_force_min(pre, p, bound)
+        assert abs(h.result.W - floor) <= 1e-9, p
+
+
+def test_best_history_matches_brute_force_on_small_cells():
+    reg = CellRegistry()
+    cell = reg.find("6/0.001/1")
+    pre = reg.pre(cell)
+    nodes, _ = _node_index(pre)
+    assert len(nodes) <= 20, len(nodes)
     for p in screen.P_ERRS:
         f = screen.run_F(pre, p)
         bound = f["inf"] * (1.0 + screen.INF_REL) + screen.INF_ABS
@@ -130,6 +165,29 @@ class _StaticPolicy(nn.Module):
         yes = torch.zeros(obs.shape[0], 2)
         yes[torch.arange(obs.shape[0]), abort.long()] = 10.0
         return yes, torch.zeros(obs.shape[0], 1)
+
+
+def test_decision_table_exports_real_policy():
+    import math
+
+    from pursuit05.policy import CultivationPolicy
+
+    reg = CellRegistry()
+    cell = reg.find("12/0.002/1")
+    pre = reg.pre(cell)
+    torch.manual_seed(0)
+    policy = CultivationPolicy()
+    table = decision_table(
+        policy, pre, stage_id=cell.stage_idx, rate_id=cell.rate_idx
+    )
+    assert len(table) > 0
+    out = exact.eval_exact(
+        table_decider(table, fth=fit_final_threshold(table, pre, cell.p)),
+        pre,
+        cell.p,
+    )
+    assert math.isfinite(out["W"])
+    assert 0.0 <= out["inf"] <= 1.0
 
 
 def test_table_decider_reproduces_static_policy():

@@ -1,16 +1,17 @@
 from __future__ import annotations
 
+import sys
 import time
 from typing import NamedTuple
 
 import numpy as np
 
 from pursuit05 import exact, screen
+from pursuit05.env import binomial_masses
 from pursuit05.exact import ArmResult
 from pursuit05.policy import PrefixTable, table_decider
 
 LAM_GRID = (0, 500, 1000, 2000, 5000, 10000, 1e9)
-FTH_GRID = (0, 1, 2)
 NODE_CAP = 100_000
 DINKELBACH_CAP = 100
 DINKELBACH_TOL = 1e-12
@@ -52,13 +53,7 @@ class _Tree(NamedTuple):
 def _build_tree(pre: dict, p: float) -> _Tree:
     t = pre["T"]
     l1 = pre["L1"]
-    big_l = float(l1)
-    p1 = big_l * p * (1.0 - p) ** (big_l - 1.0) if l1 else 0.0
-    p2 = (
-        (big_l * (big_l - 1.0) / 2.0) * p**2 * (1.0 - p) ** (big_l - 2.0)
-        if l1 >= 2
-        else 0.0
-    )
+    _, p1, p2, _ = binomial_masses(l1, p)
     key_to_idx: dict = {}
     node_k: list = []
     node_az: list = []
@@ -169,7 +164,7 @@ def _dinkelbach(tree: _Tree, pre: dict, p: float, lam: float,
     table, out, _ = best
     point = ParetoPoint(lam, fth, out["W"], out["inf"], out["pacc"], iters,
                         abs(gap))
-    return table, point
+    return table, point, 1 + iters
 
 
 def _static_table(ath: tuple, keys: list) -> PrefixTable:
@@ -181,15 +176,20 @@ def best_history(pre: dict, p: float, f_inf: float) -> HistoryBest:
     """Constrained history-dependent optimum over prefix abort tables.
 
     Returns the lowest-W feasible point over exact per-(lam, fth)
-    Dinkelbach solutions plus every static policy. Static policies
-    are prefix policies, so H never scores above S.
+    Dinkelbach solutions on LAM_GRID plus every static policy. Static
+    policies are prefix policies, so H never scores above S.
+    Brute-force tests certify the constrained optimum on tiny and
+    small cells.
     """
     bound = f_inf * (1.0 + screen.INF_REL) + screen.INF_ABS
     start = time.perf_counter()
     tree = _build_tree(pre, p)
     nodes = len(tree.keys)
     if nodes > NODE_CAP:
-        print(f"best_history fallback to S: {nodes} prefixes exceed cap")
+        print(
+            f"best_history fallback to S: {nodes} prefixes exceed cap",
+            file=sys.stderr,
+        )
         s = exact.best_static(pre, p, f_inf)
         cost = time.perf_counter() - start
         return HistoryBest(
@@ -206,10 +206,12 @@ def best_history(pre: dict, p: float, f_inf: float) -> HistoryBest:
         )
     cands: list = []
     pareto: list = []
+    n_evals = 0
     for lam in LAM_GRID:
-        for fth in FTH_GRID:
-            table, point = _dinkelbach(tree, pre, p, float(lam), fth)
+        for fth in screen.FINAL_VALS:
+            table, point, used = _dinkelbach(tree, pre, p, float(lam), fth)
             pareto.append(point)
+            n_evals += used
             cands.append((point.W, point.inf, point.pacc, table, fth,
                           float(lam), point.iters, point.gap))
     n_static = 0
@@ -226,7 +228,7 @@ def best_history(pre: dict, p: float, f_inf: float) -> HistoryBest:
     return HistoryBest(
         table=table,
         fth=fth,
-        result=ArmResult("H", w, inf, pacc, len(pareto) + n_static, cost),
+        result=ArmResult("H", w, inf, pacc, n_evals + n_static, cost),
         lam=lam,
         iters=iters,
         gap=gap,

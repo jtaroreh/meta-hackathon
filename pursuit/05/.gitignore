@@ -2,4 +2,4 @@
 runs/scratch/
 .env
 __pycache__/
-resources
+/resources

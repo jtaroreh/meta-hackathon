@@ -49,6 +49,9 @@ Smoke the abort env on one cell:
 .venv/bin/python -m pursuit05 env-smoke --cell 12/0.002/1 --agents 4096 --steps 200
 ```
 
+The env masks abort on all-zero prefixes and reject on all-zero
+finals, matching the exact scorer.
+
 Score the exact static optimum S and the exact history-dependent
 optimum H on all cells:
 

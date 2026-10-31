@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 if TYPE_CHECKING:
     from pursuit05.cells import Cell
 
@@ -210,27 +212,7 @@ MC_EPISODES = 20000
 MC_SIGMAS = 4.0
 
 
-def _scripted_actions(obs, ath, fth, t):
-    import numpy as np
-
-    n = obs.shape[0]
-    k = obs[:, 0].astype(np.int64)
-    act = np.zeros(n, dtype=np.int64)
-    mid = np.nonzero(k < t - 1)[0]
-    if len(mid):
-        act[mid] = (
-            obs[mid][:, 1:4][np.arange(len(mid)), k[mid]]
-            > np.asarray(ath)[k[mid]]
-        ).astype(np.int64)
-    fin = np.nonzero(k == t - 1)[0]
-    if len(fin):
-        act[fin] = (obs[fin][:, t - 1] <= fth).astype(np.int64)
-    return act
-
-
 def _mc_w(spent_list, acc_list, tail, vf):
-    import numpy as np
-
     s = np.asarray(spent_list, dtype=float)
     a = np.asarray(acc_list, dtype=float)
     n = len(s)
@@ -247,16 +229,15 @@ def _mc_w(spent_list, acc_list, tail, vf):
     return w, se
 
 
-def _tail_mass(l1: int, p: float) -> float:
-    big_l = float(l1)
-    p0 = (1.0 - p) ** big_l
-    p1 = big_l * p * (1.0 - p) ** (big_l - 1.0) if l1 else 0.0
-    p2 = (
-        (big_l * (big_l - 1.0) / 2.0) * p**2 * (1.0 - p) ** (big_l - 2.0)
-        if l1 >= 2
-        else 0.0
-    )
-    return max(0.0, 1.0 - p0 - p1 - p2)
+def _mc_inf_ok(log_list, acc_list, exact_inf, pacc, tail):
+    n = len(log_list)
+    count = int(sum(log_list))
+    ma = sum(acc_list) / n
+    mc = (count / n) / ma if ma else 0.0
+    c = 1.0 - tail
+    exp = n * exact_inf * pacc / c if c > 0 else 0.0
+    ok = abs(count - exp) <= MC_SIGMAS * exp**0.5 if exp > 0 else count == 0
+    return mc, count, ok
 
 
 def cmd_env_smoke(args) -> int:
@@ -267,19 +248,27 @@ def cmd_env_smoke(args) -> int:
         import pufferlib.vector
 
         from pursuit05.cells import CellRegistry
-        from pursuit05.env import CultivationAbort
+        from pursuit05.env import (
+            CultivationAbort,
+            binomial_masses,
+            draw_trajectories,
+            rollout_loaded,
+            scripted_actions,
+        )
 
         if args.agents < 1:
             raise ValueError(f"bad --agents {args.agents!r}")
         if args.steps < 1:
             raise ValueError(f"bad --steps {args.steps!r}")
+        if args.seed < 0:
+            raise ValueError(f"bad --seed {args.seed!r}")
         if args.workers < 0:
             raise ValueError(f"bad --workers {args.workers!r}")
         if args.workers and args.agents % args.workers:
             raise ValueError(
                 f"agents {args.agents} not divisible by workers {args.workers}"
             )
-        from pursuit05 import screen
+        from pursuit05 import exact, screen
 
         reg = CellRegistry()
         cell = reg.find(args.cell)
@@ -298,7 +287,8 @@ def cmd_env_smoke(args) -> int:
             cell.seed,
         )
         ath, fth = a["policy"][:-1], a["policy"][-1]
-        exact_w = screen.eval_policy(pre, ath, fth, cell.p)["W"]
+        ref = exact.eval_exact(exact.static_decider(ath, fth), pre, cell.p)
+        exact_w, exact_inf, exact_pacc = ref["W"], ref["inf"], ref["pacc"]
         per = args.agents // args.workers if args.workers else args.agents
         creator = functools.partial(
             CultivationAbort,
@@ -331,14 +321,10 @@ def cmd_env_smoke(args) -> int:
             print(f"obs[{i}] = {' '.join(f'{v:.6g}' for v in obs[i])}")
         t0 = time.perf_counter()
         for _ in range(args.steps):
-            obs, _, _, _, _ = vec.step(_scripted_actions(obs, ath, fth, t))
+            obs, _, _, _, _ = vec.step(scripted_actions(obs, ath, fth, t))
         wall = time.perf_counter() - t0
         rate = args.agents * args.steps / wall
         print(f"agent-steps/s = {rate:.0f}")
-        import numpy as np
-
-        from pursuit05.env import draw_trajectories, rollout_loaded
-
         mc_env = CultivationAbort(
             pre,
             cell.p,
@@ -353,18 +339,24 @@ def cmd_env_smoke(args) -> int:
             mc_env,
             w_all,
             rows_all,
-            lambda obs, s, w, rows: _scripted_actions(obs, ath, fth, t),
+            lambda obs, s, w, rows: scripted_actions(obs, ath, fth, t),
         )
         spent_list = [o[0] for o in outs]
         acc_list = [1.0 if o[1] else 0.0 for o in outs]
-        mc_w, se = _mc_w(spent_list, acc_list, _tail_mass(pre["L1"], cell.p),
-                         pre["Vf"])
-        ok = abs(mc_w - exact_w) <= MC_SIGMAS * se if se else abs(
+        log_list = [1.0 if o[2] else 0.0 for o in outs]
+        tail = binomial_masses(pre["L1"], cell.p)[3]
+        mc_w, se_w = _mc_w(spent_list, acc_list, tail, pre["Vf"])
+        mc_inf, count, ok_inf = _mc_inf_ok(
+            log_list, acc_list, exact_inf, exact_pacc, tail
+        )
+        ok_w = abs(mc_w - exact_w) <= MC_SIGMAS * se_w if se_w else abs(
             mc_w - exact_w
         ) <= 1e-9
+        ok = ok_w and ok_inf
         print(
             f"scripted A thresholds via env rollouts: W = {mc_w:.10g} "
-            f"+- {se:.3g} (exact {exact_w:.10g}), "
+            f"+- {se_w:.3g} (exact {exact_w:.10g}), inf = {mc_inf:.10g} "
+            f"(exact {exact_inf:.10g}, {count}/{len(log_list)} logicals), "
             f"{'within MC error' if ok else 'MISMATCH'}"
         )
         return 0 if ok else 1
@@ -374,12 +366,14 @@ def cmd_env_smoke(args) -> int:
 
 def cmd_optimum(args) -> int:
     try:
-        from pursuit05 import dp, exact, screen, table
+        from pursuit05 import exact, screen, table
         from pursuit05.cells import TEST_SEEDS, CellRegistry, split_label
 
         seeds = _parse_seeds(args.seeds, screen.SEEDS)
         reg = CellRegistry()
         targets = reg.select(seeds=seeds)
+        from pursuit05 import dp
+        from pursuit05.env import binomial_masses
     except (ImportError, ValueError) as exc:
         print(f"pursuit05: {exc}", file=sys.stderr)
         return 1
@@ -395,7 +389,7 @@ def cmd_optimum(args) -> int:
         bound = f["inf"] * (1.0 + screen.INF_REL) + screen.INF_ABS
         s = exact.best_static(pre, cell.p, f["inf"])
         h = dp.best_history(pre, cell.p, f["inf"])
-        rows.append((cell, s, h, bound, _tail_mass(pre["L1"], cell.p)))
+        rows.append((cell, s, h, bound, binomial_masses(pre["L1"], cell.p)[3]))
     body = table.render_arm_table(
         [
             (cell.cell_id, {"S": (s.result.W, s.result.inf),
