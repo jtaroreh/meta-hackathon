@@ -22,3 +22,4 @@ lands in the next commit, so every SHA below resolves on this branch.
 | 2026-10-31 | c008c626e02b0d902984a5a9c502740a234a1d13 | muse-spark-1.3-contributor | interrogate round 1 fixes |
 | 2026-10-31 | 4608635eff3b457fada896fdea789c13cb73697f | muse-spark-1.3-contributor | regenerate sweep receipts with fixed trainer |
 | 2026-10-31 | 19850bda2da5f7b30e9589184790506d59ddf2ad | muse-spark-1.3-contributor | log fix round and regenerated receipts |
+| 2026-11-01 | a542b0bec444b11efb0a7e025e77e7fca03407e5 | muse-spark-1.3-contributor | disclose held-out split duplication |
