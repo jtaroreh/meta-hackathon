@@ -15,9 +15,9 @@ import torch
 
 from pursuit05 import bc as bc_mod
 from pursuit05 import dp, exact, screen
+from pursuit05.arms import run_screen_arms
 from pursuit05.cells import TEST_SEEDS, TRAIN_SEEDS, Cell, CellRegistry
-from pursuit05.cli import run_screen_arms
-from pursuit05.env import CultivationAbort
+from pursuit05.env import CultivationAbort, binomial_masses
 from pursuit05.policy import (
     CultivationPolicy,
     decision_table,
@@ -51,6 +51,8 @@ def _coerce(value: str):
 
 
 def load_train_config(overrides: dict | None = None) -> dict:
+    if not CONFIG_PATH.is_file():
+        raise ValueError(f"missing training config {CONFIG_PATH}")
     default = (
         Path(pufferlib.__file__).resolve().parent / "config" / "default.ini"
     )
@@ -71,23 +73,36 @@ def load_train_config(overrides: dict | None = None) -> dict:
 def load_run_settings() -> dict:
     local = configparser.ConfigParser()
     local.read(CONFIG_PATH)
-    out = {"backend": "Serial", "agents_per_env": 1024, "beta": 1.0, "lam": 5000}
+    out: dict = {"agents_per_env": 1024, "beta": 1.0, "lam": 5000}
     if "vec" in local:
-        out.update({k: _coerce(v) for k, v in local["vec"].items()})
+        for k, v in local["vec"].items():
+            if k not in out:
+                raise ValueError(f"unknown setting [vec] {k}")
+            out[k] = _coerce(v)
     if "env" in local:
-        out.update({k: _coerce(v) for k, v in local["env"].items()})
+        for k, v in local["env"].items():
+            if k not in out:
+                raise ValueError(f"unknown setting [env] {k}")
+            out[k] = _coerce(v)
     return out
 
 
 def regime_id(stages: list[int], rates: list[float]) -> str:
+    stages = sorted(stages)
+    rates = sorted(rates)
     if len(stages) == 1 and len(rates) == 1:
         return f"{stages[0]}-{rates[0]}"
-    return "transfer-" + "-".join(str(n) for n in stages)
+    rid = "transfer-" + "-".join(str(n) for n in stages)
+    if rates != sorted(screen.P_ERRS):
+        rid += "-r" + "-".join(f"{p:g}" for p in rates)
+    return rid
 
 
 def evaluate_policy(
     policy: torch.nn.Module, cells: list[Cell], reg: CellRegistry
 ) -> dict:
+    if not cells:
+        raise ValueError("no cells to score")
     per = {}
     for cell in cells:
         pre = reg.pre(cell)
@@ -102,6 +117,7 @@ def evaluate_policy(
             "pacc": out["pacc"],
             "fth": fth,
             "keys": len(table),
+            "tail": binomial_masses(pre["L1"], cell.p)[3],
         }
     ws = [v["W"] for v in per.values()]
     infs = [v["inf"] for v in per.values()]
@@ -116,7 +132,7 @@ def baselines_for_cells(cells: list[Cell], reg: CellRegistry) -> dict:
     per = {}
     for cell in cells:
         pre = reg.pre(cell)
-        outs = run_screen_arms(screen, pre, cell)
+        outs = run_screen_arms(screen, pre, cell, arms=("F", "A"))
         s = exact.best_static(pre, cell.p, outs["F"]["inf"])
         h = dp.best_history(pre, cell.p, outs["F"]["inf"])
         bound = outs["F"]["inf"] * (1.0 + screen.INF_REL) + screen.INF_ABS
@@ -131,6 +147,8 @@ def baselines_for_cells(cells: list[Cell], reg: CellRegistry) -> dict:
 
 
 def _mean_bound(cells: list[Cell], reg: CellRegistry) -> float:
+    if not cells:
+        raise ValueError("no cells to score")
     tot = 0.0
     for cell in cells:
         pre = reg.pre(cell)
@@ -194,6 +212,10 @@ def run_ppo(
     config["total_timesteps"] = total_timesteps
     batch = config["batch_size"]
     horizon = config["bptt_horizon"]
+    if batch < horizon:
+        raise ValueError(
+            f"batch {batch} smaller than horizon {horizon}: raise --agents"
+        )
     if batch < config["minibatch_size"]:
         mb = max(horizon, (batch // horizon) * horizon)
         log(f"minibatch_size {config['minibatch_size']} -> {mb} for batch {batch}")
@@ -209,7 +231,7 @@ def run_ppo(
                 mark += MONITOR_EVERY
     finally:
         pufferl.utilization.stop()
-    vec.close()
+        vec.close()
     pufferl.print_dashboard()
     steps = pufferl.global_step
     pufferl.save_checkpoint()
@@ -247,13 +269,28 @@ def train_point(
                 pre, h.table, h.fth, cell.p, cell.stage_idx, cell.rate_idx
             )
         )
-    bc_policy, bc_stats = bc_mod.clone_from_tables(h_inputs, seed=bc_seed)
+    bound = _mean_bound(train_cells, reg)
+    bc_cands = []
+    for try_seed in (bc_seed, bc_seed + 1, bc_seed + 2):
+        cand, cand_stats = bc_mod.clone_from_tables(h_inputs, seed=try_seed)
+        cand_train = evaluate_policy(cand, train_cells, reg)
+        bc_cands.append((try_seed, cand, cand_stats, cand_train))
+    bc_seed_kept, bc_policy, bc_stats, bc_train = min(
+        bc_cands, key=lambda c: (c[3]["mean_W"], c[3]["mean_inf"], c[0])
+    )
     log(
-        f"bc agreement={bc_stats['agreement']:.4f} "
+        f"bc seeds tried={[c[0] for c in bc_cands]} kept={bc_seed_kept} "
+        f"agreement={bc_stats['agreement']:.4f} "
         f"samples={bc_stats['samples']} iters={bc_stats['iters']}"
     )
-    bound = _mean_bound(train_cells, reg)
-    bc_train = evaluate_policy(bc_policy, train_cells, reg)
+    az = 0
+    rows = 0
+    for cell in train_cells:
+        pre = reg.pre(cell)
+        for cw in (pre["cw1"], pre["cw2"]):
+            az += int((~cw.any(axis=1)).sum())
+            rows += cw.shape[0]
+    log(f"allzero-row fraction (PPO override upper bound) = {az / rows:.4f}")
     log(
         f"bc exact train W={bc_train['mean_W']:.10g} "
         f"inf={bc_train['mean_inf']:.10g} bound={bound:.10g}"
@@ -306,6 +343,12 @@ def train_point(
         "train_bound": bound,
         "bc_agreement": bc_stats["agreement"],
         "bc_samples": bc_stats["samples"],
+        "bc_seeds_tried": [c[0] for c in bc_cands],
+        "bc_seed_kept": bc_seed_kept,
+        "ppo_seed": seed,
+        "ppo_config": {
+            k: v for k, v in config.items() if k != "data_dir"
+        },
         "steps": steps,
         "wall_s": time.perf_counter() - t0,
         "state_dict": kept.state_dict(),
@@ -377,8 +420,9 @@ def train_cell(
     reg = CellRegistry()
     train_cells = [reg.find(cell_id)]
     monitor_cells = [reg.find(cid) for cid in monitor_ids]
-    scratch_dir = Path(run_dir) / "scratch-tmp" if run_dir else Path("scratch-tmp")
-    scratch_dir.mkdir(parents=True, exist_ok=True)
+    base = Path(run_dir) / "scratch-tmp" if run_dir else Path("scratch-tmp")
+    point_dir = base / "point"
+    point_dir.mkdir(parents=True, exist_ok=True)
     point = train_point(
         train_cells,
         monitor_cells,
@@ -388,16 +432,20 @@ def train_cell(
         agents_per_env=agents_per_env,
         beta=beta,
         bc_seed=seed,
-        scratch_dir=scratch_dir,
+        scratch_dir=point_dir,
         log=log,
     )
     out = {"point": point}
     if do_scratch:
+        scratch_dir = base / "scratch"
+        scratch_dir.mkdir(parents=True, exist_ok=True)
         out["scratch"] = train_scratch(
             train_cells,
             monitor_cells,
             lam=lam,
-            total_timesteps=scratch_timesteps or total_timesteps,
+            total_timesteps=scratch_timesteps
+            if scratch_timesteps is not None
+            else total_timesteps,
             seed=seed + 1000,
             agents_per_env=agents_per_env,
             beta=beta,
@@ -408,41 +456,49 @@ def train_cell(
 
 
 def _point_worker(spec: dict) -> dict:
+    import contextlib
+    import io
+
     log_lines: list[str] = []
 
     def log(msg) -> None:
         log_lines.append(str(msg))
 
+    if spec["kind"] not in ("point", "scratch"):
+        raise ValueError(f"unknown worker kind {spec['kind']!r}")
     reg = CellRegistry()
     train_cells = [reg.find(cid) for cid in spec["train"]]
     monitor_cells = [reg.find(cid) for cid in spec["monitor"]]
     scratch_dir = Path(spec["scratch_dir"])
     scratch_dir.mkdir(parents=True, exist_ok=True)
-    if spec["kind"] == "scratch":
-        res = train_scratch(
-            train_cells,
-            monitor_cells,
-            lam=spec["lam"],
-            total_timesteps=spec["total_timesteps"],
-            seed=spec["seed"],
-            agents_per_env=spec["agents_per_env"],
-            beta=spec["beta"],
-            scratch_dir=scratch_dir,
-            log=log,
-        )
-    else:
-        res = train_point(
-            train_cells,
-            monitor_cells,
-            lam=spec["lam"],
-            total_timesteps=spec["total_timesteps"],
-            seed=spec["seed"],
-            agents_per_env=spec["agents_per_env"],
-            beta=spec["beta"],
-            bc_seed=spec["seed"],
-            scratch_dir=scratch_dir,
-            log=log,
-        )
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        if spec["kind"] == "scratch":
+            res = train_scratch(
+                train_cells,
+                monitor_cells,
+                lam=spec["lam"],
+                total_timesteps=spec["total_timesteps"],
+                seed=spec["seed"],
+                agents_per_env=spec["agents_per_env"],
+                beta=spec["beta"],
+                scratch_dir=scratch_dir,
+                log=log,
+            )
+        else:
+            res = train_point(
+                train_cells,
+                monitor_cells,
+                lam=spec["lam"],
+                total_timesteps=spec["total_timesteps"],
+                seed=spec["seed"],
+                agents_per_env=spec["agents_per_env"],
+                beta=spec["beta"],
+                bc_seed=spec["bc_seed"],
+                scratch_dir=scratch_dir,
+                log=log,
+            )
+    log_lines.extend(buf.getvalue().splitlines())
     res["log_lines"] = log_lines
     return res
 
@@ -487,7 +543,8 @@ def assemble_receipt(
         torch.save(policy.state_dict(), run_dir / f"policy-lam{pt['lam']:g}.pt")
         ev = evaluate_policy(policy, eval_cells, reg)
         outs.append((pt, ev))
-    bound = _mean_bound(train_cells, reg)
+    bound = points[0]["train_bound"]
+    assert all(pt["train_bound"] == bound for pt in points)
     cands = [
         (
             str(i),
@@ -497,6 +554,10 @@ def assemble_receipt(
         for i, pt in enumerate(points)
     ]
     sel = int(_pick_kept(cands, bound))
+    feas = [c for c in cands if c[2] <= bound]
+    pool = feas if feas else cands
+    best_w = min(c[1] for c in pool)
+    tied = sum(1 for c in pool if c[1] == best_w) > 1
     sel_pt = outs[sel][0]
     sel_policy = _policy_from_state(sel_pt["state_dict"])
     torch.save(sel_policy.state_dict(), run_dir / "policy.pt")
@@ -543,9 +604,12 @@ def assemble_receipt(
             "seed": seed,
             "agents_per_env": agents_per_env,
             "beta": beta,
+            "ppo": points[0]["ppo_config"],
+            "bc_lr": bc_mod.BC_LR,
+            "bc_max_iters": bc_mod.BC_MAX_ITERS,
         },
         "versions": _versions(),
-        "wall_s": sum(pt["wall_s"] for pt in points)
+        "worker_s": sum(pt["wall_s"] for pt in points)
         + (scratch["wall_s"] if scratch else 0.0),
         "points": [
             {
@@ -555,12 +619,17 @@ def assemble_receipt(
                 "mean_W": ev["mean_W"],
                 "mean_inf": ev["mean_inf"],
                 "bc_agreement": pt["bc_agreement"],
+                "bc_seeds_tried": pt["bc_seeds_tried"],
+                "bc_seed_kept": pt["bc_seed_kept"],
+                "ppo_seed": pt["ppo_seed"],
                 "steps": pt["steps"],
                 "cells": ev["cells"],
             }
             for pt, ev in outs
         ],
         "selected_lam": sel_pt["lam"],
+        "selection_tied": tied,
+        "train_bound": bound,
         "tables": tables,
         "scratch": scratch_out,
     }
@@ -601,10 +670,11 @@ def sweep_lambda(
     regimes = [
         ([n], [p]) for n in stages for p in rates
     ]
-    specs = []
+    by_regime: dict[str, list[dict]] = {}
     for ri, (nstages, nrates) in enumerate(regimes):
         train, test = regime_cells(reg, nstages, nrates)
         rid = regime_id(nstages, nrates)
+        specs = []
         for li, lam in enumerate(lams):
             specs.append(
                 {
@@ -614,7 +684,8 @@ def sweep_lambda(
                     "train": [c.cell_id for c in train],
                     "monitor": [c.cell_id for c in test],
                     "total_timesteps": total_timesteps,
-                    "seed": seed + ri * 100 + li,
+                    "seed": seed + ri * 1000 + li,
+                    "bc_seed": seed + ri * 1000,
                     "agents_per_env": agents_per_env,
                     "beta": beta,
                     "scratch_dir": str(
@@ -631,46 +702,21 @@ def sweep_lambda(
                     "train": [c.cell_id for c in train],
                     "monitor": [c.cell_id for c in test],
                     "total_timesteps": total_timesteps,
-                    "seed": seed + ri * 100 + 50,
+                    "seed": seed + ri * 1000 + 997,
                     "agents_per_env": agents_per_env,
                     "beta": beta,
                     "scratch_dir": str(RUNS_DIR / "scratch" / f"{rid}-scratch"),
                 }
             )
-    results: dict[str, dict[str, list]] = {}
-    logs: dict[str, list[str]] = {}
-
-    def collect(spec, res) -> None:
-        for line in res.pop("log_lines"):
-            tagged = f"[{spec['regime']} {spec['kind']}] {line}"
-            log(tagged)
-            logs.setdefault(spec["regime"], []).append(tagged)
-
-    if jobs < 2:
-        for spec in specs:
-            res = _point_worker(spec)
-            collect(spec, res)
-            results.setdefault(spec["regime"], {}).setdefault(
-                spec["kind"], []
-            ).append(res)
-    else:
-        with ProcessPoolExecutor(max_workers=jobs) as pool:
-            futs = [(spec, pool.submit(_point_worker, spec)) for spec in specs]
-            for spec, fut in futs:
-                res = fut.result()
-                collect(spec, res)
-                results.setdefault(spec["regime"], {}).setdefault(
-                    spec["kind"], []
-                ).append(res)
+        by_regime[rid] = specs
     receipts = {}
-    for nstages, nrates in regimes:
-        rid = regime_id(nstages, nrates)
-        train, test = regime_cells(reg, nstages, nrates)
+
+    def persist(rid, lines) -> None:
         (RUNS_DIR / rid).mkdir(parents=True, exist_ok=True)
-        (RUNS_DIR / rid / "train.log").write_text(
-            "\n".join(logs.get(rid, [])) + "\n"
-        )
-        got = results[rid]
+        (RUNS_DIR / rid / "train.log").write_text("\n".join(lines) + "\n")
+
+    def finish(rid, nstages, nrates, got) -> None:
+        train, test = regime_cells(reg, nstages, nrates)
         points = sorted(got.get("point", []), key=lambda r: r["lam"])
         scratch = got.get("scratch", [None])[0]
         receipts[rid] = assemble_receipt(
@@ -687,10 +733,50 @@ def sweep_lambda(
             beta,
         )
         log(f"receipt {rid}: selected lam {receipts[rid]['selected_lam']}")
+
+    if jobs < 2:
+        for nstages, nrates in regimes:
+            rid = regime_id(nstages, nrates)
+            got: dict[str, list] = {}
+            lines: list[str] = []
+            try:
+                for spec in by_regime[rid]:
+                    res = _point_worker(spec)
+                    for line in res.pop("log_lines"):
+                        tagged = f"[{rid} {spec['kind']}] {line}"
+                        log(tagged)
+                        lines.append(tagged)
+                    got.setdefault(spec["kind"], []).append(res)
+                finish(rid, nstages, nrates, got)
+            finally:
+                persist(rid, lines)
+    else:
+        with ProcessPoolExecutor(max_workers=jobs) as pool:
+            futs = {
+                rid: [(spec, pool.submit(_point_worker, spec)) for spec in specs]
+                for rid, specs in by_regime.items()
+            }
+            for nstages, nrates in regimes:
+                rid = regime_id(nstages, nrates)
+                got = {}
+                lines = []
+                try:
+                    for spec, fut in futs[rid]:
+                        res = fut.result()
+                        for line in res.pop("log_lines"):
+                            tagged = f"[{rid} {spec['kind']}] {line}"
+                            log(tagged)
+                            lines.append(tagged)
+                        got.setdefault(spec["kind"], []).append(res)
+                    finish(rid, nstages, nrates, got)
+                finally:
+                    persist(rid, lines)
     return receipts
 
 
 def write_frontier(receipts: dict, log=print) -> dict:
+    if not receipts:
+        raise ValueError("no receipts to plot")
     reg = CellRegistry()
     points = []
     arms: dict[str, dict] = {}
@@ -703,6 +789,7 @@ def write_frontier(receipts: dict, log=print) -> dict:
                     "mean_W": pt["mean_W"],
                     "mean_inf": pt["mean_inf"],
                     "kept_from": pt["kept_from"],
+                    "selected": pt["lam"] == receipt["selected_lam"],
                 }
             )
         eval_cells = [
@@ -717,9 +804,13 @@ def write_frontier(receipts: dict, log=print) -> dict:
                 "mean_W": sum(ws) / len(ws),
                 "mean_inf": sum(infs) / len(infs),
             }
+        pooled["bound"] = (
+            sum(base[cid]["bound"] for cid in base) / len(base)
+        )
         arms[rid] = pooled
+    seeds = sorted({s for r in receipts.values() for s in r["seeds_eval"]})
     frontier = {
-        "seeds_eval": [4, 5],
+        "seeds_eval": seeds,
         "points": points,
         "arms": arms,
         "note": (
@@ -731,7 +822,12 @@ def write_frontier(receipts: dict, log=print) -> dict:
     (RUNS_DIR / "frontier.json").write_text(
         json.dumps(frontier, indent=2) + "\n"
     )
-    _render_frontier_png(frontier)
+    if points and any(
+        math.isfinite(p["mean_W"]) for p in points
+    ):
+        _render_frontier_png(frontier)
+    else:
+        log("frontier PNG skipped: no finite W")
     log(f"frontier: {len(points)} P points over {len(arms)} regimes")
     return frontier
 

@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import numpy as np
 
-if TYPE_CHECKING:
-    from pursuit05.cells import Cell
+from pursuit05.arms import run_screen_arms
 
 RECORD_REL = Path(
     "overnight-data/cfc1d43d7de946e6988f0158b5508e28"
@@ -43,24 +42,6 @@ def resolve_record_path() -> Path:
 
 def record_key(n: int, p: float, seed: int, arm: str) -> str:
     return f"{n}/p{p}/{seed}/{arm}"
-
-
-def run_screen_arms(screen, pre: dict, cell: Cell) -> dict:
-    f = screen.run_F(pre, cell.p)
-    g = screen.run_G(pre, cell.p, f["inf"], None)
-    a = screen.run_arm(
-        pre,
-        cell.p,
-        "A",
-        f["inf"],
-        screen.A_ITERS,
-        screen.R_SAMPLES,
-        None,
-        cell.stage_idx,
-        cell.rate_idx,
-        cell.seed,
-    )
-    return {"F": f, "G": g, "A": a}
 
 
 def _record_entries(record_path: Path, targets) -> dict:
@@ -462,7 +443,11 @@ def _parse_lams(raw: str | None, default: tuple) -> list[float]:
         vals = [float(s) for s in raw.split(",") if s.strip()]
     except ValueError:
         raise ValueError(f"bad --lams {raw!r}") from None
-    if not vals or any(v <= 0 for v in vals):
+    if (
+        not vals
+        or any(not math.isfinite(v) or v <= 0 for v in vals)
+        or len(set(vals)) != len(vals)
+    ):
         raise ValueError(f"bad --lams {raw!r}")
     return vals
 
@@ -470,9 +455,33 @@ def _parse_lams(raw: str | None, default: tuple) -> list[float]:
 def _nonneg_int(raw, name: str) -> int:
     if raw is None:
         raise ValueError(f"bad {name} {raw!r}")
-    if raw < 0:
+    try:
+        bad = raw < 0
+    except TypeError:
+        raise ValueError(f"bad {name} {raw!r}") from None
+    if bad:
         raise ValueError(f"bad {name} {raw!r}")
     return raw
+
+
+def _checked_beta(settings: dict) -> float:
+    try:
+        beta = float(settings["beta"])
+    except (TypeError, ValueError):
+        raise ValueError(f"bad beta {settings.get('beta')!r}") from None
+    if not math.isfinite(beta) or beta < 0:
+        raise ValueError(f"bad beta {beta!r}")
+    return beta
+
+
+def _checked_lam(raw) -> float:
+    try:
+        lam = float(raw)
+    except (TypeError, ValueError):
+        raise ValueError(f"bad --lam {raw!r}") from None
+    if not math.isfinite(lam) or lam <= 0:
+        raise ValueError(f"bad --lam {raw!r}")
+    return lam
 
 
 def cmd_train(args) -> int:
@@ -484,6 +493,13 @@ def cmd_train(args) -> int:
             raise ValueError("pass only one of --stage and --stages")
         if args.rate is not None and args.rates is not None:
             raise ValueError("pass only one of --rate and --rates")
+        if (
+            args.stage is None
+            and args.stages is None
+            and args.rate is None
+            and args.rates is None
+        ):
+            raise ValueError("pass --stage/--rate or --stages/--rates")
         stages = (
             _parse_int_list(args.stages, screen.SIZES, "--stages")
             if args.stages is not None
@@ -503,9 +519,7 @@ def cmd_train(args) -> int:
             )
         )
         settings = train.load_run_settings()
-        lam = float(args.lam) if args.lam is not None else float(settings["lam"])
-        if lam <= 0:
-            raise ValueError(f"bad --lam {args.lam!r}")
+        lam = _checked_lam(args.lam if args.lam is not None else settings["lam"])
         cfg = train.load_train_config()
         total = args.total_timesteps if args.total_timesteps is not None else cfg["total_timesteps"]
         total = _nonneg_int(total, "--total-timesteps")
@@ -517,7 +531,7 @@ def cmd_train(args) -> int:
         agents = _nonneg_int(agents, "--agents")
         if agents < 1:
             raise ValueError(f"bad --agents {agents!r}")
-        beta = float(settings["beta"])
+        beta = _checked_beta(settings)
         reg = CellRegistry()
         train_cells, test_cells = train.regime_cells(reg, stages, rates)
         rid = train.regime_id(stages, rates)
@@ -534,7 +548,11 @@ def cmd_train(args) -> int:
         lines.append(str(msg))
 
     try:
-        log(f"train {rid} kind={kind} lam={lam:g} steps={total} seed={seed}")
+        log(
+            f"train {rid} kind={kind} lam={lam:g} steps={total} seed={seed} "
+            f"bptt={cfg['bptt_horizon']} mb={cfg['minibatch_size']} "
+            f"gamma={cfg['gamma']} lr={cfg['learning_rate']}"
+        )
         scratch_dir = train.RUNS_DIR / "scratch" / f"{rid}-lam{lam:g}"
         scratch_dir.mkdir(parents=True, exist_ok=True)
         point = train.train_point(
@@ -620,7 +638,7 @@ def cmd_sweep(args) -> int:
         jobs = _nonneg_int(args.jobs, "--jobs")
         if jobs < 1 or jobs > 2:
             raise ValueError(f"bad --jobs {args.jobs!r}: at most 2 concurrent trainings")
-        beta = float(settings["beta"])
+        beta = _checked_beta(settings)
     except (ImportError, ValueError) as exc:
         print(f"pursuit05: {exc}", file=sys.stderr)
         return 1
@@ -662,14 +680,35 @@ def _eval_rows(screen, table, train, reg, stages, rates, seeds, policy_path):
             weights_path = (
                 Path(policy_path) if policy_path is not None else run_dir / "policy.pt"
             )
-            weights = torch.load(weights_path, map_location="cpu", weights_only=True)
-            policy = CultivationPolicy()
-            policy.load_state_dict(weights)
+            try:
+                weights = torch.load(
+                    weights_path, map_location="cpu", weights_only=True
+                )
+            except (OSError, RuntimeError) as exc:
+                raise ValueError(
+                    f"cannot load weights {weights_path}: {exc}"
+                ) from None
+            try:
+                policy = CultivationPolicy()
+                policy.load_state_dict(weights)
+            except RuntimeError as exc:
+                raise ValueError(
+                    f"bad weights {weights_path}: {exc}"
+                ) from None
             policy.eval()
             if policy_path is not None:
                 side = weights_path.parent / "receipt.json"
                 if side.is_file():
-                    trained_on = json.loads(side.read_text())["trained_on"]["stages"]
+                    try:
+                        trained_on = json.loads(side.read_text())["trained_on"]
+                    except (KeyError, ValueError) as exc:
+                        raise ValueError(
+                            f"bad sidecar receipt {side}: {exc}"
+                        ) from None
+                    if not isinstance(trained_on, dict):
+                        raise ValueError(f"bad sidecar receipt {side}")
+                else:
+                    trained_on = "unknown (no sidecar receipt)"
             ev = train.evaluate_policy(policy, cells, reg)
             vals = {}
             for arm in ("F", "A", "S", "H"):
@@ -702,11 +741,17 @@ def cmd_eval(args) -> int:
     except (ImportError, ValueError) as exc:
         print(f"pursuit05: {exc}", file=sys.stderr)
         return 1
-    label = "all" if args.all else "selected"
+    full = stages == list(screen.SIZES) and rates == list(screen.P_ERRS)
+    label = "all" if full else "selected"
     print(f"# eval P vs F, A, S, H ({label} regimes, test seeds {','.join(str(s) for s in seeds)})")
     print(table.render_arm_table([(cid, vals) for cid, vals, _ in rows], ("F", "A", "S", "H", "P")))
     if trained_on is not None:
-        print(f"trained_on = {trained_on}")
+        if isinstance(trained_on, dict):
+            print(f"trained_on = {trained_on.get('stages')}")
+            print(f"trained_rates = {trained_on.get('rates')}")
+            print(f"trained_seeds = {trained_on.get('seeds')}")
+        else:
+            print(f"trained_on = {trained_on}")
     census = [(cid, vals, b) for cid, vals, b in rows if float(cid.split("/")[1]) <= 0.002]
     if len(census) == 6 and set(seeds) == set(TEST_SEEDS):
         beats_s = beats_a = near_h = 0
@@ -767,7 +812,7 @@ def main(argv=None) -> int:
     sp.add_argument("--jobs", type=int, default=2, help="concurrent trainings, max 2")
     sp.add_argument("--no-scratch", action="store_true", help="skip scratch ablation")
     vp = sub.add_parser("eval", help="score P against F, A, S, H on test seeds")
-    vp.add_argument("--all", action="store_true", help="all 9 regimes")
+    vp.add_argument("--all", action="store_true", help="all 9 regimes (same as defaults)")
     vp.add_argument("--stages", default=None, help="comma stages")
     vp.add_argument("--rates", default=None, help="comma rates")
     vp.add_argument("--seeds", default="4,5", help="test seeds only")

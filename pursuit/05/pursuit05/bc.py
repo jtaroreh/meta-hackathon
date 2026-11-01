@@ -6,8 +6,8 @@ import numpy as np
 import torch
 from torch import nn
 
-from pursuit05.env import CW_COLS, binomial_masses
-from pursuit05.policy import CultivationPolicy, PrefixTable
+from pursuit05.env import binomial_masses
+from pursuit05.policy import CultivationPolicy, PrefixTable, obs_row
 
 BC_LR = 1e-2
 BC_MAX_ITERS = 5000
@@ -20,19 +20,6 @@ class BCTable(NamedTuple):
     p: float
     stage_id: int
     rate_id: int
-
-
-def obs_row(
-    k: int, vals: tuple[int, ...], stage_id: int, rate_id: int, t: int
-) -> list[float]:
-    return [
-        float(k),
-        *[float(v) for v in vals],
-        *[0.0] * (CW_COLS - len(vals)),
-        float(stage_id),
-        float(rate_id),
-        float(t),
-    ]
 
 
 def _majority_accept_votes(
@@ -108,7 +95,7 @@ def clone_from_tables(
         loss.backward()
         opt.step()
         with torch.no_grad():
-            got = logits.argmax(dim=-1)
+            got = policy.forward_eval(obs)[0].argmax(dim=-1)
             if bool((got == tgt).all()):
                 break
     return policy, {

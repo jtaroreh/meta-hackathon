@@ -62,7 +62,7 @@ class TableDecider(NamedTuple):
         return bool(self.table[(k, tuple(prefix))])
 
 
-def _obs_row(k: int, vals: tuple, stage_id: int, rate_id: int, t: int) -> list:
+def obs_row(k: int, vals: tuple, stage_id: int, rate_id: int, t: int) -> list:
     return [float(k), *[float(v) for v in vals], *[0.0] * (CW_COLS - len(vals)),
             float(stage_id), float(rate_id), float(t)]
 
@@ -85,14 +85,14 @@ def decision_table(
                 if any(vals) and (k, vals) not in seen:
                     seen.add((k, vals))
                     keys.append((k, vals))
-                    rows.append(_obs_row(k, vals, stage_id, rate_id, t))
+                    rows.append(obs_row(k, vals, stage_id, rate_id, t))
     for cw in (pre["cw1"], pre["cw2"]):
         for row in np.unique(cw, axis=0):
             vals = tuple(int(v) for v in row)
             if any(vals) and (t - 1, vals) not in seen:
                 seen.add((t - 1, vals))
                 keys.append((t - 1, vals))
-                rows.append(_obs_row(t - 1, vals, stage_id, rate_id, t))
+                rows.append(obs_row(t - 1, vals, stage_id, rate_id, t))
     with torch.no_grad():
         obs = torch.as_tensor(np.asarray(rows, dtype=np.float32), device=dev)
         logits, _ = policy.forward_eval(obs)
