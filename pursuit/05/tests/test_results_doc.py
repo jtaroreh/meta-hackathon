@@ -1,14 +1,3 @@
-"""Every number in RESULTS.md traces to a committed receipt.
-
-RESULTS.md ends with a receipt index: one JSON object per line, each
-naming a file under runs/, a field path, and the exact value. This
-module checks each line against its file, checks the three data tables
-cell by cell against the indexed values, pins every prose sentence that
-carries a number to values recomputed from the index, and recomputes the
-D1/D2 censuses plus the per-cell ties from the indexed values and the
-exact solvers. Values render with the same %.10g format eval prints.
-"""
-
 import json
 from pathlib import Path
 
@@ -33,6 +22,7 @@ REGIMES = [
 ]
 CENSUS_REGIMES = [r for r in REGIMES if float(r.split("-")[1]) <= 0.002]
 EXPECTED_INDEX_COUNT = 352
+SPLIT_ANALYSIS_CLEAN_CELLS = 15
 
 D2_LINE = (
     "P beats S in 0/6, beats A in 1/6, and reaches H within 2% in 6/6 at p <= 0.002"
@@ -534,12 +524,10 @@ def test_transfer_row_sentences():
 def test_split_caveat_counts():
     ntest = len(REGIMES) * len(TEST_SEEDS)
     assert ntest == 18
-    # 15 comes from the split analysis in pursuit/05/README.md, not the
-    # receipts; pinning the sentence guards its transcription only.
     assert (
         f"P ties H and S bit-exactly in all {ntest} test cells, "
-        "including all 15 clean ones, so the 6/6 near-H count stands "
-        "with or without the duplicated cells."
+        f"including all {SPLIT_ANALYSIS_CLEAN_CELLS} clean ones, "
+        "so the 6/6 near-H count stands with or without the duplicated cells."
     ) in _prose_text()
 
 

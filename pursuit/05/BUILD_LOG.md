@@ -35,3 +35,4 @@ lands in the next commit, so every SHA below resolves on this branch.
 | 2026-10-31 | 856fb6380889fc01a0e3abd50c0e9d3addf719c9 | muse-spark-1.3-contributor | submission video and script |
 | 2026-10-31 | c955e72e84414b4f2f68b1d2abe418559867dc08 | muse-spark-1.3-contributor | correct checkpoint path wording in judge README |
 | 2026-10-31 | df4beb6731489eb27be43853d28cb94dbf5a254c | muse-spark-1.3-contributor | refresh build log SHAs after rebase onto 1decd50 |
+| 2026-10-31 | f1ffc6c2d84599f81b09a202234b269b71856734 | muse-spark-1.3-contributor | harden results checks per interrogate round |
