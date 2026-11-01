@@ -12,6 +12,7 @@ from pursuit05.cells import CellRegistry
 from pursuit05.policy import CultivationPolicy, decision_table, table_decider
 
 PURSUIT05_DIR = Path(__file__).resolve().parents[1]
+STRICT_ACCEPT_FTH = 0
 
 
 def test_bc_reproduces_table():
@@ -23,7 +24,9 @@ def test_bc_reproduces_table():
         f = screen.run_F(pre, cell.p)
         h = dp.best_history(pre, cell.p, f["inf"])
         inputs.append(
-            (pre, h.table, h.fth, cell.p, cell.stage_idx, cell.rate_idx)
+            bc_mod.BCTable(
+                pre, h.table, h.fth, cell.p, cell.stage_idx, cell.rate_idx
+            )
         )
     policy, stats = bc_mod.clone_from_tables(inputs, seed=0)
     assert stats["agreement"] >= 0.99
@@ -34,11 +37,10 @@ def test_bc_reproduces_table():
     pre = screen.precompute(tiny, list(range(tiny["C"])), 3)
     f = screen.run_F(pre, 0.001)
     h = dp.best_history(pre, 0.001, f["inf"])
-    tiny_policy, tiny_stats = bc_mod.clone_from_tables(
-        [(pre, h.table, h.fth, 0.001, 0, 0)], seed=0
-    )
+    tiny_input = bc_mod.BCTable(pre, h.table, h.fth, 0.001, 0, 0)
+    tiny_policy, tiny_stats = bc_mod.clone_from_tables([tiny_input], seed=0)
     assert tiny_stats["agreement"] == 1.0
-    obs, tgt = bc_mod.bc_dataset([(pre, h.table, h.fth, 0.001, 0, 0)])
+    obs, tgt = bc_mod.bc_dataset([tiny_input])
     with torch.no_grad():
         got = tiny_policy.forward_eval(obs)[0].argmax(dim=-1)
     assert bool((got == tgt).all())
@@ -103,7 +105,6 @@ def test_finetune_never_worse_than_bc(tmp_path):
 
 
 def test_scratch_ppo_ablation_beats_random(tmp_path):
-    """Scratch PPO beats random abort timing with strict accept (R convention)."""
     reg = CellRegistry()
     cell = reg.find("6/0.001/1")
     scratch_dir = tmp_path / "scratch"
@@ -129,7 +130,9 @@ def test_scratch_ppo_ablation_beats_random(tmp_path):
     )
     rng = np.random.default_rng(0)
     rand = {k: bool(rng.random() < 0.5) for k in keys if k[0] < pre["T"] - 1}
-    out = exact.eval_exact(table_decider(rand, fth=0), pre, cell.p)
+    out = exact.eval_exact(
+        table_decider(rand, fth=STRICT_ACCEPT_FTH), pre, cell.p
+    )
     assert got["mean_W"] < out["W"]
 
 

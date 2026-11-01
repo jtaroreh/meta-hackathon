@@ -26,7 +26,7 @@ from pursuit05.policy import (
 )
 
 NOMINAL_LAMS = (1000, 5000, 10000)
-LAM_NORM = 10000.0
+LAM_NORM = 10000.0  # PuffeRL clamps step rewards to [-1, 1]
 MONITOR_EVERY = 1_000_000
 
 PURSUIT05_DIR = Path(__file__).resolve().parent.parent
@@ -51,7 +51,6 @@ def _coerce(value: str):
 
 
 def load_train_config(overrides: dict | None = None) -> dict:
-    """PufferLib default.ini [train] with cultivation.ini overlaid."""
     default = (
         Path(pufferlib.__file__).resolve().parent / "config" / "default.ini"
     )
@@ -70,7 +69,6 @@ def load_train_config(overrides: dict | None = None) -> dict:
 
 
 def load_run_settings() -> dict:
-    """Vec and env settings from cultivation.ini."""
     local = configparser.ConfigParser()
     local.read(CONFIG_PATH)
     out = {"backend": "Serial", "agents_per_env": 1024, "beta": 1.0, "lam": 5000}
@@ -90,7 +88,6 @@ def regime_id(stages: list[int], rates: list[float]) -> str:
 def evaluate_policy(
     policy: torch.nn.Module, cells: list[Cell], reg: CellRegistry
 ) -> dict:
-    """Exact scores plus decision-table key counts per cell."""
     per = {}
     for cell in cells:
         pre = reg.pre(cell)
@@ -232,14 +229,6 @@ def train_point(
     scratch_dir: Path,
     log=print,
 ) -> dict:
-    """BC from H then PPO fine-tuning on pooled train cells.
-
-    lam is nominal; the env gets lam / LAM_NORM because PuffeRL
-    clamps step rewards to [-1, 1] and raw lam values would collapse
-    to one operating point. Reported policy keeps the better of the
-    cloned start and the fine-tuned checkpoint on exact train-seed W,
-    preferring bound-feasible checkpoints.
-    """
     t0 = time.perf_counter()
     torch.set_num_threads(2)
     random.seed(seed)
@@ -254,7 +243,9 @@ def train_point(
         f = screen.run_F(pre, cell.p)
         h = dp.best_history(pre, cell.p, f["inf"])
         h_inputs.append(
-            (pre, h.table, h.fth, cell.p, cell.stage_idx, cell.rate_idx)
+            bc_mod.BCTable(
+                pre, h.table, h.fth, cell.p, cell.stage_idx, cell.rate_idx
+            )
         )
     bc_policy, bc_stats = bc_mod.clone_from_tables(h_inputs, seed=bc_seed)
     log(
@@ -383,7 +374,6 @@ def train_cell(
     run_dir: Path | None = None,
     log=print,
 ) -> dict:
-    """Train on one cell; small wrapper over train_point for tests."""
     reg = CellRegistry()
     train_cells = [reg.find(cell_id)]
     monitor_cells = [reg.find(cid) for cid in monitor_ids]
@@ -487,11 +477,8 @@ def assemble_receipt(
     agents_per_env: int,
     beta: float,
 ) -> dict:
-    """Score kept policies on test cells and write receipt.json.
-
-    The receipt holds test-seed scores only. Train-seed scores stay
-    in train.log, which records the keep-better selection evidence.
-    """
+    for cell in eval_cells:
+        assert cell.seed in TEST_SEEDS, cell.cell_id
     reg = CellRegistry()
     run_dir.mkdir(parents=True, exist_ok=True)
     outs = []
@@ -610,7 +597,6 @@ def sweep_lambda(
     do_scratch: bool = True,
     log=print,
 ) -> dict:
-    """Train one pooled policy per (regime, lam); write receipts."""
     reg = CellRegistry()
     regimes = [
         ([n], [p]) for n in stages for p in rates
@@ -705,7 +691,6 @@ def sweep_lambda(
 
 
 def write_frontier(receipts: dict, log=print) -> dict:
-    """Frontier JSON plus PNG from regime receipts on test seeds."""
     reg = CellRegistry()
     points = []
     arms: dict[str, dict] = {}

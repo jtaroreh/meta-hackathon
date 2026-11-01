@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import NamedTuple
+
 import numpy as np
 import torch
 from torch import nn
@@ -9,6 +11,15 @@ from pursuit05.policy import CultivationPolicy, PrefixTable
 
 BC_LR = 1e-2
 BC_MAX_ITERS = 5000
+
+
+class BCTable(NamedTuple):
+    pre: dict
+    table: PrefixTable
+    fth: int
+    p: float
+    stage_id: int
+    rate_id: int
 
 
 def obs_row(
@@ -24,7 +35,7 @@ def obs_row(
     ]
 
 
-def _final_targets(
+def _majority_accept_votes(
     pre: dict, p: float, fth: int
 ) -> dict[tuple[int, ...], bool]:
     _, p1, p2, _ = binomial_masses(pre["L1"], p)
@@ -46,27 +57,22 @@ def _final_targets(
 
 
 def bc_dataset(
-    cells: list[tuple[dict, PrefixTable, int, float, int, int]],
+    cells: list[BCTable],
 ) -> tuple[torch.Tensor, torch.Tensor]:
-    """Stack (obs, abort-vote) rows from H tables over pooled cells.
-
-    Each entry is (pre, table, fth, p, stage_id, rate_id). Mid
-    prefixes come from the table; final-step votes are the
-    mass-weighted majority accept label per full-cw prefix, since fw
-    is not in the observation. Ties accept, matching the env bias
-    toward accepting clean finals.
-    """
     obs: list[list[float]] = []
     tgt: list[int] = []
-    for pre, table, fth, p, stage_id, rate_id in cells:
-        t = pre["T"]
-        for (k, vals), abort in table.items():
+    for entry in cells:
+        t = entry.pre["T"]
+        for (k, vals), abort in entry.table.items():
             if k >= t - 1:
                 continue
-            obs.append(obs_row(k, vals, stage_id, rate_id, t))
+            obs.append(
+                obs_row(k, vals, entry.stage_id, entry.rate_id, t)
+            )
             tgt.append(1 if abort else 0)
-        for vals, accept in _final_targets(pre, p, fth).items():
-            obs.append(obs_row(t - 1, vals, stage_id, rate_id, t))
+        got = _majority_accept_votes(entry.pre, entry.p, entry.fth)
+        for vals, accept in got.items():
+            obs.append(obs_row(t - 1, vals, entry.stage_id, entry.rate_id, t))
             tgt.append(1 if accept else 0)
     return (
         torch.as_tensor(np.asarray(obs, dtype=np.float32)),
@@ -86,10 +92,9 @@ def agreement(
 
 
 def clone_from_tables(
-    cells: list[tuple[dict, PrefixTable, int, float, int, int]],
+    cells: list[BCTable],
     seed: int = 0,
 ) -> tuple[CultivationPolicy, dict]:
-    """Distill H tables into a policy; returns it with fit stats."""
     torch.manual_seed(seed)
     obs, tgt = bc_dataset(cells)
     policy = CultivationPolicy()

@@ -17,3 +17,4 @@ lands in the next commit, so every SHA below resolves on this branch.
 | 2026-10-31 | b1b3bee4832a20df3f9d605ddcb53cc6867fd4f0 | muse-spark-1.3-contributor | log sweep train lines per regime, stringify versions |
 | 2026-10-31 | 3dd0b72895aa27cab2a991e437df17d284462400 | muse-spark-1.3-contributor | commit sweep receipts, transfer policy, frontier |
 | 2026-10-31 | ada80ed9ad4706955c1882a82cd7afcec32e8a15 | muse-spark-1.3-contributor | drop stale validation-sweep weights |
+| 2026-10-31 | 0728e5a9fe64b9fa581738cd1ee04c9fa874d40f | muse-spark-1.3-contributor | log sweep and fix commits |
