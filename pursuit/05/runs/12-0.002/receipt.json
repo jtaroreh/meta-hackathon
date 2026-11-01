@@ -28,14 +28,54 @@
     "total_timesteps": 5000000,
     "seed": 0,
     "agents_per_env": 1024,
-    "beta": 1.0
+    "beta": 1.0,
+    "ppo": {
+      "name": "pufferai",
+      "project": "ablations",
+      "seed": 7000,
+      "torch_deterministic": true,
+      "cpu_offload": false,
+      "device": "cpu",
+      "optimizer": "adam",
+      "anneal_lr": true,
+      "precision": "float32",
+      "total_timesteps": 5000000,
+      "learning_rate": 0.015,
+      "gamma": 0.995,
+      "gae_lambda": 0.9,
+      "update_epochs": 1,
+      "clip_coef": 0.2,
+      "vf_coef": 2.0,
+      "vf_clip_coef": 0.2,
+      "max_grad_norm": 1.5,
+      "ent_coef": 0.001,
+      "adam_beta1": 0.95,
+      "adam_beta2": 0.999,
+      "adam_eps": 1e-12,
+      "checkpoint_interval": 200,
+      "batch_size": 12288,
+      "minibatch_size": 8192,
+      "max_minibatch_size": 32768,
+      "bptt_horizon": 4,
+      "compile": false,
+      "compile_mode": "max-autotune-no-cudagraphs",
+      "compile_fullgraph": true,
+      "vtrace_rho_clip": 1.0,
+      "vtrace_c_clip": 1.0,
+      "prio_alpha": 0.8,
+      "prio_beta0": 0.2,
+      "use_rnn": false,
+      "env": "cultivation-abort"
+    },
+    "bc_lr": 0.01,
+    "bc_max_iters": 5000
   },
   "versions": {
     "pufferlib": "3.0",
     "torch": "2.15.0",
     "numpy": "1.26.4"
   },
-  "wall_s": 113.00982462399406,
+  "worker_s": 201.2109070430015,
   "points": [
     {
       "lam": 1000,
@@ -43,7 +83,14 @@
       "kept_from": "bc",
       "mean_W": 687.5224059699183,
       "mean_inf": 0.0571476488418205,
-      "bc_agreement": 0.9802371263504028,
+      "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        7000,
+        7001,
+        7002
+      ],
+      "bc_seed_kept": 7000,
+      "ppo_seed": 7000,
       "steps": 5001216,
       "cells": {
         "12/0.002/4": {
@@ -51,14 +98,16 @@
           "inf": 0.05703601211622601,
           "pacc": 0.2797050437881467,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.15298250295806298
         },
         "12/0.002/5": {
           "W": 687.7073316460833,
           "inf": 0.05725928556741499,
           "pacc": 0.27978349215688425,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.15298250295806298
         }
       }
     },
@@ -69,6 +118,13 @@
       "mean_W": 687.5224059699183,
       "mean_inf": 0.0571476488418205,
       "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        7000,
+        7001,
+        7002
+      ],
+      "bc_seed_kept": 7000,
+      "ppo_seed": 7001,
       "steps": 5001216,
       "cells": {
         "12/0.002/4": {
@@ -76,14 +132,16 @@
           "inf": 0.05703601211622601,
           "pacc": 0.2797050437881467,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.15298250295806298
         },
         "12/0.002/5": {
           "W": 687.7073316460833,
           "inf": 0.05725928556741499,
           "pacc": 0.27978349215688425,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.15298250295806298
         }
       }
     },
@@ -94,6 +152,13 @@
       "mean_W": 687.5224059699183,
       "mean_inf": 0.0571476488418205,
       "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        7000,
+        7001,
+        7002
+      ],
+      "bc_seed_kept": 7000,
+      "ppo_seed": 7002,
       "steps": 5001216,
       "cells": {
         "12/0.002/4": {
@@ -101,19 +166,23 @@
           "inf": 0.05703601211622601,
           "pacc": 0.2797050437881467,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.15298250295806298
         },
         "12/0.002/5": {
           "W": 687.7073316460833,
           "inf": 0.05725928556741499,
           "pacc": 0.27978349215688425,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.15298250295806298
         }
       }
     }
   ],
   "selected_lam": 1000,
+  "selection_tied": true,
+  "train_bound": 0.05931197776249388,
   "tables": {
     "12/0.002/4": {
       "fth": 0,
@@ -1256,7 +1325,7 @@
             5,
             5
           ],
-          true
+          false
         ],
         [
           3,
@@ -1265,7 +1334,7 @@
             5,
             6
           ],
-          true
+          false
         ],
         [
           3,
@@ -1274,7 +1343,7 @@
             6,
             6
           ],
-          true
+          false
         ],
         [
           3,
@@ -1436,7 +1505,7 @@
             6,
             6
           ],
-          true
+          false
         ],
         [
           3,
@@ -2851,7 +2920,7 @@
             5,
             5
           ],
-          true
+          false
         ],
         [
           3,
@@ -2860,7 +2929,7 @@
             5,
             6
           ],
-          true
+          false
         ],
         [
           3,
@@ -2869,7 +2938,7 @@
             6,
             6
           ],
-          true
+          false
         ],
         [
           3,
@@ -3031,7 +3100,7 @@
             6,
             6
           ],
-          true
+          false
         ],
         [
           3,
@@ -3316,14 +3385,16 @@
         "inf": 0.2496838446866566,
         "pacc": 0.3515208644435087,
         "fth": 2,
-        "keys": 181
+        "keys": 181,
+        "tail": 0.15298250295806298
       },
       "12/0.002/5": {
         "W": 473.5415274225089,
         "inf": 0.25123522774511553,
         "pacc": 0.35226455497914083,
         "fth": 2,
-        "keys": 181
+        "keys": 181,
+        "tail": 0.15298250295806298
       }
     }
   }

@@ -9,189 +9,216 @@
       "lam": 1000,
       "mean_W": 209.05869827732658,
       "mean_inf": 0.02841871990008263,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": true
     },
     {
       "regime": "12-0.001",
       "lam": 5000,
       "mean_W": 209.05869827732658,
       "mean_inf": 0.02841871990008263,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "12-0.001",
       "lam": 10000,
       "mean_W": 209.05869827732658,
       "mean_inf": 0.02841871990008263,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "12-0.002",
       "lam": 1000,
       "mean_W": 687.5224059699183,
       "mean_inf": 0.0571476488418205,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": true
     },
     {
       "regime": "12-0.002",
       "lam": 5000,
       "mean_W": 687.5224059699183,
       "mean_inf": 0.0571476488418205,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "12-0.002",
       "lam": 10000,
       "mean_W": 687.5224059699183,
       "mean_inf": 0.0571476488418205,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "12-0.005",
       "lam": 1000,
       "mean_W": 8668.84035676414,
       "mean_inf": 0.1386571278920128,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": true
     },
     {
       "regime": "12-0.005",
       "lam": 5000,
       "mean_W": 8668.84035676414,
       "mean_inf": 0.1386571278920128,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "12-0.005",
       "lam": 10000,
       "mean_W": 8668.84035676414,
       "mean_inf": 0.1386571278920128,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "6-0.001",
       "lam": 1000,
       "mean_W": 2.9831648572152005,
       "mean_inf": 0.006985945535093383,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": true
     },
     {
       "regime": "6-0.001",
       "lam": 5000,
       "mean_W": 2.9831648572152005,
       "mean_inf": 0.006985945535093383,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "6-0.001",
       "lam": 10000,
       "mean_W": 2.9831648572152005,
       "mean_inf": 0.006985945535093383,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "6-0.002",
       "lam": 1000,
-      "mean_W": 6.586872779767873,
+      "mean_W": 6.204779777682063,
       "mean_inf": 0.01393962661431721,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": true
     },
     {
       "regime": "6-0.002",
       "lam": 5000,
       "mean_W": 6.204779777682063,
       "mean_inf": 0.01393962661431721,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "6-0.002",
       "lam": 10000,
       "mean_W": 6.204779777682063,
       "mean_inf": 0.01393962661431721,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "6-0.005",
       "lam": 1000,
       "mean_W": 17.82404842783997,
       "mean_inf": 0.03454726561550982,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": true
     },
     {
       "regime": "6-0.005",
       "lam": 5000,
       "mean_W": 17.82404842783997,
       "mean_inf": 0.03454726561550982,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "6-0.005",
       "lam": 10000,
       "mean_W": 17.82404842783997,
       "mean_inf": 0.03454726561550982,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "9-0.001",
       "lam": 1000,
       "mean_W": 21.334618116025695,
       "mean_inf": 0.00011165327944984764,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": true
     },
     {
       "regime": "9-0.001",
       "lam": 5000,
       "mean_W": 21.334618116025695,
       "mean_inf": 0.00011165327944984764,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "9-0.001",
       "lam": 10000,
       "mean_W": 21.334618116025695,
       "mean_inf": 0.00011165327944984764,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "9-0.002",
       "lam": 1000,
       "mean_W": 47.58679316514615,
       "mean_inf": 0.00044666609895223613,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": true
     },
     {
       "regime": "9-0.002",
       "lam": 5000,
       "mean_W": 47.58679316514615,
       "mean_inf": 0.00044666609895223613,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "9-0.002",
       "lam": 10000,
       "mean_W": 47.58679316514615,
       "mean_inf": 0.00044666609895223613,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "9-0.005",
       "lam": 1000,
       "mean_W": 179.53285160203293,
       "mean_inf": 0.0027717579241786005,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": true
     },
     {
       "regime": "9-0.005",
       "lam": 5000,
       "mean_W": 179.53285160203293,
       "mean_inf": 0.0027717579241786005,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     },
     {
       "regime": "9-0.005",
       "lam": 10000,
       "mean_W": 179.53285160203293,
       "mean_inf": 0.0027717579241786005,
-      "kept_from": "bc"
+      "kept_from": "bc",
+      "selected": false
     }
   ],
   "arms": {
@@ -211,7 +238,8 @@
       "H": {
         "mean_W": 209.05869827732658,
         "mean_inf": 0.02841871990008263
-      }
+      },
+      "bound": 0.031261591890090895
     },
     "12-0.002": {
       "F": {
@@ -229,7 +257,8 @@
       "H": {
         "mean_W": 687.5224059699183,
         "mean_inf": 0.0571476488418205
-      }
+      },
+      "bound": 0.06286341372600256
     },
     "12-0.005": {
       "F": {
@@ -247,7 +276,8 @@
       "H": {
         "mean_W": 8668.84035676414,
         "mean_inf": 0.1386571278920128
-      }
+      },
+      "bound": 0.15252384068121405
     },
     "6-0.001": {
       "F": {
@@ -265,7 +295,8 @@
       "H": {
         "mean_W": 2.9831648572152005,
         "mean_inf": 0.006985945535093383
-      }
+      },
+      "bound": 0.007685540088602723
     },
     "6-0.002": {
       "F": {
@@ -283,7 +314,8 @@
       "H": {
         "mean_W": 6.204779777682063,
         "mean_inf": 0.01393962661431721
-      }
+      },
+      "bound": 0.015334589275748932
     },
     "6-0.005": {
       "F": {
@@ -301,7 +333,8 @@
       "H": {
         "mean_W": 17.82404842783997,
         "mean_inf": 0.03454726561550982
-      }
+      },
+      "bound": 0.0380029921770608
     },
     "9-0.001": {
       "F": {
@@ -319,7 +352,8 @@
       "H": {
         "mean_W": 21.334618116025695,
         "mean_inf": 0.00011165327944984764
-      }
+      },
+      "bound": 0.00012381860739483241
     },
     "9-0.002": {
       "F": {
@@ -337,7 +371,8 @@
       "H": {
         "mean_W": 47.58679316514615,
         "mean_inf": 0.00044666609895223613
-      }
+      },
+      "bound": 0.0004923327088474598
     },
     "9-0.005": {
       "F": {
@@ -355,7 +390,8 @@
       "H": {
         "mean_W": 179.53285160203293,
         "mean_inf": 0.0027717579241786005
-      }
+      },
+      "bound": 0.0030499337165964613
     }
   },
   "note": "P points are kept BC/PPO policies per nominal lam on held-out cells; lam_env = lam / 10000 in the env."

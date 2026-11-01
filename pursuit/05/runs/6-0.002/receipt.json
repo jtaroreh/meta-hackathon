@@ -28,37 +28,86 @@
     "total_timesteps": 5000000,
     "seed": 0,
     "agents_per_env": 1024,
-    "beta": 1.0
+    "beta": 1.0,
+    "ppo": {
+      "name": "pufferai",
+      "project": "ablations",
+      "seed": 1000,
+      "torch_deterministic": true,
+      "cpu_offload": false,
+      "device": "cpu",
+      "optimizer": "adam",
+      "anneal_lr": true,
+      "precision": "float32",
+      "total_timesteps": 5000000,
+      "learning_rate": 0.015,
+      "gamma": 0.995,
+      "gae_lambda": 0.9,
+      "update_epochs": 1,
+      "clip_coef": 0.2,
+      "vf_coef": 2.0,
+      "vf_clip_coef": 0.2,
+      "max_grad_norm": 1.5,
+      "ent_coef": 0.001,
+      "adam_beta1": 0.95,
+      "adam_beta2": 0.999,
+      "adam_eps": 1e-12,
+      "checkpoint_interval": 200,
+      "batch_size": 12288,
+      "minibatch_size": 8192,
+      "max_minibatch_size": 32768,
+      "bptt_horizon": 4,
+      "compile": false,
+      "compile_mode": "max-autotune-no-cudagraphs",
+      "compile_fullgraph": true,
+      "vtrace_rho_clip": 1.0,
+      "vtrace_c_clip": 1.0,
+      "prio_alpha": 0.8,
+      "prio_beta0": 0.2,
+      "use_rnn": false,
+      "env": "cultivation-abort"
+    },
+    "bc_lr": 0.01,
+    "bc_max_iters": 5000
   },
   "versions": {
     "pufferlib": "3.0",
     "torch": "2.15.0",
     "numpy": "1.26.4"
   },
-  "wall_s": 34.75466466698708,
+  "worker_s": 60.11140975000308,
   "points": [
     {
       "lam": 1000,
       "lam_env": 0.1,
       "kept_from": "bc",
-      "mean_W": 6.586872779767873,
+      "mean_W": 6.204779777682063,
       "mean_inf": 0.01393962661431721,
-      "bc_agreement": 0.8983050584793091,
+      "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        1000,
+        1001,
+        1002
+      ],
+      "bc_seed_kept": 1000,
+      "ppo_seed": 1000,
       "steps": 5001216,
       "cells": {
         "6/0.002/4": {
-          "W": 6.586872779767873,
+          "W": 6.204779777682063,
           "inf": 0.01393962661431721,
           "pacc": 0.8576351804085975,
           "fth": 0,
-          "keys": 43
+          "keys": 43,
+          "tail": 0.0006753316980763202
         },
         "6/0.002/5": {
-          "W": 6.586872779767873,
+          "W": 6.204779777682063,
           "inf": 0.01393962661431721,
           "pacc": 0.8576351804085975,
           "fth": 0,
-          "keys": 43
+          "keys": 43,
+          "tail": 0.0006753316980763202
         }
       }
     },
@@ -69,6 +118,13 @@
       "mean_W": 6.204779777682063,
       "mean_inf": 0.01393962661431721,
       "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        1000,
+        1001,
+        1002
+      ],
+      "bc_seed_kept": 1000,
+      "ppo_seed": 1001,
       "steps": 5001216,
       "cells": {
         "6/0.002/4": {
@@ -76,14 +132,16 @@
           "inf": 0.01393962661431721,
           "pacc": 0.8576351804085975,
           "fth": 0,
-          "keys": 43
+          "keys": 43,
+          "tail": 0.0006753316980763202
         },
         "6/0.002/5": {
           "W": 6.204779777682063,
           "inf": 0.01393962661431721,
           "pacc": 0.8576351804085975,
           "fth": 0,
-          "keys": 43
+          "keys": 43,
+          "tail": 0.0006753316980763202
         }
       }
     },
@@ -93,7 +151,14 @@
       "kept_from": "bc",
       "mean_W": 6.204779777682063,
       "mean_inf": 0.01393962661431721,
-      "bc_agreement": 0.9830508232116699,
+      "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        1000,
+        1001,
+        1002
+      ],
+      "bc_seed_kept": 1000,
+      "ppo_seed": 1002,
       "steps": 5001216,
       "cells": {
         "6/0.002/4": {
@@ -101,19 +166,23 @@
           "inf": 0.01393962661431721,
           "pacc": 0.8576351804085975,
           "fth": 0,
-          "keys": 43
+          "keys": 43,
+          "tail": 0.0006753316980763202
         },
         "6/0.002/5": {
           "W": 6.204779777682063,
           "inf": 0.01393962661431721,
           "pacc": 0.8576351804085975,
           "fth": 0,
-          "keys": 43
+          "keys": 43,
+          "tail": 0.0006753316980763202
         }
       }
     }
   ],
-  "selected_lam": 5000,
+  "selected_lam": 1000,
+  "selection_tied": true,
+  "train_bound": 0.005197784081350531,
   "tables": {
     "6/0.002/4": {
       "fth": 0,
@@ -814,14 +883,16 @@
         "inf": 0.01393962661431721,
         "pacc": 0.8576351804085975,
         "fth": 0,
-        "keys": 43
+        "keys": 43,
+        "tail": 0.0006753316980763202
       },
       "6/0.002/5": {
         "W": 6.204779777682063,
         "inf": 0.01393962661431721,
         "pacc": 0.8576351804085975,
         "fth": 0,
-        "keys": 43
+        "keys": 43,
+        "tail": 0.0006753316980763202
       }
     }
   }

@@ -28,14 +28,54 @@
     "total_timesteps": 5000000,
     "seed": 0,
     "agents_per_env": 1024,
-    "beta": 1.0
+    "beta": 1.0,
+    "ppo": {
+      "name": "pufferai",
+      "project": "ablations",
+      "seed": 3000,
+      "torch_deterministic": true,
+      "cpu_offload": false,
+      "device": "cpu",
+      "optimizer": "adam",
+      "anneal_lr": true,
+      "precision": "float32",
+      "total_timesteps": 5000000,
+      "learning_rate": 0.015,
+      "gamma": 0.995,
+      "gae_lambda": 0.9,
+      "update_epochs": 1,
+      "clip_coef": 0.2,
+      "vf_coef": 2.0,
+      "vf_clip_coef": 0.2,
+      "max_grad_norm": 1.5,
+      "ent_coef": 0.001,
+      "adam_beta1": 0.95,
+      "adam_beta2": 0.999,
+      "adam_eps": 1e-12,
+      "checkpoint_interval": 200,
+      "batch_size": 12288,
+      "minibatch_size": 8192,
+      "max_minibatch_size": 32768,
+      "bptt_horizon": 4,
+      "compile": false,
+      "compile_mode": "max-autotune-no-cudagraphs",
+      "compile_fullgraph": true,
+      "vtrace_rho_clip": 1.0,
+      "vtrace_c_clip": 1.0,
+      "prio_alpha": 0.8,
+      "prio_beta0": 0.2,
+      "use_rnn": false,
+      "env": "cultivation-abort"
+    },
+    "bc_lr": 0.01,
+    "bc_max_iters": 5000
   },
   "versions": {
     "pufferlib": "3.0",
     "torch": "2.15.0",
     "numpy": "1.26.4"
   },
-  "wall_s": 37.29980900100054,
+  "worker_s": 185.38021095699514,
   "points": [
     {
       "lam": 1000,
@@ -44,6 +84,13 @@
       "mean_W": 21.334618116025695,
       "mean_inf": 0.00011165327944984764,
       "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        3000,
+        3001,
+        3002
+      ],
+      "bc_seed_kept": 3000,
+      "ppo_seed": 3000,
       "steps": 5001216,
       "cells": {
         "9/0.001/4": {
@@ -51,14 +98,16 @@
           "inf": 0.00013818807396867133,
           "pacc": 0.8208129787412388,
           "fth": 0,
-          "keys": 58
+          "keys": 58,
+          "tail": 0.0011015612828059497
         },
         "9/0.001/5": {
           "W": 26.59761067130995,
           "inf": 8.511848493102397e-05,
           "pacc": 0.8207874988607805,
           "fth": 0,
-          "keys": 43
+          "keys": 43,
+          "tail": 0.0011015612828059497
         }
       }
     },
@@ -69,6 +118,13 @@
       "mean_W": 21.334618116025695,
       "mean_inf": 0.00011165327944984764,
       "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        3000,
+        3001,
+        3002
+      ],
+      "bc_seed_kept": 3000,
+      "ppo_seed": 3001,
       "steps": 5001216,
       "cells": {
         "9/0.001/4": {
@@ -76,14 +132,16 @@
           "inf": 0.00013818807396867133,
           "pacc": 0.8208129787412388,
           "fth": 0,
-          "keys": 58
+          "keys": 58,
+          "tail": 0.0011015612828059497
         },
         "9/0.001/5": {
           "W": 26.59761067130995,
           "inf": 8.511848493102397e-05,
           "pacc": 0.8207874988607805,
           "fth": 0,
-          "keys": 43
+          "keys": 43,
+          "tail": 0.0011015612828059497
         }
       }
     },
@@ -94,6 +152,13 @@
       "mean_W": 21.334618116025695,
       "mean_inf": 0.00011165327944984764,
       "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        3000,
+        3001,
+        3002
+      ],
+      "bc_seed_kept": 3000,
+      "ppo_seed": 3002,
       "steps": 5001216,
       "cells": {
         "9/0.001/4": {
@@ -101,19 +166,23 @@
           "inf": 0.00013818807396867133,
           "pacc": 0.8208129787412388,
           "fth": 0,
-          "keys": 58
+          "keys": 58,
+          "tail": 0.0011015612828059497
         },
         "9/0.001/5": {
           "W": 26.59761067130995,
           "inf": 8.511848493102397e-05,
           "pacc": 0.8207874988607805,
           "fth": 0,
-          "keys": 43
+          "keys": 43,
+          "tail": 0.0011015612828059497
         }
       }
     }
   ],
   "selected_lam": 1000,
+  "selection_tied": true,
+  "train_bound": 0.004126721643298605,
   "tables": {
     "9/0.001/4": {
       "fth": 0,
@@ -933,14 +1002,16 @@
         "inf": 0.0695554371081607,
         "pacc": 0.882050994662023,
         "fth": 2,
-        "keys": 58
+        "keys": 58,
+        "tail": 0.0011015612828059497
       },
       "9/0.001/5": {
         "W": 12.531600782496866,
         "inf": 0.06856283068289516,
         "pacc": 0.8811304312390141,
         "fth": 2,
-        "keys": 43
+        "keys": 43,
+        "tail": 0.0011015612828059497
       }
     }
   }

@@ -28,14 +28,54 @@
     "total_timesteps": 5000000,
     "seed": 0,
     "agents_per_env": 1024,
-    "beta": 1.0
+    "beta": 1.0,
+    "ppo": {
+      "name": "pufferai",
+      "project": "ablations",
+      "seed": 8000,
+      "torch_deterministic": true,
+      "cpu_offload": false,
+      "device": "cpu",
+      "optimizer": "adam",
+      "anneal_lr": true,
+      "precision": "float32",
+      "total_timesteps": 5000000,
+      "learning_rate": 0.015,
+      "gamma": 0.995,
+      "gae_lambda": 0.9,
+      "update_epochs": 1,
+      "clip_coef": 0.2,
+      "vf_coef": 2.0,
+      "vf_clip_coef": 0.2,
+      "max_grad_norm": 1.5,
+      "ent_coef": 0.001,
+      "adam_beta1": 0.95,
+      "adam_beta2": 0.999,
+      "adam_eps": 1e-12,
+      "checkpoint_interval": 200,
+      "batch_size": 12288,
+      "minibatch_size": 8192,
+      "max_minibatch_size": 32768,
+      "bptt_horizon": 4,
+      "compile": false,
+      "compile_mode": "max-autotune-no-cudagraphs",
+      "compile_fullgraph": true,
+      "vtrace_rho_clip": 1.0,
+      "vtrace_c_clip": 1.0,
+      "prio_alpha": 0.8,
+      "prio_beta0": 0.2,
+      "use_rnn": false,
+      "env": "cultivation-abort"
+    },
+    "bc_lr": 0.01,
+    "bc_max_iters": 5000
   },
   "versions": {
     "pufferlib": "3.0",
     "torch": "2.15.0",
     "numpy": "1.26.4"
   },
-  "wall_s": 118.32805112499773,
+  "worker_s": 206.72483091699542,
   "points": [
     {
       "lam": 1000,
@@ -43,7 +83,14 @@
       "kept_from": "bc",
       "mean_W": 8668.84035676414,
       "mean_inf": 0.1386571278920128,
-      "bc_agreement": 0.926877498626709,
+      "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        8000,
+        8001,
+        8002
+      ],
+      "bc_seed_kept": 8000,
+      "ppo_seed": 8000,
       "steps": 5001216,
       "cells": {
         "12/0.005/4": {
@@ -51,14 +98,16 @@
           "inf": 0.13811731505744812,
           "pacc": 0.043149258338868575,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.6531490226433037
         },
         "12/0.005/5": {
           "W": 8663.082936685008,
           "inf": 0.13919694072657743,
           "pacc": 0.04321449104145707,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.6531490226433037
         }
       }
     },
@@ -68,7 +117,14 @@
       "kept_from": "bc",
       "mean_W": 8668.84035676414,
       "mean_inf": 0.1386571278920128,
-      "bc_agreement": 0.9031620621681213,
+      "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        8000,
+        8001,
+        8002
+      ],
+      "bc_seed_kept": 8000,
+      "ppo_seed": 8001,
       "steps": 5001216,
       "cells": {
         "12/0.005/4": {
@@ -76,14 +132,16 @@
           "inf": 0.13811731505744812,
           "pacc": 0.043149258338868575,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.6531490226433037
         },
         "12/0.005/5": {
           "W": 8663.082936685008,
           "inf": 0.13919694072657743,
           "pacc": 0.04321449104145707,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.6531490226433037
         }
       }
     },
@@ -94,6 +152,13 @@
       "mean_W": 8668.84035676414,
       "mean_inf": 0.1386571278920128,
       "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        8000,
+        8001,
+        8002
+      ],
+      "bc_seed_kept": 8000,
+      "ppo_seed": 8002,
       "steps": 5001216,
       "cells": {
         "12/0.005/4": {
@@ -101,19 +166,23 @@
           "inf": 0.13811731505744812,
           "pacc": 0.043149258338868575,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.6531490226433037
         },
         "12/0.005/5": {
           "W": 8663.082936685008,
           "inf": 0.13919694072657743,
           "pacc": 0.04321449104145707,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.6531490226433037
         }
       }
     }
   ],
   "selected_lam": 1000,
+  "selection_tied": true,
+  "train_bound": 0.13528996188889414,
   "tables": {
     "12/0.005/4": {
       "fth": 0,
@@ -842,7 +911,7 @@
             3,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -869,7 +938,7 @@
             4,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -923,7 +992,7 @@
             3,
             5
           ],
-          false
+          true
         ],
         [
           2,
@@ -932,7 +1001,7 @@
             3,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -950,7 +1019,7 @@
             4,
             5
           ],
-          false
+          true
         ],
         [
           2,
@@ -959,7 +1028,7 @@
             4,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -968,7 +1037,7 @@
             5,
             5
           ],
-          false
+          true
         ],
         [
           2,
@@ -977,7 +1046,7 @@
             5,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -986,7 +1055,7 @@
             6,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -1004,7 +1073,7 @@
             5,
             5
           ],
-          false
+          true
         ],
         [
           2,
@@ -1013,7 +1082,7 @@
             6,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -1022,7 +1091,7 @@
             5,
             5
           ],
-          false
+          true
         ],
         [
           2,
@@ -1031,7 +1100,7 @@
             6,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -1040,7 +1109,7 @@
             6,
             6
           ],
-          false
+          true
         ],
         [
           3,
@@ -2437,7 +2506,7 @@
             3,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -2464,7 +2533,7 @@
             4,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -2518,7 +2587,7 @@
             3,
             5
           ],
-          false
+          true
         ],
         [
           2,
@@ -2527,7 +2596,7 @@
             3,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -2545,7 +2614,7 @@
             4,
             5
           ],
-          false
+          true
         ],
         [
           2,
@@ -2554,7 +2623,7 @@
             4,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -2563,7 +2632,7 @@
             5,
             5
           ],
-          false
+          true
         ],
         [
           2,
@@ -2572,7 +2641,7 @@
             5,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -2581,7 +2650,7 @@
             6,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -2599,7 +2668,7 @@
             5,
             5
           ],
-          false
+          true
         ],
         [
           2,
@@ -2608,7 +2677,7 @@
             6,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -2617,7 +2686,7 @@
             5,
             5
           ],
-          false
+          true
         ],
         [
           2,
@@ -2626,7 +2695,7 @@
             6,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -2635,7 +2704,7 @@
             6,
             6
           ],
-          false
+          true
         ],
         [
           3,
@@ -3316,14 +3385,16 @@
         "inf": 0.47644761170089006,
         "pacc": 0.07103319450266193,
         "fth": 2,
-        "keys": 181
+        "keys": 181,
+        "tail": 0.6531490226433037
       },
       "12/0.005/5": {
         "W": 5106.788446749447,
         "inf": 0.47893518518518513,
         "pacc": 0.07139066971284687,
         "fth": 2,
-        "keys": 181
+        "keys": 181,
+        "tail": 0.6531490226433037
       }
     }
   }

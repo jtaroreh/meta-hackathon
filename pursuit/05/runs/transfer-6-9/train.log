@@ -1,8 +1,9 @@
-train transfer-6-9 kind=transfer lam=5000 steps=5000000 seed=0
+train transfer-6-9 kind=transfer lam=5000 steps=5000000 seed=0 bptt=4 mb=8192 gamma=0.995 lr=0.015
 train_point lam=5000.0 (env 0.5) seed=0 steps=5000000
-bc agreement=1.0000 samples=876 iters=7
+bc seeds tried=[0, 1, 2] kept=0 agreement=1.0000 samples=876 iters=6
+allzero-row fraction (PPO override upper bound) = 0.0341
 bc exact train W=43.97406347 inf=0.008445728797 bound=0.009291301677
-[1032192] exact test W=45.91111926 inf=0.009800485845
+[1032192] exact test W=45.91104266 inf=0.009800485845
 [2064384] exact test W=23.03835396 inf=0.1144110992
 [3022848] exact test W=23.03835396 inf=0.1144110992
 [4055040] exact test W=23.03835396 inf=0.1144110992

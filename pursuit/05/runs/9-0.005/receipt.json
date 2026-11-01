@@ -28,14 +28,54 @@
     "total_timesteps": 5000000,
     "seed": 0,
     "agents_per_env": 1024,
-    "beta": 1.0
+    "beta": 1.0,
+    "ppo": {
+      "name": "pufferai",
+      "project": "ablations",
+      "seed": 5000,
+      "torch_deterministic": true,
+      "cpu_offload": false,
+      "device": "cpu",
+      "optimizer": "adam",
+      "anneal_lr": true,
+      "precision": "float32",
+      "total_timesteps": 5000000,
+      "learning_rate": 0.015,
+      "gamma": 0.995,
+      "gae_lambda": 0.9,
+      "update_epochs": 1,
+      "clip_coef": 0.2,
+      "vf_coef": 2.0,
+      "vf_clip_coef": 0.2,
+      "max_grad_norm": 1.5,
+      "ent_coef": 0.001,
+      "adam_beta1": 0.95,
+      "adam_beta2": 0.999,
+      "adam_eps": 1e-12,
+      "checkpoint_interval": 200,
+      "batch_size": 12288,
+      "minibatch_size": 8192,
+      "max_minibatch_size": 32768,
+      "bptt_horizon": 4,
+      "compile": false,
+      "compile_mode": "max-autotune-no-cudagraphs",
+      "compile_fullgraph": true,
+      "vtrace_rho_clip": 1.0,
+      "vtrace_c_clip": 1.0,
+      "prio_alpha": 0.8,
+      "prio_beta0": 0.2,
+      "use_rnn": false,
+      "env": "cultivation-abort"
+    },
+    "bc_lr": 0.01,
+    "bc_max_iters": 5000
   },
   "versions": {
     "pufferlib": "3.0",
     "torch": "2.15.0",
     "numpy": "1.26.4"
   },
-  "wall_s": 40.89405304200045,
+  "worker_s": 90.48409533300583,
   "points": [
     {
       "lam": 1000,
@@ -44,6 +84,13 @@
       "mean_W": 179.53285160203293,
       "mean_inf": 0.0027717579241786005,
       "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        5000,
+        5001,
+        5002
+      ],
+      "bc_seed_kept": 5000,
+      "ppo_seed": 5000,
       "steps": 5001216,
       "cells": {
         "9/0.005/4": {
@@ -51,14 +98,16 @@
           "inf": 0.0034295086856035197,
           "pacc": 0.37662662122011925,
           "fth": 0,
-          "keys": 58
+          "keys": 58,
+          "tail": 0.07800934541342805
         },
         "9/0.005/5": {
           "W": 224.0614263177191,
           "inf": 0.0021140071627536814,
           "pacc": 0.3763364692467147,
           "fth": 0,
-          "keys": 43
+          "keys": 43,
+          "tail": 0.07800934541342805
         }
       }
     },
@@ -69,6 +118,13 @@
       "mean_W": 179.53285160203293,
       "mean_inf": 0.0027717579241786005,
       "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        5000,
+        5001,
+        5002
+      ],
+      "bc_seed_kept": 5000,
+      "ppo_seed": 5001,
       "steps": 5001216,
       "cells": {
         "9/0.005/4": {
@@ -76,14 +132,16 @@
           "inf": 0.0034295086856035197,
           "pacc": 0.37662662122011925,
           "fth": 0,
-          "keys": 58
+          "keys": 58,
+          "tail": 0.07800934541342805
         },
         "9/0.005/5": {
           "W": 224.0614263177191,
           "inf": 0.0021140071627536814,
           "pacc": 0.3763364692467147,
           "fth": 0,
-          "keys": 43
+          "keys": 43,
+          "tail": 0.07800934541342805
         }
       }
     },
@@ -94,6 +152,13 @@
       "mean_W": 179.53285160203293,
       "mean_inf": 0.0027717579241786005,
       "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        5000,
+        5001,
+        5002
+      ],
+      "bc_seed_kept": 5000,
+      "ppo_seed": 5002,
       "steps": 5001216,
       "cells": {
         "9/0.005/4": {
@@ -101,19 +166,23 @@
           "inf": 0.0034295086856035197,
           "pacc": 0.37662662122011925,
           "fth": 0,
-          "keys": 58
+          "keys": 58,
+          "tail": 0.07800934541342805
         },
         "9/0.005/5": {
           "W": 224.0614263177191,
           "inf": 0.0021140071627536814,
           "pacc": 0.3763364692467147,
           "fth": 0,
-          "keys": 43
+          "keys": 43,
+          "tail": 0.07800934541342805
         }
       }
     }
   ],
   "selected_lam": 1000,
+  "selection_tied": true,
+  "train_bound": 0.02220623094301685,
   "tables": {
     "9/0.005/4": {
       "fth": 0,
@@ -933,14 +1002,16 @@
         "inf": 0.28828269203464435,
         "pacc": 0.527365251274296,
         "fth": 2,
-        "keys": 58
+        "keys": 58,
+        "tail": 0.07800934541342805
       },
       "9/0.005/5": {
         "W": 111.57096653903415,
         "inf": 0.2838247893759817,
         "pacc": 0.5243701341294754,
         "fth": 2,
-        "keys": 43
+        "keys": 43,
+        "tail": 0.07800934541342805
       }
     }
   }

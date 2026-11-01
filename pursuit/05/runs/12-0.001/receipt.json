@@ -28,14 +28,54 @@
     "total_timesteps": 5000000,
     "seed": 0,
     "agents_per_env": 1024,
-    "beta": 1.0
+    "beta": 1.0,
+    "ppo": {
+      "name": "pufferai",
+      "project": "ablations",
+      "seed": 6000,
+      "torch_deterministic": true,
+      "cpu_offload": false,
+      "device": "cpu",
+      "optimizer": "adam",
+      "anneal_lr": true,
+      "precision": "float32",
+      "total_timesteps": 5000000,
+      "learning_rate": 0.015,
+      "gamma": 0.995,
+      "gae_lambda": 0.9,
+      "update_epochs": 1,
+      "clip_coef": 0.2,
+      "vf_coef": 2.0,
+      "vf_clip_coef": 0.2,
+      "max_grad_norm": 1.5,
+      "ent_coef": 0.001,
+      "adam_beta1": 0.95,
+      "adam_beta2": 0.999,
+      "adam_eps": 1e-12,
+      "checkpoint_interval": 200,
+      "batch_size": 12288,
+      "minibatch_size": 8192,
+      "max_minibatch_size": 32768,
+      "bptt_horizon": 4,
+      "compile": false,
+      "compile_mode": "max-autotune-no-cudagraphs",
+      "compile_fullgraph": true,
+      "vtrace_rho_clip": 1.0,
+      "vtrace_c_clip": 1.0,
+      "prio_alpha": 0.8,
+      "prio_beta0": 0.2,
+      "use_rnn": false,
+      "env": "cultivation-abort"
+    },
+    "bc_lr": 0.01,
+    "bc_max_iters": 5000
   },
   "versions": {
     "pufferlib": "3.0",
     "torch": "2.15.0",
     "numpy": "1.26.4"
   },
-  "wall_s": 104.33518529299909,
+  "worker_s": 224.4786445830032,
   "points": [
     {
       "lam": 1000,
@@ -43,7 +83,14 @@
       "kept_from": "bc",
       "mean_W": 209.05869827732658,
       "mean_inf": 0.02841871990008263,
-      "bc_agreement": 0.9802371263504028,
+      "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        6000,
+        6001,
+        6002
+      ],
+      "bc_seed_kept": 6000,
+      "ppo_seed": 6000,
       "steps": 5001216,
       "cells": {
         "12/0.001/4": {
@@ -51,14 +98,16 @@
           "inf": 0.028388699643831096,
           "pacc": 0.5270929120864175,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.030747233210408897
         },
         "12/0.001/5": {
           "W": 209.1823341722311,
           "inf": 0.028448740156334158,
           "pacc": 0.527131277366652,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.030747233210408897
         }
       }
     },
@@ -69,6 +118,13 @@
       "mean_W": 209.05869827732658,
       "mean_inf": 0.02841871990008263,
       "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        6000,
+        6001,
+        6002
+      ],
+      "bc_seed_kept": 6000,
+      "ppo_seed": 6001,
       "steps": 5001216,
       "cells": {
         "12/0.001/4": {
@@ -76,14 +132,16 @@
           "inf": 0.028388699643831096,
           "pacc": 0.5270929120864175,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.030747233210408897
         },
         "12/0.001/5": {
           "W": 209.1823341722311,
           "inf": 0.028448740156334158,
           "pacc": 0.527131277366652,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.030747233210408897
         }
       }
     },
@@ -93,7 +151,14 @@
       "kept_from": "bc",
       "mean_W": 209.05869827732658,
       "mean_inf": 0.02841871990008263,
-      "bc_agreement": 0.9743083119392395,
+      "bc_agreement": 1.0,
+      "bc_seeds_tried": [
+        6000,
+        6001,
+        6002
+      ],
+      "bc_seed_kept": 6000,
+      "ppo_seed": 6002,
       "steps": 5001216,
       "cells": {
         "12/0.001/4": {
@@ -101,19 +166,23 @@
           "inf": 0.028388699643831096,
           "pacc": 0.5270929120864175,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.030747233210408897
         },
         "12/0.001/5": {
           "W": 209.1823341722311,
           "inf": 0.028448740156334158,
           "pacc": 0.527131277366652,
           "fth": 0,
-          "keys": 181
+          "keys": 181,
+          "tail": 0.030747233210408897
         }
       }
     }
   ],
   "selected_lam": 1000,
+  "selection_tied": true,
+  "train_bound": 0.030312021257619115,
   "tables": {
     "12/0.001/4": {
       "fth": 0,
@@ -842,7 +911,7 @@
             3,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -923,7 +992,7 @@
             3,
             5
           ],
-          false
+          true
         ],
         [
           2,
@@ -932,7 +1001,7 @@
             3,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -959,7 +1028,7 @@
             4,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -2437,7 +2506,7 @@
             3,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -2518,7 +2587,7 @@
             3,
             5
           ],
-          false
+          true
         ],
         [
           2,
@@ -2527,7 +2596,7 @@
             3,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -2554,7 +2623,7 @@
             4,
             6
           ],
-          false
+          true
         ],
         [
           2,
@@ -3307,23 +3376,25 @@
     }
   },
   "scratch": {
-    "mean_W": 145.72911158719302,
-    "mean_inf": 0.1374293399252765,
+    "mean_W": 162.50218730233308,
+    "mean_inf": 0.10790619112800443,
     "steps": 5001216,
     "cells": {
       "12/0.001/4": {
-        "W": 145.8713038875029,
-        "inf": 0.1369840931875604,
-        "pacc": 0.5934182970188354,
-        "fth": 2,
-        "keys": 181
+        "W": 164.03780635534895,
+        "inf": 0.10506297091868981,
+        "pacc": 0.5722519161449,
+        "fth": 1,
+        "keys": 181,
+        "tail": 0.030747233210408897
       },
       "12/0.001/5": {
-        "W": 145.58691928688313,
-        "inf": 0.13787458666299257,
-        "pacc": 0.5940377684103559,
-        "fth": 2,
-        "keys": 181
+        "W": 160.96656824931722,
+        "inf": 0.11074941133731903,
+        "pacc": 0.5759175907870437,
+        "fth": 1,
+        "keys": 181,
+        "tail": 0.030747233210408897
       }
     }
   }
