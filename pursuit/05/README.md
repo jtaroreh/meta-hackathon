@@ -132,10 +132,17 @@ within the F-anchored bound, and counts H-within-2% when P's test-mean
 W is at most 1.02 times H's with P within the bound, over the six
 p <= 0.002 regimes.
 
-Split caveat: n = 9 test seed 4 drops the same check as train seed 1,
-so those test means are half-memorized; n = 6 test seeds 4 and 5 drop
-the same check, so those means repeat one cell. P ties H exactly on
-the clean cells too.
+Split caveat (program root ruling: keep the split, disclosed): the
+imported screen's `drop_one` maps n = 9 test seed 4 to the same
+dropped check as train seed 1, and n = 6 test seeds 4 and 5 to the
+same dropped check as each other. An independent SHA-256 check over
+each cell's frozen world (`cw1/cw2/fw1/fw2/nt2/spent` plus `L1/Vf/T`)
+confirms bit-identical precompute for the three n = 9 (1, 4) pairs
+and the three n = 6 (4, 5) pairs; all n = 12 cells are distinct. So
+half of each n = 9 test mean is a train cell and each n = 6 test mean
+repeats one cell. The D2 headline is robust to this: P ties H and S
+bit-exactly in all 18 test cells, including all 15 clean ones, so the
+6/6 near-H count stands with or without the duplicated cells.
 
 One `decision_table` forward per cell costs milliseconds, and the
 annealing arm costs tens of evaluations near 1 ms each. Both are
