@@ -4,8 +4,32 @@
   "model": "muse-spark-1.3-contributor",
   "muse_version": "1.4.14",
   "measured": "2026-11-01T00:30Z",
-  "budget_input_tokens": 8000,
-  "chosen": null,
+  "budget_input_tokens": 25000,
+  "chosen": {
+    "name": "full-runtime",
+    "flags": [
+      "--preset",
+      "empty",
+      "--reasoning-effort",
+      "low",
+      "--max-model-steps",
+      "1",
+      "--no-foreign-personal-context",
+      "--disable-web-tools",
+      "--disable-reminders",
+      "--disable-request-user-input",
+      "--no-session-log",
+      "--disable-write",
+      "--disable-shell",
+      "--approval-mode",
+      "never"
+    ],
+    "input_tokens": 20805,
+    "output_tokens": 1868,
+    "calls": 1,
+    "schema_valid": true,
+    "rationale": "Cheapest input (20805, tied floor) among sets carrying the mandated --disable-write --disable-shell --approval-mode never; low effort and 1 step match the prototype-validated shape that completed in all samples."
+  },
   "sets": [
     {
       "name": "baseline",
@@ -574,5 +598,6 @@
       }
     ]
   },
-  "conclusion": "No flag set lands under 8,000 input tokens. Floor is 20,765 with --preset empty plus every disable flag. The trace proves system_base alone (~48.6KB, ~11.4k tokens) exceeds the budget, so no -c tweak of the context lane can close the gap. Blocked: need the root-approved fallback (portable key or direct client)."
+  "conclusion": "Per-call budget raised to 25000 by the operator on 2026-11-01 (root relay). Chosen set full-runtime at 20805 input tokens fits. Run guard stays 200000 tokens per run; watch run.usage on every call.",
+  "budget_note": "Operator-approved raise from 8000 on 2026-11-01 via root decision; per-run guard stays 200000 tokens."
 }
