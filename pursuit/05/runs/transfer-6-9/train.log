@@ -1,0 +1,24 @@
+train transfer-6-9 kind=transfer lam=5000 steps=5000000 seed=0
+train_point lam=5000.0 (env 0.5) seed=0 steps=5000000
+bc agreement=1.0000 samples=876 iters=7
+bc exact train W=43.97406347 inf=0.008445728797 bound=0.009291301677
+[1032192] exact test W=45.91111926 inf=0.009800485845
+[2064384] exact test W=23.03835396 inf=0.1144110992
+[3022848] exact test W=23.03835396 inf=0.1144110992
+[4055040] exact test W=23.03835396 inf=0.1144110992
+[5013504] exact test W=23.03835396 inf=0.1144110992
+finetuned exact train W=21.4417788 inf=0.1196703497
+kept bc on exact train-seed W
+decision-table keys 6/0.001/4: 43
+decision-table keys 6/0.001/5: 43
+decision-table keys 6/0.002/4: 43
+decision-table keys 6/0.002/5: 43
+decision-table keys 6/0.005/4: 43
+decision-table keys 6/0.005/5: 43
+decision-table keys 9/0.001/4: 58
+decision-table keys 9/0.001/5: 43
+decision-table keys 9/0.002/4: 58
+decision-table keys 9/0.002/5: 43
+decision-table keys 9/0.005/4: 58
+decision-table keys 9/0.005/5: 43
+exact test W = 45.91104266, inf = 0.009800485845; S = 45.91104266; H = 45.91104266; A = 45.91104266

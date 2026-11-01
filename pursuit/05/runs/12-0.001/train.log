@@ -1,0 +1,36 @@
+[12-0.001 point] train_point lam=1000 (env 0.1) seed=600 steps=5000000
+[12-0.001 point] bc agreement=0.9802 samples=506 iters=13
+[12-0.001 point] bc exact train W=223.9056464 inf=0.02755547387 bound=0.03031202126
+[12-0.001 point] [1007616] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 point] [2002944] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 point] [3010560] exact test W=145.7291116 inf=0.1374293399
+[12-0.001 point] [4005888] exact test W=145.7291116 inf=0.1374293399
+[12-0.001 point] [5001216] exact test W=145.7291116 inf=0.1374293399
+[12-0.001 point] finetuned exact train W=156.4965188 inf=0.135933709
+[12-0.001 point] kept bc on exact train-seed W
+[12-0.001 point] train_point lam=5000 (env 0.5) seed=601 steps=5000000
+[12-0.001 point] bc agreement=1.0000 samples=506 iters=13
+[12-0.001 point] bc exact train W=223.9056464 inf=0.02755547387 bound=0.03031202126
+[12-0.001 point] [1007616] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 point] [2002944] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 point] [3010560] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 point] [4005888] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 point] [5001216] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 point] finetuned exact train W=223.9056464 inf=0.02755547387
+[12-0.001 point] kept bc on exact train-seed W
+[12-0.001 point] train_point lam=10000 (env 1.0) seed=602 steps=5000000
+[12-0.001 point] bc agreement=0.9743 samples=506 iters=10
+[12-0.001 point] bc exact train W=223.9056464 inf=0.02755547387 bound=0.03031202126
+[12-0.001 point] [1007616] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 point] [2002944] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 point] [3010560] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 point] [4005888] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 point] [5001216] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 point] finetuned exact train W=223.9056464 inf=0.02755547387
+[12-0.001 point] kept bc on exact train-seed W
+[12-0.001 scratch] train_scratch lam=5000 (env 0.5) seed=650
+[12-0.001 scratch] [scratch 1007616] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 scratch] [scratch 2002944] exact test W=209.0586983 inf=0.0284187199
+[12-0.001 scratch] [scratch 3010560] exact test W=145.2107198 inf=0.1374293399
+[12-0.001 scratch] [scratch 4005888] exact test W=145.7291116 inf=0.1374293399
+[12-0.001 scratch] [scratch 5001216] exact test W=145.7291116 inf=0.1374293399
