@@ -19,3 +19,5 @@ lands in the next commit, so every SHA below resolves on this branch.
 | 2026-10-31 | ada80ed9ad4706955c1882a82cd7afcec32e8a15 | muse-spark-1.3-contributor | drop stale validation-sweep weights |
 | 2026-10-31 | 0728e5a9fe64b9fa581738cd1ee04c9fa874d40f | muse-spark-1.3-contributor | log sweep and fix commits |
 | 2026-10-31 | 6c83ead60835513ebe81eed98e4384b143711829 | muse-spark-1.3-contributor | encode no-comments findings as types |
+| 2026-10-31 | c008c626e02b0d902984a5a9c502740a234a1d13 | muse-spark-1.3-contributor | interrogate round 1 fixes |
+| 2026-10-31 | 4608635eff3b457fada896fdea789c13cb73697f | muse-spark-1.3-contributor | regenerate sweep receipts with fixed trainer |
