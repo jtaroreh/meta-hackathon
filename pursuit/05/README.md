@@ -95,7 +95,9 @@ Without Muse Code, run the whole demo from recorded transcripts:
 The demo scores the proposed policy L with the same exact harness as
 every other arm on held-out test cells, prints the arm table with
 `F, A, S, H, L` plus `P` when a committed 05-3 checkpoint exists,
-writes a witness, and prints the replay command. Re-score any witness
+writes a witness, and prints the replay command. L passes a cell when
+its exact W sits below F's W within the F-anchored infidelity bound,
+else the table marks the failing cell. Re-score any witness
 with no model call:
 
 ```sh

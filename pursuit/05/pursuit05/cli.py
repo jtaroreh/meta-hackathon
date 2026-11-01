@@ -810,6 +810,49 @@ def _load_demo_tables() -> dict:
     return obj if isinstance(obj, dict) else {}
 
 
+GOAL_MAX_CHARS = 2000
+
+
+def _check_goal(goal: str) -> None:
+    if len(goal) > GOAL_MAX_CHARS:
+        raise ValueError(
+            f"goal is {len(goal)} chars, past the {GOAL_MAX_CHARS} cap"
+        )
+
+
+def _validated_hit(stored, cell):
+    import math
+
+    from pursuit05.witness import decode_table
+
+    hit = stored.get(cell.cell_id) if isinstance(stored, dict) else None
+    if not isinstance(hit, dict):
+        return None
+    try:
+        s, h = hit["S"], hit["H"]
+        for arm in (s, h):
+            for key in ("W", "inf", "pacc"):
+                val = arm[key]
+                if not isinstance(val, (int, float)) or not math.isfinite(val):
+                    return None
+        ath, fth = s["policy"]["ath"], s["policy"]["fth"]
+        if (
+            not isinstance(ath, list)
+            or len(ath) != cell.T - 1
+            or any(not isinstance(v, int) for v in ath)
+            or fth not in (0, 1, 2)
+        ):
+            return None
+        if h["policy"]["fth"] not in (0, 1, 2):
+            return None
+        if not isinstance(h.get("fallback", False), bool):
+            return None
+        decode_table(h["policy"]["table"])
+    except (KeyError, ValueError, TypeError):
+        return None
+    return hit
+
+
 def _cell_summary(cell, pre) -> str:
     return (
         f"A {cell.n}-qubit magic-state cultivation stage runs {cell.T} syndrome "
@@ -823,6 +866,7 @@ def _cell_summary(cell, pre) -> str:
 def _collect_versions() -> dict:
     import importlib.metadata
     import platform
+    import subprocess
 
     versions = {"python": platform.python_version()}
     for dist in ("pufferlib", "torch", "numpy"):
@@ -831,8 +875,6 @@ def _collect_versions() -> dict:
         except importlib.metadata.PackageNotFoundError:
             versions[dist] = "unknown"
     try:
-        import subprocess
-
         proc = subprocess.run(
             ["muse", "--version"], capture_output=True, text=True, timeout=15,
             check=False,
@@ -843,6 +885,22 @@ def _collect_versions() -> dict:
         )
     except (OSError, subprocess.SubprocessError, IndexError):
         versions["muse"] = "unknown"
+    try:
+        from pursuit05 import screen
+
+        versions["screen_src"] = str(screen.SCREEN_SRC)
+    except ImportError:
+        versions["screen_src"] = "unknown"
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True,
+            cwd=_pursuit05_dir(), timeout=15, check=False,
+        )
+        versions["git_head"] = (
+            proc.stdout.strip()[:12] if proc.returncode == 0 else "unknown"
+        )
+    except (OSError, subprocess.SubprocessError):
+        versions["git_head"] = "unknown"
     return versions
 
 
@@ -895,19 +953,18 @@ def _score_policy_checkpoint(policy_path: Path, reg, cells):
     return out
 
 
-def _offline_explanation(goal, table_text, rules_text, s_text) -> dict:
-    diffs = [line for line in rules_text.splitlines() if line.endswith("*differs from S*")]
-    if diffs:
-        shown = "; ".join(diffs[:3])
+def _offline_explanation(goal, n_diffs, examples) -> dict:
+    if n_diffs:
+        shown = "; ".join(examples[:3])
         expl = (
             f"Offline read of the exact table for goal {goal!r}: the learned "
-            f"policy differs from the best static policy on {len(diffs)} prefixes, "
+            f"policy differs from the best static policy on {n_diffs} prefixes, "
             f"including {shown}."
         )
     else:
         expl = (
             f"Offline read of the exact table for goal {goal!r}: the learned "
-            "policy matches the best static policy on every listed prefix, so "
+            "policy matches the best static policy on every prefix, so "
             "history buys nothing on these cells within the pinned decider class."
         )
     return {
@@ -919,33 +976,307 @@ def _offline_explanation(goal, table_text, rules_text, s_text) -> dict:
     }
 
 
-def cmd_demo(args) -> int:
-    import uuid
-    from datetime import datetime
+def _eval_static_policy(pre, p, ath, fth):
+    from pursuit05 import exact
 
-    from pursuit05 import exact, screen, table
-    from pursuit05.cells import TEST_SEEDS, CellRegistry
+    return exact.eval_exact(exact.static_decider(ath, fth), pre, p)
+
+
+def _score_baselines(reg, cells, stored):
+    from pursuit05 import dp, exact, screen
+    from pursuit05.witness import decode_table, encode_table
+
+    arms: dict[str, dict] = {}
+    h_tables: dict[str, dict] = {}
+    s_bests: dict[str, tuple] = {}
+    h_fths: dict[str, int] = {}
+    notes: list[str] = []
+    fallbacks: list[str] = []
+    for cell in cells:
+        pre = reg.pre(cell)
+        f = screen.run_F(pre, cell.p)
+        a = screen.run_arm(
+            pre, cell.p, "A", f["inf"], screen.A_ITERS, screen.R_SAMPLES,
+            None, cell.stage_idx, cell.rate_idx, cell.seed,
+        )
+        slot = {
+            "F": {"W": f["W"], "inf": f["inf"], "pacc": f.get("pacc", 0.0),
+                  "n_evaluated": 1, "inference_cost_s": 0.0},
+            "A": {"W": a["W"], "inf": a["inf"], "pacc": a.get("pacc", 0.0),
+                  "n_evaluated": 1, "inference_cost_s": 0.0},
+        }
+        hit = _validated_hit(stored, cell)
+        if hit is None:
+            print(f"computed S/H live for {cell.cell_id}")
+            s = exact.best_static(pre, cell.p, f["inf"])
+            h = dp.best_history(pre, cell.p, f["inf"])
+            slot["S"] = {"W": s.result.W, "inf": s.result.inf,
+                         "pacc": s.result.pacc,
+                         "n_evaluated": s.result.n_evaluated,
+                         "inference_cost_s": s.result.inference_cost_s,
+                         "policy": {"ath": list(s.ath), "fth": s.fth}}
+            slot["H"] = {"W": h.result.W, "inf": h.result.inf,
+                         "pacc": h.result.pacc,
+                         "n_evaluated": h.result.n_evaluated,
+                         "inference_cost_s": h.result.inference_cost_s,
+                         "lam": h.lam, "fallback": h.fallback,
+                         "policy": {"table": encode_table(h.table),
+                                    "fth": h.fth}}
+            h_tables[cell.cell_id] = dict(h.table)
+            s_bests[cell.cell_id] = (s.ath, s.fth)
+            h_fths[cell.cell_id] = h.fth
+        else:
+            slot["S"] = hit["S"]
+            slot["H"] = hit["H"]
+            h_tables[cell.cell_id] = decode_table(hit["H"]["policy"]["table"])
+            s_bests[cell.cell_id] = (tuple(hit["S"]["policy"]["ath"]),
+                                     hit["S"]["policy"]["fth"])
+            h_fths[cell.cell_id] = hit["H"]["policy"]["fth"]
+        if slot["H"].get("fallback"):
+            fallbacks.append(cell.cell_id)
+        arms[cell.cell_id] = slot
+    if fallbacks:
+        msg = f"H fallback in {len(fallbacks)}/{len(cells)} cells"
+        print(msg)
+        notes.append(msg)
+    return arms, h_tables, s_bests, h_fths, notes
+
+
+def _score_live_l(cells, reg, goal, guard, workdir, arms, proposals, fails,
+                  notes):
+    import functools
+
+    from pursuit05 import screen
     from pursuit05.proposer import (
-        EXPECTED_PROVIDER,
-        MODEL_ID,
         CallOverBudget,
         ExecFailed,
         ProposalError,
-        SpendGuard,
         SpendRefused,
-        build_explainer_prompt,
+        run_proposal_loop,
+    )
+
+    provider_id = model_id = None
+    for cell in cells:
+        pre = reg.pre(cell)
+        f = screen.run_F(pre, cell.p)
+        scorer = functools.partial(_eval_static_policy, pre, cell.p)
+        try:
+            loop = run_proposal_loop(
+                goal, _cell_summary(cell, pre), pre["T"], f["W"], f["inf"],
+                scorer, guard, workdir,
+                tag=f"cell-{cell.n}-{cell.p}-{cell.seed}",
+            )
+        except SpendRefused as exc:
+            msg = (f"spend guard refused L for {cell.cell_id} "
+                   "and later cells")
+            print(f"{msg}: {exc}")
+            notes.append(msg)
+            break
+        except (ProposalError, ExecFailed, CallOverBudget) as exc:
+            msg = (f"proposer failed for {cell.cell_id}; transcripts under "
+                   f"{workdir}")
+            print(f"pursuit05: {msg}: {exc}", file=sys.stderr)
+            notes.append(msg)
+            continue
+        for att in loop.attempts:
+            provider_id = att.provider_id
+            model_id = att.model_id
+        if loop.failed:
+            fails[cell.cell_id] = loop.fail_reason
+        arms[cell.cell_id]["L"] = {
+            "W": loop.w, "inf": loop.inf, "pacc": loop.pacc,
+            "n_evaluated": len(loop.attempts), "inference_cost_s": 0.0,
+            "policy": {"ath": list(loop.best.ath), "fth": loop.best.fth},
+        }
+        proposals[cell.cell_id] = {
+            "proposal": {"ath": list(loop.best.ath), "fth": loop.best.fth,
+                         "rationale": loop.best.rationale},
+            "reason": loop.fail_reason or "accepted",
+            "tries": len(loop.attempts),
+            "usage": {
+                "input_tokens": sum(a.usage.get("input_tokens", 0)
+                                    for a in loop.attempts),
+                "output_tokens": sum(a.usage.get("output_tokens", 0)
+                                     for a in loop.attempts),
+            },
+        }
+    return provider_id, model_id
+
+
+def _score_offline_l(cells, reg, guard, arms, proposals, fails):
+    from pursuit05 import exact, screen
+    from pursuit05.proposer import (
+        EXPECTED_PROVIDER,
+        MODEL_ID,
         dominance_reason,
         fixture_proposal,
         load_fixture,
+    )
+
+    try:
+        fixture = load_fixture()
+        entries = fixture["entries"]
+        if not isinstance(entries, list) or len(entries) < len(cells):
+            raise ValueError(
+                f"fixture holds {len(entries)} entries for {len(cells)} cells"
+                if isinstance(entries, list)
+                else "fixture entries is not a list"
+            )
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"pursuit05: {exc}", file=sys.stderr)
+        return None
+    provider_id = model_id = None
+    for cell, entry in zip(cells, entries):
+        want = f"cell-{cell.n}-{cell.p}-{cell.seed}"
+        try:
+            if not isinstance(entry, dict) or entry.get("cell_tag") != want:
+                raise ValueError(
+                    f"fixture entry for {entry.get('cell_tag')!r} "
+                    f"does not match {want}"
+                    if isinstance(entry, dict)
+                    else f"fixture entry is not an object for {want}"
+                )
+            prop, tr = fixture_proposal(entry, reg.pre(cell)["T"])
+        except (ValueError, KeyError, TypeError) as exc:
+            print(f"pursuit05: fixture entry bad: {exc}", file=sys.stderr)
+            return None
+        pre = reg.pre(cell)
+        f = screen.run_F(pre, cell.p)
+        res = exact.eval_exact(exact.static_decider(prop.ath, prop.fth),
+                               pre, cell.p)
+        dom = dominance_reason(res["W"], res["inf"], f["W"], f["inf"])
+        if dom is not None:
+            fails[cell.cell_id] = dom
+        arms[cell.cell_id]["L"] = {
+            "W": res["W"], "inf": res["inf"], "pacc": res["pacc"],
+            "n_evaluated": 1, "inference_cost_s": 0.0,
+            "policy": {"ath": list(prop.ath), "fth": prop.fth},
+        }
+        guard.add(tr.usage)
+        provider_id = tr.provider_id or EXPECTED_PROVIDER
+        model_id = tr.model_id or MODEL_ID
+        proposals[cell.cell_id] = {
+            "proposal": {"ath": list(prop.ath), "fth": prop.fth,
+                         "rationale": prop.rationale},
+            "reason": dom or "accepted",
+            "tries": 1,
+            "usage": tr.usage,
+        }
+    return provider_id, model_id
+
+
+def _attach_p(n, p, reg, cells, arms, notes):
+    import pickle
+
+    pol_path = _find_policy_checkpoint(n, p)
+    if pol_path is None:
+        print(f"no 05-3 checkpoint for {n}/{p}; table without P")
+        return
+    print(f"policy checkpoint: {pol_path}")
+    try:
+        scored = _score_policy_checkpoint(pol_path, reg, cells)
+    except (OSError, ValueError, RuntimeError, KeyError, EOFError,
+            pickle.UnpicklingError) as exc:
+        msg = f"policy checkpoint {pol_path} unusable: {exc}"
+        print(msg)
+        notes.append(msg)
+        return
+    for cid, (res, pol) in scored.items():
+        arms[cid]["P"] = {
+            "W": res["W"], "inf": res["inf"], "pacc": res["pacc"],
+            "n_evaluated": 1,
+            "inference_cost_s": 0.0, "policy": pol,
+        }
+
+
+def _explain(offline, goal, table_text, rules_text, s_text, source_name,
+             cell_id, n_diffs, examples, guard, workdir):
+    from pursuit05.proposer import (
+        CallOverBudget,
+        ExecFailed,
+        ProposalError,
+        SpendRefused,
+        build_explainer_prompt,
+        run_explainer,
+    )
+
+    if not offline:
+        try:
+            prompt = build_explainer_prompt(goal, table_text, rules_text,
+                                            s_text, source_name, cell_id)
+            expl_obj, expl_tr = run_explainer(prompt, guard, workdir, "demo")
+            explanation = {"explanation": expl_obj["explanation"],
+                           "next_experiment": expl_obj["next_experiment"],
+                           "source": "live", "usage": expl_tr.usage}
+            print(explanation["explanation"])
+            print(f"Next experiment: {explanation['next_experiment']}")
+            return explanation
+        except (SpendRefused, ProposalError, ExecFailed,
+                CallOverBudget) as exc:
+            print(f"explainer failed ({exc}); offline text instead")
+            source = "offline-fallback"
+    else:
+        source = "offline"
+    explanation = _offline_explanation(goal, n_diffs, examples)
+    explanation["source"] = source
+    print(explanation["explanation"])
+    print(f"Next experiment: {explanation['next_experiment']}")
+    return explanation
+
+
+def _write_witness(*, goal, regime, cells, arms, proposals, explanation,
+                   provider_id, model_id, source, seed, started, notes,
+                   guard, witness_dir_arg):
+    import uuid
+    from datetime import datetime
+
+    from pursuit05.witness import Witness
+
+    finished = datetime.now(UTC).isoformat()
+    wid = uuid.uuid4().hex[:12]
+    witness_dir = Path(witness_dir_arg)
+    if not witness_dir.is_absolute():
+        witness_dir = _pursuit05_dir() / witness_dir
+    shown = (f"{witness_dir_arg}/{wid}.json"
+             if not Path(witness_dir_arg).is_absolute()
+             else str(witness_dir / f"{wid}.json"))
+    witness = Witness(
+        witness_id=wid, goal=goal, regime=regime,
+        cell_ids=[c.cell_id for c in cells], arms=arms, proposals=proposals,
+        explanation=explanation, provider_id=provider_id, model_id=model_id,
+        source=source, versions=_collect_versions(), seed=seed,
+        timestamps={"started": started, "finished": finished},
+        replay_command=f"python -m pursuit05 replay {shown}",
+        usage_total={"input_tokens": guard.input_total,
+                     "output_tokens": guard.output_total},
+        notes=notes,
+    )
+    try:
+        witness.write(witness_dir / f"{wid}.json")
+    except OSError as exc:
+        print(f"pursuit05: cannot write witness: {exc}", file=sys.stderr)
+        return 1
+    print(f"witness written to {shown}; replay with {witness.replay_command}")
+    return 0
+
+
+def cmd_demo(args) -> int:
+    from datetime import datetime
+
+    from pursuit05 import table
+    from pursuit05.cells import TEST_SEEDS, CellRegistry
+    from pursuit05.proposer import (
+        SpendGuard,
+        count_rule_diffs,
         make_workdir,
         render_table_rules,
-        run_explainer,
-        run_proposal_loop,
     )
-    from pursuit05.witness import Witness, decode_table
+    from pursuit05.witness import decode_table
 
     try:
         n, p = _parse_regime(args.regime)
+        _check_goal(args.goal)
+        guard = SpendGuard()
         reg = CellRegistry()
         cells = sorted(
             (c for c in reg.all_cells()
@@ -958,164 +1289,31 @@ def cmd_demo(args) -> int:
         print(f"pursuit05: {exc}", file=sys.stderr)
         return 1
     started = datetime.now(UTC).isoformat()
-    guard = SpendGuard()
-    in_tok = 0
-    out_tok = 0
     stored = _load_demo_tables()
-    arms: dict[str, dict] = {}
-    fails: dict[str, str] = {}
-    h_tables: dict[str, dict] = {}
-    s_bests: dict[str, tuple] = {}
-    for cell in cells:
-        pre = reg.pre(cell)
-        f = screen.run_F(pre, cell.p)
-        a = screen.run_arm(
-            pre, cell.p, "A", f["inf"], screen.A_ITERS, screen.R_SAMPLES,
-            None, cell.stage_idx, cell.rate_idx, cell.seed,
-        )
-        slot = arms.setdefault(cell.cell_id, {})
-        slot["F"] = {"W": f["W"], "inf": f["inf"], "pacc": f.get("pacc", 0.0),
-                     "n_evaluated": 1, "inference_cost_s": 0.0}
-        slot["A"] = {"W": a["W"], "inf": a["inf"], "pacc": a.get("pacc", 0.0),
-                     "n_evaluated": 1, "inference_cost_s": 0.0}
-        hit = stored.get(cell.cell_id)
-        if hit:
-            slot["S"] = hit["S"]
-            slot["H"] = {k: v for k, v in hit["H"].items() if k != "table"}
-            h_tables[cell.cell_id] = decode_table(hit["H"]["table"])
-            s_bests[cell.cell_id] = (tuple(hit["S"]["policy"]["ath"]),
-                                     hit["S"]["policy"]["fth"])
-        else:
-            print(f"computed S/H live for {cell.cell_id}")
-            from pursuit05 import dp
-
-            s = exact.best_static(pre, cell.p, f["inf"])
-            h = dp.best_history(pre, cell.p, f["inf"])
-            slot["S"] = {"W": s.result.W, "inf": s.result.inf,
-                         "pacc": s.result.pacc,
-                         "n_evaluated": s.result.n_evaluated,
-                         "inference_cost_s": s.result.inference_cost_s,
-                         "policy": {"ath": list(s.ath), "fth": s.fth}}
-            slot["H"] = {"W": h.result.W, "inf": h.result.inf,
-                         "pacc": h.result.pacc,
-                         "n_evaluated": h.result.n_evaluated,
-                         "inference_cost_s": h.result.inference_cost_s,
-                         "lam": h.lam}
-            h_tables[cell.cell_id] = dict(h.table)
-            s_bests[cell.cell_id] = (s.ath, s.fth)
+    arms, h_tables, s_bests, h_fths, notes = _score_baselines(
+        reg, cells, stored)
     proposals: dict = {}
-    provider_id: str | None = None
-    model_id: str | None = None
-    source = "live"
+    fails: dict[str, str] = {}
     if args.offline:
         source = "fixture"
-        try:
-            fixture = load_fixture()
-            entries = fixture["entries"]
-            if len(entries) < len(cells):
-                raise ValueError(
-                    f"fixture holds {len(entries)} entries for {len(cells)} cells"
-                )
-        except (OSError, ValueError) as exc:
-            print(f"pursuit05: {exc}", file=sys.stderr)
+        got = _score_offline_l(cells, reg, guard, arms, proposals, fails)
+        if got is None:
             return 1
-        for cell, entry in zip(cells, entries):
-            pre = reg.pre(cell)
-            t = pre["T"]
-            try:
-                prop, usage = fixture_proposal(entry, t)
-            except ValueError as exc:
-                print(f"pursuit05: fixture entry bad: {exc}", file=sys.stderr)
-                return 1
-            f = screen.run_F(pre, cell.p)
-            res = exact.eval_exact(exact.static_decider(prop.ath, prop.fth),
-                                   pre, cell.p)
-            dom = dominance_reason(res["W"], res["inf"], f["W"], f["inf"])
-            if dom is not None:
-                fails[cell.cell_id] = dom
-            arms[cell.cell_id]["L"] = {
-                "W": res["W"], "inf": res["inf"], "pacc": res["pacc"],
-                "n_evaluated": 1, "inference_cost_s": 0.0,
-                "policy": {"ath": list(prop.ath), "fth": prop.fth},
-            }
-            in_tok += usage.get("input_tokens", 0)
-            out_tok += usage.get("output_tokens", 0)
-            provider_id = EXPECTED_PROVIDER
-            model_id = MODEL_ID
-            proposals[cell.cell_id] = {
-                "proposal": {"ath": list(prop.ath), "fth": prop.fth,
-                             "rationale": prop.rationale},
-                "reason": dom or "accepted",
-                "usage": usage,
-            }
+        provider_id, model_id = got
     else:
+        source = "live"
         workdir = make_workdir(_pursuit05_dir())
-        for cell in cells:
-            pre = reg.pre(cell)
-            t = pre["T"]
-            f = screen.run_F(pre, cell.p)
-            summary = _cell_summary(cell, pre)
-
-            def scorer(ath, fth, _pre=pre, _p=cell.p):
-                r = exact.eval_exact(exact.static_decider(ath, fth), _pre, _p)
-                return r["W"], r["inf"]
-
-            try:
-                loop = run_proposal_loop(
-                    args.goal, summary, t, f["W"], f["inf"],
-                    scorer, guard, workdir,
-                    tag=f"cell-{cell.n}-{cell.p}-{cell.seed}",
-                )
-            except SpendRefused as exc:
-                print(f"spend guard refused; table without L: {exc}")
-                for slot in arms.values():
-                    slot.pop("L", None)
-                break
-            except (ProposalError, ExecFailed, CallOverBudget) as exc:
-                print(f"pursuit05: proposer failed: {exc}", file=sys.stderr)
-                return 1
-            for att in loop.attempts:
-                in_tok += att.usage.get("input_tokens", 0)
-                out_tok += att.usage.get("output_tokens", 0)
-                provider_id = att.provider_id
-                model_id = att.model_id
-            if loop.failed:
-                fails[cell.cell_id] = loop.fail_reason
-            arms[cell.cell_id]["L"] = {
-                "W": loop.w, "inf": loop.inf,
-                "pacc": exact.eval_exact(
-                    exact.static_decider(loop.best.ath, loop.best.fth),
-                    pre, cell.p)["pacc"],
-                "n_evaluated": len(loop.attempts), "inference_cost_s": 0.0,
-                "policy": {"ath": list(loop.best.ath), "fth": loop.best.fth},
-            }
-            proposals[cell.cell_id] = {
-                "proposal": {"ath": list(loop.best.ath), "fth": loop.best.fth,
-                             "rationale": loop.best.rationale},
-                "reason": loop.fail_reason or "accepted",
-                "tries": len(loop.attempts),
-            }
-    if "L" in arms[cells[0].cell_id]:
+        provider_id, model_id = _score_live_l(
+            cells, reg, args.goal, guard, workdir, arms, proposals, fails,
+            notes)
+    if model_id is not None:
         print(f"provider {provider_id}, model {model_id}")
-        print(f"input tokens {in_tok}, output tokens {out_tok}")
-        if args.offline:
-            print("transcript: fixture")
+    print(f"input tokens {guard.input_total}, "
+          f"output tokens {guard.output_total}")
+    if args.offline:
+        print("transcript: fixture")
+    _attach_p(n, p, reg, cells, arms, notes)
     present = [a for a in DEMO_ARMS if all(a in arms[c.cell_id] for c in cells)]
-    pol_path = _find_policy_checkpoint(n, p)
-    if pol_path is not None:
-        try:
-            scored = _score_policy_checkpoint(pol_path, reg, cells)
-        except (OSError, ValueError, RuntimeError, KeyError) as exc:
-            print(f"policy checkpoint {pol_path} unusable: {exc}")
-        else:
-            for cid, (res, pol) in scored.items():
-                arms[cid]["P"] = {
-                    "W": res["W"], "inf": res["inf"], "pacc": res["pacc"],
-                    "n_evaluated": len(pol["table"]),
-                    "inference_cost_s": 0.0, "policy": pol,
-                }
-            present = [a for a in DEMO_ARMS if all(a in arms[c.cell_id]
-                                                  for c in cells)]
     rows = [(c.cell_id, {a: (arms[c.cell_id][a]["W"], arms[c.cell_id][a]["inf"])
                          for a in present}) for c in cells]
     table_text = table.render_arm_table(rows, tuple(present))
@@ -1125,63 +1323,69 @@ def cmd_demo(args) -> int:
     first = cells[0]
     s_ath, s_fth = s_bests[first.cell_id]
     rules_src = h_tables[first.cell_id]
+    fth, owner = h_fths[first.cell_id], "H"
+    source_name = "exact H optimum"
     if "P" in arms[first.cell_id]:
         rules_src = decode_table(arms[first.cell_id]["P"]["policy"]["table"])
-    rules_text = render_table_rules(rules_src, s_ath, s_fth)
+        fth, owner = arms[first.cell_id]["P"]["policy"]["fth"], "P"
+        source_name = "learned P policy"
+    rules_text = render_table_rules(rules_src, s_ath, s_fth, fth, owner)
+    n_diffs = count_rule_diffs(rules_src, s_ath)
+    examples = [line for line in rules_text.splitlines()
+                if line.endswith("*differs from S*")]
     s_text = (f"abort {list(s_ath)}, accept weight <= {s_fth} "
               f"(W={arms[first.cell_id]['S']['W']:.6g})")
-    explanation: dict
-    if args.offline:
-        explanation = _offline_explanation(args.goal, table_text, rules_text,
-                                           s_text)
-        explanation["source"] = "offline"
-        print(explanation["explanation"])
-        print(f"Next experiment: {explanation['next_experiment']}")
-    else:
-        try:
-            prompt = build_explainer_prompt(args.goal, table_text, rules_text,
-                                            s_text)
-            expl_obj, expl_tr = run_explainer(prompt, guard, workdir, "demo")
-            in_tok += expl_tr.usage.get("input_tokens", 0)
-            out_tok += expl_tr.usage.get("output_tokens", 0)
-            explanation = {"explanation": expl_obj["explanation"],
-                           "next_experiment": expl_obj["next_experiment"],
-                           "source": "live",
-                           "usage": expl_tr.usage}
-            print(explanation["explanation"])
-            print(f"Next experiment: {explanation['next_experiment']}")
-        except (SpendRefused, ProposalError, ExecFailed, CallOverBudget) as exc:
-            print(f"explainer failed ({exc}); offline text instead")
-            explanation = _offline_explanation(args.goal, table_text,
-                                               rules_text, s_text)
-            explanation["source"] = "offline-fallback"
-            print(explanation["explanation"])
-            print(f"Next experiment: {explanation['next_experiment']}")
-    finished = datetime.now(UTC).isoformat()
-    wid = uuid.uuid4().hex[:12]
-    witness_dir = Path(args.witness_dir)
-    if not witness_dir.is_absolute():
-        witness_dir = _pursuit05_dir() / witness_dir
-    rel = f"witnesses/{wid}.json"
-    witness = Witness(
-        witness_id=wid, goal=args.goal, regime=args.regime,
-        cell_ids=[c.cell_id for c in cells], arms=arms, proposals=proposals,
-        explanation=explanation, provider_id=provider_id, model_id=model_id,
-        source=source, versions=_collect_versions(), seed=args.seed,
-        timestamps={"started": started, "finished": finished},
-        replay_command=f"python -m pursuit05 replay {rel}",
-        usage_total={"input_tokens": in_tok, "output_tokens": out_tok},
-    )
-    witness.write(witness_dir / f"{wid}.json")
-    print(f"witness written to {rel}; replay with {witness.replay_command}")
-    return 0
+    explanation = _explain(args.offline, args.goal, table_text, rules_text,
+                           s_text, source_name, first.cell_id, n_diffs,
+                           examples, guard,
+                           workdir if not args.offline else None)
+    return _write_witness(
+        goal=args.goal, regime=args.regime, cells=cells, arms=arms,
+        proposals=proposals, explanation=explanation,
+        provider_id=provider_id, model_id=model_id, source=source,
+        seed=args.seed, started=started, notes=notes, guard=guard,
+        witness_dir_arg=args.witness_dir)
+
+
+def _rescore_arm(arm, cell, pre, f, stored):
+    from pursuit05 import exact, screen
+    from pursuit05.policy import table_decider
+    from pursuit05.witness import decode_table
+
+    if arm == "F":
+        return {"W": f["W"], "inf": f["inf"], "pacc": f.get("pacc", 0.0)}
+    if arm == "A":
+        a = screen.run_arm(
+            pre, cell.p, "A", f["inf"], screen.A_ITERS,
+            screen.R_SAMPLES, None, cell.stage_idx, cell.rate_idx,
+            cell.seed,
+        )
+        return {"W": a["W"], "inf": a["inf"], "pacc": a.get("pacc", 0.0)}
+    if arm == "S":
+        pol = stored["policy"]
+        return exact.eval_exact(
+            exact.static_decider(pol["ath"], pol["fth"]), pre, cell.p)
+    if arm == "H":
+        pol = stored["policy"]
+        return exact.eval_exact(
+            table_decider(decode_table(pol["table"]), fth=pol["fth"]),
+            pre, cell.p)
+    if arm == "L":
+        pol = stored["policy"]
+        return exact.eval_exact(
+            exact.static_decider(pol["ath"], pol["fth"]), pre, cell.p)
+    if arm == "P":
+        pol = stored["policy"]
+        return exact.eval_exact(
+            table_decider(decode_table(pol["table"]), fth=pol["fth"]),
+            pre, cell.p)
+    raise ValueError(f"unknown arm {arm!r}")
 
 
 def cmd_replay(args) -> int:
-    from pursuit05 import dp, exact, screen
+    from pursuit05 import screen
     from pursuit05.cells import CellRegistry
-    from pursuit05.policy import table_decider
-    from pursuit05.witness import Witness, arm_names, decode_table
+    from pursuit05.witness import Witness, arm_names
 
     try:
         witness = Witness.read(Path(args.witness))
@@ -1189,58 +1393,51 @@ def cmd_replay(args) -> int:
     except (ImportError, ValueError, TypeError) as exc:
         print(f"pursuit05: {exc}", file=sys.stderr)
         return 1
+    precells = {}
+    for cid in witness.cell_ids:
+        try:
+            cell = reg.find(cid)
+        except ValueError as exc:
+            print(f"pursuit05: {exc}", file=sys.stderr)
+            return 1
+        precells[cid] = (cell, reg.pre(cell))
+    f_of = {cid: screen.run_F(pre, cell.p)
+            for cid, (cell, pre) in precells.items()}
     names = [a for a in DEMO_ARMS if a in arm_names(witness)]
+    extras = [a for a in arm_names(witness) if a not in DEMO_ARMS]
+    for extra in extras:
+        print(f"warning: witness arm {extra!r} is unknown; skipped",
+              file=sys.stderr)
+    if not names:
+        print("pursuit05: witness holds no known arms", file=sys.stderr)
+        return 1
     matched = []
     failed = []
     for arm in names:
         ok = True
-        for cid in witness.cell_ids:
+        have = [cid for cid in witness.cell_ids
+                if arm in witness.arms.get(cid, {})]
+        for cid in have:
             try:
-                cell = reg.find(cid)
-            except ValueError as exc:
-                print(f"pursuit05: {exc}", file=sys.stderr)
-                return 1
-            pre = reg.pre(cell)
-            stored = witness.arms[cid][arm]
-            f = screen.run_F(pre, cell.p)
-            if arm == "F":
-                w, inf = f["W"], f["inf"]
-            elif arm == "A":
-                a = screen.run_arm(
-                    pre, cell.p, "A", f["inf"], screen.A_ITERS,
-                    screen.R_SAMPLES, None, cell.stage_idx, cell.rate_idx,
-                    cell.seed,
-                )
-                w, inf = a["W"], a["inf"]
-            elif arm == "S":
-                s = exact.best_static(pre, cell.p, f["inf"])
-                w, inf = s.result.W, s.result.inf
-            elif arm == "H":
-                h = dp.best_history(pre, cell.p, f["inf"])
-                w, inf = h.result.W, h.result.inf
-            elif arm == "L":
-                pol = stored["policy"]
-                r = exact.eval_exact(
-                    exact.static_decider(pol["ath"], pol["fth"]), pre, cell.p)
-                w, inf = r["W"], r["inf"]
-            elif arm == "P":
-                pol = stored["policy"]
-                r = exact.eval_exact(
-                    table_decider(decode_table(pol["table"]), fth=pol["fth"]),
-                    pre, cell.p)
-                w, inf = r["W"], r["inf"]
-            else:
-                print(f"pursuit05: unknown arm {arm!r}", file=sys.stderr)
-                return 1
-            if (abs(w - stored["W"]) > REPLAY_TOL
-                    or abs(inf - stored["inf"]) > REPLAY_TOL):
+                cell, pre = precells[cid]
+                stored = witness.arms[cid][arm]
+                r = _rescore_arm(arm, cell, pre, f_of[cid], stored)
+                bad = (abs(r["W"] - stored["W"]) > REPLAY_TOL
+                       or abs(r["inf"] - stored["inf"]) > REPLAY_TOL
+                       or abs(r["pacc"] - stored["pacc"]) > REPLAY_TOL)
+            except (KeyError, ValueError, TypeError) as exc:
+                print(f"MISMATCH {arm} {cid}: unreadable stored arm ({exc})")
+                ok = False
+                continue
+            if bad:
                 print(
                     f"MISMATCH {arm} {cid}: W witness={stored['W']:.12g} "
-                    f"replay={w:.12g}; inf witness={stored['inf']:.12g} "
-                    f"replay={inf:.12g}"
+                    f"replay={r['W']:.12g}; inf witness={stored['inf']:.12g} "
+                    f"replay={r['inf']:.12g}; pacc witness={stored['pacc']:.12g} "
+                    f"replay={r['pacc']:.12g}"
                 )
                 ok = False
-        (matched if ok else failed).append(arm)
+        (matched if ok and have else failed).append(arm)
     print(f"replay matches witness on {len(matched)}/{len(names)} arms")
     return 0 if not failed else 1
 
@@ -1293,8 +1490,8 @@ def main(argv=None) -> int:
     dp.add_argument("--seed", type=int, default=0, help="witness seed")
     dp.add_argument("--witness-dir", default="witnesses",
                     help="witness output dir")
-    rp = sub.add_parser("replay", help="re-score a demo witness exactly")
-    rp.add_argument("witness", help="witness json path")
+    rpl = sub.add_parser("replay", help="re-score a demo witness exactly")
+    rpl.add_argument("witness", help="witness json path")
     args = ap.parse_args(argv)
     if args.cmd == "reproduce":
         return cmd_reproduce(args)

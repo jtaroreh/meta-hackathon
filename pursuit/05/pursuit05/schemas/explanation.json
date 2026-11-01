@@ -1,1 +1,1 @@
-{"additionalProperties":false,"properties":{"explanation":{"type":"string"},"next_experiment":{"type":"string"}},"required":["explanation","next_experiment"],"title":"pursuit05-explanation","type":"object"}
+{"additionalProperties":false,"properties":{"explanation":{"minLength":1,"type":"string"},"next_experiment":{"minLength":1,"type":"string"}},"required":["explanation","next_experiment"],"title":"pursuit05-explanation","type":"object"}

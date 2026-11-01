@@ -36,6 +36,7 @@ class Witness:
     timestamps: dict
     replay_command: str
     usage_total: dict = field(default_factory=dict)
+    notes: list = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -54,6 +55,7 @@ class Witness:
             "timestamps": self.timestamps,
             "replay_command": self.replay_command,
             "usage_total": self.usage_total,
+            "notes": self.notes,
         }
 
     @classmethod
@@ -80,6 +82,7 @@ class Witness:
             timestamps=dict(obj["timestamps"]),
             replay_command=obj["replay_command"],
             usage_total=dict(obj.get("usage_total", {})),
+            notes=list(obj.get("notes", [])),
         )
 
     def write(self, path: Path) -> None:
