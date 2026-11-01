@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 if TYPE_CHECKING:
     from pursuit05.cells import Cell
 
@@ -206,6 +208,229 @@ def cmd_baselines(args) -> int:
     return 0
 
 
+MC_EPISODES = 20000
+MC_SIGMAS = 4.0
+
+
+def _mc_w(spent_list, acc_list, tail, vf):
+    s = np.asarray(spent_list, dtype=float)
+    a = np.asarray(acc_list, dtype=float)
+    n = len(s)
+    c = 1.0 - tail
+    e = c * s.mean() + tail * vf
+    pacc = c * a.mean()
+    w = e / pacc - vf
+    ds = c / pacc
+    da = -c * e / pacc**2
+    vs = s.var()
+    va = a.var()
+    cv = ((s - s.mean()) * (a - a.mean())).mean()
+    se = (max(0.0, ds * ds * vs + da * da * va + 2.0 * ds * da * cv) / n) ** 0.5
+    return w, se
+
+
+def _mc_inf_ok(log_list, acc_list, exact_inf, pacc, tail):
+    n = len(log_list)
+    count = int(sum(log_list))
+    ma = sum(acc_list) / n
+    mc = (count / n) / ma if ma else 0.0
+    c = 1.0 - tail
+    exp = n * exact_inf * pacc / c if c > 0 else 0.0
+    ok = abs(count - exp) <= MC_SIGMAS * exp**0.5 if exp > 0 else count == 0
+    return mc, count, ok
+
+
+def cmd_env_smoke(args) -> int:
+    import functools
+    import time
+
+    try:
+        import pufferlib.vector
+
+        from pursuit05.cells import CellRegistry
+        from pursuit05.env import (
+            CultivationAbort,
+            binomial_masses,
+            draw_trajectories,
+            rollout_loaded,
+            scripted_actions,
+        )
+
+        if args.agents < 1:
+            raise ValueError(f"bad --agents {args.agents!r}")
+        if args.steps < 1:
+            raise ValueError(f"bad --steps {args.steps!r}")
+        if args.seed < 0:
+            raise ValueError(f"bad --seed {args.seed!r}")
+        if args.workers < 0:
+            raise ValueError(f"bad --workers {args.workers!r}")
+        if args.workers and args.agents % args.workers:
+            raise ValueError(
+                f"agents {args.agents} not divisible by workers {args.workers}"
+            )
+        from pursuit05 import exact, screen
+
+        reg = CellRegistry()
+        cell = reg.find(args.cell)
+        pre = reg.pre(cell)
+        f = screen.run_F(pre, cell.p)
+        a = screen.run_arm(
+            pre,
+            cell.p,
+            "A",
+            f["inf"],
+            screen.A_ITERS,
+            screen.R_SAMPLES,
+            None,
+            cell.stage_idx,
+            cell.rate_idx,
+            cell.seed,
+        )
+        ath, fth = a["policy"][:-1], a["policy"][-1]
+        ref = exact.eval_exact(exact.static_decider(ath, fth), pre, cell.p)
+        exact_w, exact_inf, exact_pacc = ref["W"], ref["inf"], ref["pacc"]
+        per = args.agents // args.workers if args.workers else args.agents
+        creator = functools.partial(
+            CultivationAbort,
+            pre=pre,
+            p=cell.p,
+            stage_id=cell.stage_idx,
+            rate_id=cell.rate_idx,
+            num_agents=per,
+        )
+        if args.workers:
+            vec = pufferlib.vector.make(
+                creator,
+                backend=pufferlib.vector.Serial
+                if args.workers == 1
+                else pufferlib.vector.Multiprocessing,
+                num_envs=args.workers,
+                num_workers=args.workers,
+            )
+        else:
+            vec = pufferlib.vector.make(
+                creator, backend=pufferlib.vector.Serial, num_envs=1
+            )
+    except (ImportError, ValueError) as exc:
+        print(f"pursuit05: {exc}", file=sys.stderr)
+        return 1
+    try:
+        t = pre["T"]
+        obs, _ = vec.reset(seed=args.seed)
+        for i in range(min(50, obs.shape[0])):
+            print(f"obs[{i}] = {' '.join(f'{v:.6g}' for v in obs[i])}")
+        t0 = time.perf_counter()
+        for _ in range(args.steps):
+            obs, _, _, _, _ = vec.step(scripted_actions(obs, ath, fth, t))
+        wall = time.perf_counter() - t0
+        rate = args.agents * args.steps / wall
+        print(f"agent-steps/s = {rate:.0f}")
+        mc_env = CultivationAbort(
+            pre,
+            cell.p,
+            stage_id=cell.stage_idx,
+            rate_id=cell.rate_idx,
+            num_agents=args.agents,
+        )
+        w_all, rows_all = draw_trajectories(
+            pre, cell.p, MC_EPISODES, np.random.default_rng(args.seed + 1)
+        )
+        outs = rollout_loaded(
+            mc_env,
+            w_all,
+            rows_all,
+            lambda obs, s, w, rows: scripted_actions(obs, ath, fth, t),
+        )
+        spent_list = [o[0] for o in outs]
+        acc_list = [1.0 if o[1] else 0.0 for o in outs]
+        log_list = [1.0 if o[2] else 0.0 for o in outs]
+        tail = binomial_masses(pre["L1"], cell.p)[3]
+        mc_w, se_w = _mc_w(spent_list, acc_list, tail, pre["Vf"])
+        mc_inf, count, ok_inf = _mc_inf_ok(
+            log_list, acc_list, exact_inf, exact_pacc, tail
+        )
+        ok_w = abs(mc_w - exact_w) <= MC_SIGMAS * se_w if se_w else abs(
+            mc_w - exact_w
+        ) <= 1e-9
+        ok = ok_w and ok_inf
+        print(
+            f"scripted A thresholds via env rollouts: W = {mc_w:.10g} "
+            f"+- {se_w:.3g} (exact {exact_w:.10g}), inf = {mc_inf:.10g} "
+            f"(exact {exact_inf:.10g}, {count}/{len(log_list)} logicals), "
+            f"{'within MC error' if ok else 'MISMATCH'}"
+        )
+        return 0 if ok else 1
+    finally:
+        vec.close()
+
+
+def cmd_optimum(args) -> int:
+    try:
+        from pursuit05 import exact, screen, table
+        from pursuit05.cells import TEST_SEEDS, CellRegistry, split_label
+
+        seeds = _parse_seeds(args.seeds, screen.SEEDS)
+        reg = CellRegistry()
+        targets = reg.select(seeds=seeds)
+        from pursuit05 import dp
+        from pursuit05.env import binomial_masses
+    except (ImportError, ValueError) as exc:
+        print(f"pursuit05: {exc}", file=sys.stderr)
+        return 1
+    if set(seeds) == set(screen.SEEDS):
+        label = "all"
+    else:
+        label = split_label(seeds)
+    print(f"# optimum ({label} seeds {','.join(str(s) for s in seeds)})")
+    rows = []
+    for cell in targets:
+        pre = reg.pre(cell)
+        f = screen.run_F(pre, cell.p)
+        bound = f["inf"] * (1.0 + screen.INF_REL) + screen.INF_ABS
+        s = exact.best_static(pre, cell.p, f["inf"])
+        h = dp.best_history(pre, cell.p, f["inf"])
+        rows.append((cell, s, h, bound, binomial_masses(pre["L1"], cell.p)[3]))
+    body = table.render_arm_table(
+        [
+            (cell.cell_id, {"S": (s.result.W, s.result.inf),
+                            "H": (h.result.W, h.result.inf)})
+            for cell, s, h, _, _ in rows
+        ],
+        ("S", "H"),
+    )
+    lines = body.splitlines()
+    print(lines[0] + " " + "tail".rjust(16))
+    for line, (_, _, h, _, tail) in zip(lines[1:], rows):
+        mark = " FALLBACK" if h.fallback else ""
+        print(f"{line} {tail:16.10g}{mark}")
+    nfb = sum(1 for _, _, h, _, _ in rows if h.fallback)
+    if nfb:
+        print(f"H fallback in {nfb}/{len(rows)} cells")
+    if set(TEST_SEEDS) <= set(seeds):
+        wins = 0
+        for n in screen.SIZES:
+            for p in screen.P_ERRS:
+                if p > 0.002:
+                    continue
+                sub = [(s, h, b) for c, s, h, b, _ in rows
+                       if c.n == n and c.p == p and c.seed in TEST_SEEDS]
+                mw_h = sum(h.result.W for _, h, _ in sub) / len(sub)
+                mw_s = sum(s.result.W for s, _, _ in sub) / len(sub)
+                mi_h = sum(h.result.inf for _, h, _ in sub) / len(sub)
+                mi_s = sum(s.result.inf for s, _, _ in sub) / len(sub)
+                mb = sum(b for _, _, b in sub) / len(sub)
+                if mw_h <= 0.9 * mw_s and mi_h <= mb and mi_s <= mb:
+                    wins += 1
+        print(
+            "on test seeds, H's W is at least 10% below S's W, both "
+            f"within the F-anchored bound, in {wins}/6 (stage, rate) "
+            "cells at p <= 0.002"
+        )
+    else:
+        print("D1 census skipped: select test seeds 4,5")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="pursuit05")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -213,7 +438,19 @@ def main(argv=None) -> int:
     rp.add_argument("--cell", default=None, help="single cell id like 12/0.005/1")
     bp = sub.add_parser("baselines", help="score F, G, A, and S")
     bp.add_argument("--seeds", default=None, help="comma seeds like 4,5")
+    ep = sub.add_parser("env-smoke", help="smoke the abort env")
+    ep.add_argument("--cell", default="12/0.002/1", help="cell id")
+    ep.add_argument("--agents", type=int, default=4096, help="agent count")
+    ep.add_argument("--steps", type=int, default=200, help="timed steps")
+    ep.add_argument("--seed", type=int, default=0, help="vec seed")
+    ep.add_argument("--workers", type=int, default=0, help="mp workers")
+    op = sub.add_parser("optimum", help="score exact S and H optima")
+    op.add_argument("--seeds", default=None, help="comma seeds like 4,5")
     args = ap.parse_args(argv)
     if args.cmd == "reproduce":
         return cmd_reproduce(args)
+    if args.cmd == "env-smoke":
+        return cmd_env_smoke(args)
+    if args.cmd == "optimum":
+        return cmd_optimum(args)
     return cmd_baselines(args)
