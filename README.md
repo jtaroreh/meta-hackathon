@@ -14,7 +14,7 @@ uv pip install -r requirements.lock
 .venv/bin/python -m pursuit05 demo --offline "cut wasted cultivation volume at p = 0.002 without raising infidelity"
 ```
 
-You should see the provider and model lines, the token counts, the `transcript: fixture` label, the `policy checkpoint: runs/9-0.002/policy.pt` line, the arm table with F, A, S, H, L, and P on the two test cells, the explanation with its next experiment, and finally a witness path with its replay command. Fresh clone to table runs under 10 minutes. Then verify the witness without any model call:
+You should see the provider and model lines, the token counts, the `transcript: fixture` label, the `policy checkpoint:` line naming the run's policy file, the arm table with F, A, S, H, L, and P on the two test cells, the explanation with its next experiment, and finally a witness path with its replay command. Fresh clone to table runs under 10 minutes. Then verify the witness without any model call:
 
 ```sh
 .venv/bin/python -m pursuit05 replay witnesses/<id>.json
