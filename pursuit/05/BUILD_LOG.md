@@ -30,5 +30,7 @@ lands in the next commit, so every SHA below resolves on this branch.
 | 2026-11-01 | 7d022a0d4e6be19500781dd71e178daae91a46f0 | muse-spark-1.3-contributor | demo review media |
 | 2026-11-01 | 0e8f8e564d266ef824c98912a76f9fb0295c318f | muse-spark-1.3-contributor | log media commits |
 | 2026-11-01 | 49ec6baaad412dc1f37d472035e4ba99beccfb5e | muse-spark-1.3-contributor | commit live demo receipt for audit trace |
-| 2026-10-31 | 7affd7ffb36f896ad846df0bc8419daa3ef2f904 | muse-spark-1.3-contributor | held-out RESULTS.md with receipt index and checks |
-| 2026-10-31 | 357cb591a9c7e8c0ba034541c732a5b8176b9246 | muse-spark-1.3-contributor | root README judge path and hackathon scope note |
+| 2026-10-31 | 1627b27820c84d1a630c40fd0e6522c0f0cdffbc | muse-spark-1.3-contributor | held-out RESULTS.md with receipt index and checks |
+| 2026-10-31 | 4f47058604765883cbf73293645cd0a8642bfe46 | muse-spark-1.3-contributor | root README judge path and hackathon scope note |
+| 2026-10-31 | 856fb6380889fc01a0e3abd50c0e9d3addf719c9 | muse-spark-1.3-contributor | submission video and script |
+| 2026-10-31 | c955e72e84414b4f2f68b1d2abe418559867dc08 | muse-spark-1.3-contributor | correct checkpoint path wording in judge README |
