@@ -14,3 +14,6 @@ lands in the next commit, so every SHA below resolves on this branch.
 | 2026-10-31 | 1103f78a489f4e849450458fca958e01205ed326 | muse-spark-1.3-contributor | interrogate round 1 fixes, 22 items plus tests |
 | 2026-10-31 | 79f4278ff71732d53b78173a34735d4f985da6b1 | muse-spark-1.3-contributor | pin PPO training config and direct pillow dep |
 | 2026-10-31 | cf965930aeb2b77b2d1692f4a15d03f1f3a47f2f | muse-spark-1.3-contributor | train pooled abort policies with BC plus PPO |
+| 2026-10-31 | b1b3bee4832a20df3f9d605ddcb53cc6867fd4f0 | muse-spark-1.3-contributor | log sweep train lines per regime, stringify versions |
+| 2026-10-31 | 3dd0b72895aa27cab2a991e437df17d284462400 | muse-spark-1.3-contributor | commit sweep receipts, transfer policy, frontier |
+| 2026-10-31 | ada80ed9ad4706955c1882a82cd7afcec32e8a15 | muse-spark-1.3-contributor | drop stale validation-sweep weights |
