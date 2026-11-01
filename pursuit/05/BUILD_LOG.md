@@ -36,3 +36,4 @@ lands in the next commit, so every SHA below resolves on this branch.
 | 2026-10-31 | c955e72e84414b4f2f68b1d2abe418559867dc08 | muse-spark-1.3-contributor | correct checkpoint path wording in judge README |
 | 2026-10-31 | df4beb6731489eb27be43853d28cb94dbf5a254c | muse-spark-1.3-contributor | refresh build log SHAs after rebase onto 1decd50 |
 | 2026-10-31 | f1ffc6c2d84599f81b09a202234b269b71856734 | muse-spark-1.3-contributor | harden results checks per interrogate round |
+| 2026-10-31 | e48bb5f78f1ea8a0b3c1b45a2339b9a2470d3f08 | muse-spark-1.3-contributor | apply no-comments findings to results test |
