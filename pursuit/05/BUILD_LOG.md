@@ -12,4 +12,5 @@ lands in the next commit, so every SHA below resolves on this branch.
 | 2026-10-31 | 0fd78b543305c4e608140c616121b1ddcb549eaa | muse-spark-1.3-contributor | unbiased env-smoke MC via loaded rollouts |
 | 2026-10-31 | e3b0c53dc8853347fbc9bd385387fcdd7e597e3a | muse-spark-1.3-contributor | encode no-comments findings as types |
 | 2026-10-31 | 1103f78a489f4e849450458fca958e01205ed326 | muse-spark-1.3-contributor | interrogate round 1 fixes, 22 items plus tests |
-| 2026-10-31 | 79f427862b2e8930695febddccb0d99a5fcac9c7 | muse-spark-1.3-contributor | pin PPO training config and direct pillow dep |
+| 2026-10-31 | 79f4278ff71732d53b78173a34735d4f985da6b1 | muse-spark-1.3-contributor | pin PPO training config and direct pillow dep |
+| 2026-10-31 | cf965930aeb2b77b2d1692f4a15d03f1f3a47f2f | muse-spark-1.3-contributor | train pooled abort policies with BC plus PPO |

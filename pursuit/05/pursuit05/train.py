@@ -468,7 +468,7 @@ def _versions() -> dict:
     import pufferlib as _pl
 
     return {
-        "pufferlib": getattr(_pl, "__version__", "unknown"),
+        "pufferlib": str(getattr(_pl, "__version__", "unknown")),
         "torch": torch.__version__,
         "numpy": np.__version__,
     }
@@ -652,11 +652,18 @@ def sweep_lambda(
                 }
             )
     results: dict[str, dict[str, list]] = {}
+    logs: dict[str, list[str]] = {}
+
+    def collect(spec, res) -> None:
+        for line in res.pop("log_lines"):
+            tagged = f"[{spec['regime']} {spec['kind']}] {line}"
+            log(tagged)
+            logs.setdefault(spec["regime"], []).append(tagged)
+
     if jobs < 2:
         for spec in specs:
             res = _point_worker(spec)
-            for line in res.pop("log_lines"):
-                log(f"[{spec['regime']} {spec['kind']}] {line}")
+            collect(spec, res)
             results.setdefault(spec["regime"], {}).setdefault(
                 spec["kind"], []
             ).append(res)
@@ -665,8 +672,7 @@ def sweep_lambda(
             futs = [(spec, pool.submit(_point_worker, spec)) for spec in specs]
             for spec, fut in futs:
                 res = fut.result()
-                for line in res.pop("log_lines"):
-                    log(f"[{spec['regime']} {spec['kind']}] {line}")
+                collect(spec, res)
                 results.setdefault(spec["regime"], {}).setdefault(
                     spec["kind"], []
                 ).append(res)
@@ -674,6 +680,10 @@ def sweep_lambda(
     for nstages, nrates in regimes:
         rid = regime_id(nstages, nrates)
         train, test = regime_cells(reg, nstages, nrates)
+        (RUNS_DIR / rid).mkdir(parents=True, exist_ok=True)
+        (RUNS_DIR / rid / "train.log").write_text(
+            "\n".join(logs.get(rid, [])) + "\n"
+        )
         got = results[rid]
         points = sorted(got.get("point", []), key=lambda r: r["lam"])
         scratch = got.get("scratch", [None])[0]
