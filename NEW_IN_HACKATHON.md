@@ -4,7 +4,7 @@ Build window: Oct 26 to Nov 2, 2026. Everything below landed in that window.
 
 ## New: `pursuit/05/`
 
-The PufferLib program is new: the exact-evaluation harness, the abort env, the exact static and history optima, the BC plus PPO trainer, the Muse Spark demo loop, the held-out results, the submission video, and the tests. It arrived in five parts: harness, env, train, demo, ship. The dated record is [pursuit/05/BUILD_LOG.md](pursuit/05/BUILD_LOG.md). Also new at the root: `README.md`, this file, and `.audit/pursuit-05.tsv`, the committed decision trail.
+The PufferLib program is new: the exact-evaluation harness, the abort env, the exact static and history optima, the BC plus PPO trainer, the Muse Spark demo loop, the held-out results, the submission video, and the tests. It arrived in five parts: harness, env, train, demo, ship. The dated record is [pursuit/05/BUILD_LOG.md](pursuit/05/BUILD_LOG.md). Also new at the root: `README.md` and this file. `.audit/pursuit-05.tsv`, the committed decision trail, lands in the finalize commit.
 
 ## Imported in-window: `screens/05/src/run05.py`
 

@@ -54,7 +54,7 @@ D1 is flat: H equals S bit-exactly in all 45 cells, so no regime clears the 10% 
 
 ## Transfer row
 
-One policy trained on n = 6, 9 (rates 0.001, 0.002, 0.005, seeds 1, 2, 3) and scored on the n = 12 test cells ties H exactly on all 6 cells. The n = 12 H values it ties are the table rows above: 209.0586983, 687.522406, and 8668.840357. Training record and sidecar live at `runs/transfer-6-9/receipt.json` with weights at `runs/transfer-6-9/policy.pt`. The transfer receipt's own train-stage means are W 45.91104266 with infidelity 0.009800485845, descriptive only.
+One policy trained on n = 6, 9 (rates 0.001, 0.002, 0.005, seeds 1, 2, 3) and scored on the n = 12 test cells ties H exactly on all 6 cells. The n = 12 H values it ties are the table rows above: 209.0586983, 687.522406, and 8668.840357. Training record and sidecar live at `runs/transfer-6-9/receipt.json` (selected lam 5000, kept from bc) with weights at `runs/transfer-6-9/policy.pt`. The transfer receipt's own train-stage means are W 45.91104266 with infidelity 0.009800485845, descriptive only. Reproduce the tie with `python -m pursuit05 eval --stages 12 --policy runs/transfer-6-9/policy.pt`; `test_transfer_policy_ties_h_on_n12` checks it per cell.
 
 ## Frontier and training detail
 
@@ -82,7 +82,7 @@ Program root ruling: keep the split, disclosed. The imported screen's `drop_one`
 
 ## Claim boundary
 
-These cells are modeled ring-plus-chord views, not device maps. The weight-3 tail stays censored: evaluative claims use p <= 0.002 only, and the p = 0.005 rows print as descriptive with their tail mass beside them. No hardware claim and no error-correction threshold claim follow from these numbers. Policy numbers cover held-out cells only. D1 and D2 are descriptive censuses over exact means, with no significance claim. Inference cost is milliseconds per cell for the decision-table forward and tens of millisecond-scale evaluations for A; both are small and no speed win is claimed.
+These cells are modeled ring-plus-chord views, not device maps. The weight-3 tail stays censored: evaluative claims use p <= 0.002 only, and the p = 0.005 rows print as descriptive with their tail mass beside them. No hardware claim and no error-correction threshold claim follow from these numbers. Policy numbers cover held-out cells only. D1 and D2 are descriptive censuses over exact means, with no significance claim. No speed win is claimed.
 
 ## Receipt index
 
@@ -175,7 +175,6 @@ Each line below is one JSON object with the receipt file, the field path, and th
 {"file": "runs/6-0.001/receipt.json", "path": ["selection_tied"], "value": true}
 {"file": "runs/6-0.001/receipt.json", "path": ["train_bound"], "value": 0.0025838492794191393}
 {"file": "runs/6-0.001/receipt.json", "path": ["worker_s"], "value": 68.66017216600449}
-{"file": "runs/6-0.001/receipt.json", "path": ["config", "total_timesteps"], "value": 5000000}
 {"file": "runs/6-0.001/receipt.json", "path": ["points", {"lam": 1000}, "mean_W"], "value": 2.9831648572152005}
 {"file": "runs/6-0.001/receipt.json", "path": ["points", {"lam": 1000}, "mean_inf"], "value": 0.006985945535093383}
 {"file": "runs/6-0.001/receipt.json", "path": ["points", {"lam": 1000}, "kept_from"], "value": "bc"}
@@ -205,7 +204,6 @@ Each line below is one JSON object with the receipt file, the field path, and th
 {"file": "runs/6-0.002/receipt.json", "path": ["selection_tied"], "value": true}
 {"file": "runs/6-0.002/receipt.json", "path": ["train_bound"], "value": 0.005197784081350531}
 {"file": "runs/6-0.002/receipt.json", "path": ["worker_s"], "value": 60.11140975000308}
-{"file": "runs/6-0.002/receipt.json", "path": ["config", "total_timesteps"], "value": 5000000}
 {"file": "runs/6-0.002/receipt.json", "path": ["points", {"lam": 1000}, "mean_W"], "value": 6.204779777682063}
 {"file": "runs/6-0.002/receipt.json", "path": ["points", {"lam": 1000}, "mean_inf"], "value": 0.01393962661431721}
 {"file": "runs/6-0.002/receipt.json", "path": ["points", {"lam": 1000}, "kept_from"], "value": "bc"}
@@ -235,7 +233,6 @@ Each line below is one JSON object with the receipt file, the field path, and th
 {"file": "runs/6-0.005/receipt.json", "path": ["selection_tied"], "value": true}
 {"file": "runs/6-0.005/receipt.json", "path": ["train_bound"], "value": 0.013206564630457046}
 {"file": "runs/6-0.005/receipt.json", "path": ["worker_s"], "value": 74.94929916699039}
-{"file": "runs/6-0.005/receipt.json", "path": ["config", "total_timesteps"], "value": 5000000}
 {"file": "runs/6-0.005/receipt.json", "path": ["points", {"lam": 1000}, "mean_W"], "value": 17.82404842783997}
 {"file": "runs/6-0.005/receipt.json", "path": ["points", {"lam": 1000}, "mean_inf"], "value": 0.03454726561550982}
 {"file": "runs/6-0.005/receipt.json", "path": ["points", {"lam": 1000}, "kept_from"], "value": "bc"}
@@ -265,7 +262,6 @@ Each line below is one JSON object with the receipt file, the field path, and th
 {"file": "runs/9-0.001/receipt.json", "path": ["selection_tied"], "value": true}
 {"file": "runs/9-0.001/receipt.json", "path": ["train_bound"], "value": 0.004126721643298605}
 {"file": "runs/9-0.001/receipt.json", "path": ["worker_s"], "value": 185.38021095699514}
-{"file": "runs/9-0.001/receipt.json", "path": ["config", "total_timesteps"], "value": 5000000}
 {"file": "runs/9-0.001/receipt.json", "path": ["points", {"lam": 1000}, "mean_W"], "value": 21.334618116025695}
 {"file": "runs/9-0.001/receipt.json", "path": ["points", {"lam": 1000}, "mean_inf"], "value": 0.00011165327944984764}
 {"file": "runs/9-0.001/receipt.json", "path": ["points", {"lam": 1000}, "kept_from"], "value": "bc"}
@@ -295,7 +291,6 @@ Each line below is one JSON object with the receipt file, the field path, and th
 {"file": "runs/9-0.002/receipt.json", "path": ["selection_tied"], "value": true}
 {"file": "runs/9-0.002/receipt.json", "path": ["train_bound"], "value": 0.008426659485189699}
 {"file": "runs/9-0.002/receipt.json", "path": ["worker_s"], "value": 159.5788429999884}
-{"file": "runs/9-0.002/receipt.json", "path": ["config", "total_timesteps"], "value": 5000000}
 {"file": "runs/9-0.002/receipt.json", "path": ["points", {"lam": 1000}, "mean_W"], "value": 47.58679316514615}
 {"file": "runs/9-0.002/receipt.json", "path": ["points", {"lam": 1000}, "mean_inf"], "value": 0.00044666609895223613}
 {"file": "runs/9-0.002/receipt.json", "path": ["points", {"lam": 1000}, "kept_from"], "value": "bc"}
@@ -325,7 +320,6 @@ Each line below is one JSON object with the receipt file, the field path, and th
 {"file": "runs/9-0.005/receipt.json", "path": ["selection_tied"], "value": true}
 {"file": "runs/9-0.005/receipt.json", "path": ["train_bound"], "value": 0.02220623094301685}
 {"file": "runs/9-0.005/receipt.json", "path": ["worker_s"], "value": 90.48409533300583}
-{"file": "runs/9-0.005/receipt.json", "path": ["config", "total_timesteps"], "value": 5000000}
 {"file": "runs/9-0.005/receipt.json", "path": ["points", {"lam": 1000}, "mean_W"], "value": 179.53285160203293}
 {"file": "runs/9-0.005/receipt.json", "path": ["points", {"lam": 1000}, "mean_inf"], "value": 0.0027717579241786005}
 {"file": "runs/9-0.005/receipt.json", "path": ["points", {"lam": 1000}, "kept_from"], "value": "bc"}
@@ -355,7 +349,6 @@ Each line below is one JSON object with the receipt file, the field path, and th
 {"file": "runs/12-0.001/receipt.json", "path": ["selection_tied"], "value": true}
 {"file": "runs/12-0.001/receipt.json", "path": ["train_bound"], "value": 0.030312021257619115}
 {"file": "runs/12-0.001/receipt.json", "path": ["worker_s"], "value": 224.4786445830032}
-{"file": "runs/12-0.001/receipt.json", "path": ["config", "total_timesteps"], "value": 5000000}
 {"file": "runs/12-0.001/receipt.json", "path": ["points", {"lam": 1000}, "mean_W"], "value": 209.05869827732658}
 {"file": "runs/12-0.001/receipt.json", "path": ["points", {"lam": 1000}, "mean_inf"], "value": 0.02841871990008263}
 {"file": "runs/12-0.001/receipt.json", "path": ["points", {"lam": 1000}, "kept_from"], "value": "bc"}
@@ -385,7 +378,6 @@ Each line below is one JSON object with the receipt file, the field path, and th
 {"file": "runs/12-0.002/receipt.json", "path": ["selection_tied"], "value": true}
 {"file": "runs/12-0.002/receipt.json", "path": ["train_bound"], "value": 0.05931197776249388}
 {"file": "runs/12-0.002/receipt.json", "path": ["worker_s"], "value": 201.2109070430015}
-{"file": "runs/12-0.002/receipt.json", "path": ["config", "total_timesteps"], "value": 5000000}
 {"file": "runs/12-0.002/receipt.json", "path": ["points", {"lam": 1000}, "mean_W"], "value": 687.5224059699183}
 {"file": "runs/12-0.002/receipt.json", "path": ["points", {"lam": 1000}, "mean_inf"], "value": 0.0571476488418205}
 {"file": "runs/12-0.002/receipt.json", "path": ["points", {"lam": 1000}, "kept_from"], "value": "bc"}
@@ -415,7 +407,6 @@ Each line below is one JSON object with the receipt file, the field path, and th
 {"file": "runs/12-0.005/receipt.json", "path": ["selection_tied"], "value": true}
 {"file": "runs/12-0.005/receipt.json", "path": ["train_bound"], "value": 0.13528996188889414}
 {"file": "runs/12-0.005/receipt.json", "path": ["worker_s"], "value": 206.72483091699542}
-{"file": "runs/12-0.005/receipt.json", "path": ["config", "total_timesteps"], "value": 5000000}
 {"file": "runs/12-0.005/receipt.json", "path": ["points", {"lam": 1000}, "mean_W"], "value": 8668.84035676414}
 {"file": "runs/12-0.005/receipt.json", "path": ["points", {"lam": 1000}, "mean_inf"], "value": 0.1386571278920128}
 {"file": "runs/12-0.005/receipt.json", "path": ["points", {"lam": 1000}, "kept_from"], "value": "bc"}

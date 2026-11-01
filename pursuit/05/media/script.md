@@ -13,15 +13,15 @@ Recording tree (local only, never pushed): `origin/pursuit-05-4-demo` at `49ec6b
 
 Render with the throwaway script at `/tmp/videobuild/render.py` (not committed) and assemble with ffmpeg.
 
-## Beat 1, 0:00-0:21 — problem and certified result
+## Beat 1, 0:00-0:21 - problem and certified result
 
 Card: "Magic-state cultivation wastes volume on runs that fail. Screen 05 certified the search arms. We train an abort policy and score it exactly."
 
-Capture: `baselines --seeds 4,5` table head plus the `reproduced 45/45 cells` line.
+Capture: `reproduce` (`reproduced 45/45 cells` line) plus the `baselines --seeds 4,5` table head.
 
 Narration: "Magic-state cultivation wastes volume growing runs that fail. Screen 05 certified exact search arms for when to abort: fixed, greedy, and annealing. We reproduce all 45 certified cells exactly, then train a PufferLib abort policy and score it with the same exact accounting, on held-out cells only."
 
-## Beat 2, 0:21-0:52 — live demo
+## Beat 2, 0:21-0:52 - live demo
 
 Card: "One command: propose, score exactly, explain, write a replayable witness."
 
@@ -29,7 +29,7 @@ Capture: live `demo` on regime 9/0.002. Keep the `provider meta, model muse-spar
 
 Narration: "One command runs the demo. Muse Spark proposes an abort policy for the goal. The exact harness scores it beside the certified arms: fixed, annealing, the exact static best, and the exact history optimum. Then the learned policy enters the table from its committed checkpoint, tying the optimum on both test cells. The explainer reads the table in one paragraph, proposes the next experiment, and the run writes a witness anyone can replay with no model call."
 
-## Beat 3, 0:52-1:25 — training, frontier, replay
+## Beat 3, 0:52-1:25 - training, frontier, replay
 
 Card: "Behavior cloning from the exact history optimum, then PPO. The sweep collapses to one point per regime."
 
@@ -37,7 +37,7 @@ Captures: a short live `train --stage 6 --rate 0.001 --total-timesteps 200000` c
 
 Narration: "Training distills the exact history optimum with behavior cloning, then fine-tunes with PPO. The penalty sweep collapses: every setting keeps the same policy, so each regime contributes one frontier point. The frontier figure plots the learned policy against the search arms. And the witness from the demo replays exactly, six out of six arms, with no network."
 
-## Beat 4, 1:25-1:49 — result and next experiment
+## Beat 4, 1:25-1:49 - result and next experiment
 
 Cards, one per line:
 
