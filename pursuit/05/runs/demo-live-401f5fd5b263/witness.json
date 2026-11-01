@@ -1,0 +1,251 @@
+{
+  "witness_id": "401f5fd5b263",
+  "goal": "cut wasted cultivation volume at p = 0.002 without raising infidelity",
+  "regime": "9/0.002",
+  "cell_ids": [
+    "9/0.002/4",
+    "9/0.002/5"
+  ],
+  "arms": {
+    "9/0.002/4": {
+      "F": {
+        "W": 78.19087079868982,
+        "inf": 0.0005527982406595122,
+        "pacc": 0.6744636024729532,
+        "n_evaluated": 1,
+        "inference_cost_s": 0.0
+      },
+      "A": {
+        "W": 35.836046432304755,
+        "inf": 0.0005527982406595122,
+        "pacc": 0.0,
+        "n_evaluated": 1,
+        "inference_cost_s": 0.0
+      },
+      "S": {
+        "W": 35.836046432304755,
+        "inf": 0.0005527982406595122,
+        "pacc": 0.6744636024729532,
+        "n_evaluated": 75,
+        "inference_cost_s": 0.02664845800609328,
+        "policy": {
+          "ath": [
+            0,
+            0
+          ],
+          "fth": 0
+        }
+      },
+      "H": {
+        "W": 35.836046432304755,
+        "inf": 0.0005527982406595122,
+        "pacc": 0.6744636024729532,
+        "n_evaluated": 138,
+        "inference_cost_s": 0.06224445899715647,
+        "lam": 0.0,
+        "fallback": false,
+        "policy": {
+          "table": {
+            "0:1": true,
+            "0:2": true,
+            "0:3": true,
+            "1:0,1": true,
+            "1:0,2": true,
+            "1:0,3": true,
+            "1:1,1": true,
+            "1:1,2": true,
+            "1:1,3": true,
+            "1:2,2": true,
+            "1:2,3": true,
+            "1:3,3": true,
+            "0:4": true,
+            "0:5": true,
+            "0:6": true,
+            "1:0,4": true,
+            "1:0,5": true,
+            "1:1,4": true,
+            "1:1,5": true,
+            "1:1,6": true,
+            "1:2,4": true,
+            "1:2,5": true,
+            "1:2,6": true,
+            "1:3,4": true,
+            "1:3,5": true,
+            "1:3,6": true,
+            "1:4,4": true,
+            "1:4,5": true,
+            "1:4,6": true,
+            "1:5,5": true,
+            "1:5,6": true,
+            "1:6,6": true
+          },
+          "fth": 0
+        }
+      },
+      "L": {
+        "W": 63.11952377358557,
+        "inf": 0.0005527982406595122,
+        "pacc": 0.6744636024729532,
+        "n_evaluated": 1,
+        "inference_cost_s": 0.0,
+        "policy": {
+          "ath": [
+            1,
+            2
+          ],
+          "fth": 0
+        }
+      }
+    },
+    "9/0.002/5": {
+      "F": {
+        "W": 130.36783540133683,
+        "inf": 0.00034053395724496007,
+        "pacc": 0.6743798480448524,
+        "n_evaluated": 1,
+        "inference_cost_s": 0.0
+      },
+      "A": {
+        "W": 59.33753989798754,
+        "inf": 0.00034053395724496007,
+        "pacc": 0.0,
+        "n_evaluated": 1,
+        "inference_cost_s": 0.0
+      },
+      "S": {
+        "W": 59.33753989798754,
+        "inf": 0.00034053395724496007,
+        "pacc": 0.6743798480448524,
+        "n_evaluated": 75,
+        "inference_cost_s": 0.025477709001279436,
+        "policy": {
+          "ath": [
+            0,
+            0
+          ],
+          "fth": 0
+        }
+      },
+      "H": {
+        "W": 59.33753989798754,
+        "inf": 0.00034053395724496007,
+        "pacc": 0.6743798480448524,
+        "n_evaluated": 138,
+        "inference_cost_s": 0.04209324999828823,
+        "lam": 0.0,
+        "fallback": false,
+        "policy": {
+          "table": {
+            "0:1": true,
+            "0:2": true,
+            "0:3": true,
+            "1:0,1": true,
+            "1:0,2": true,
+            "1:1,1": true,
+            "1:1,2": true,
+            "1:1,3": true,
+            "1:2,2": true,
+            "1:2,3": true,
+            "1:3,3": true,
+            "0:4": true,
+            "0:5": true,
+            "1:0,3": true,
+            "1:0,4": true,
+            "1:1,4": true,
+            "1:1,5": true,
+            "1:2,4": true,
+            "1:2,5": true,
+            "1:3,4": true,
+            "1:3,5": true,
+            "1:4,4": true,
+            "1:4,5": true,
+            "1:5,5": true
+          },
+          "fth": 0
+        }
+      },
+      "L": {
+        "W": 59.33753989798754,
+        "inf": 0.00034053395724496007,
+        "pacc": 0.6743798480448524,
+        "n_evaluated": 1,
+        "inference_cost_s": 0.0,
+        "policy": {
+          "ath": [
+            0,
+            0
+          ],
+          "fth": 0
+        }
+      }
+    }
+  },
+  "proposals": {
+    "9/0.002/4": {
+      "proposal": {
+        "ath": [
+          1,
+          2
+        ],
+        "fth": 0,
+        "rationale": "Early abort on weight>=2 discards shots overwhelmingly likely to fail final weight-0 postselection, saving volume while preserving baseline fidelity bound."
+      },
+      "reason": "accepted",
+      "tries": 1,
+      "usage": {
+        "input_tokens": 20906,
+        "output_tokens": 586
+      }
+    },
+    "9/0.002/5": {
+      "proposal": {
+        "ath": [
+          0,
+          0
+        ],
+        "fth": 0,
+        "rationale": "Aborting as soon as cumulative weight exceeds 0 discards only shots that could never satisfy final weight-0 acceptance, so the accepted ensemble and infidelity are unchanged while skipped rounds cut volume per acceptance."
+      },
+      "reason": "accepted",
+      "tries": 1,
+      "usage": {
+        "input_tokens": 20905,
+        "output_tokens": 1304
+      }
+    }
+  },
+  "explanation": {
+    "explanation": "The shown H policy is functionally identical to the best static S policy despite looking more aggressive: S aborts only on [0,0] while H aborts on every listed k=0 and k=1 ring-plus-chord history, but both keep the same final accept rule of weight <= 0, and on held-out cell 9/0.002/4 both achieve identical W=35.83604643 and infidelity=0.0005527982407, so the expanded early-abort set saves zero wasted cultivation volume and changes no accept/reject decision versus static.",
+    "next_experiment": "Run exact dynamic optimization allowing selective k=1/k=2 abort only for histories with zero posterior probability of reaching final weight <= 0, and evaluate W versus infidelity on held-out cells 9/0.002/4 and 9/0.002/5 to find a strictly smaller abort set that lowers W below 35.836/59.338 without raising infidelity above 0.000553/0.000341.",
+    "source": "live",
+    "usage": {
+      "input_tokens": 21416,
+      "output_tokens": 1365,
+      "reasoning_tokens": 1091,
+      "calls": 1
+    }
+  },
+  "provider_id": "meta",
+  "model_id": "muse-spark-1.3-contributor",
+  "source": "live",
+  "versions": {
+    "python": "3.12.13",
+    "pufferlib": "3.0.0",
+    "torch": "2.15.0",
+    "numpy": "1.26.4",
+    "muse": "Muse Code 1.4.14 (1.4.14-R7309.1)",
+    "screen_src": "/Users/joeltaroreh/.t3/worktrees/meta-hackathon/pursuit-05-4-demo/screens/05/src",
+    "git_head": "0e8f8e564d26"
+  },
+  "seed": 0,
+  "timestamps": {
+    "started": "2026-11-01T01:29:06.509807+00:00",
+    "finished": "2026-11-01T01:29:34.255619+00:00"
+  },
+  "replay_command": "python -m pursuit05 replay /tmp/pursuit05-exec/wit-receipt/401f5fd5b263.json",
+  "usage_total": {
+    "input_tokens": 63227,
+    "output_tokens": 3255
+  },
+  "notes": []
+}

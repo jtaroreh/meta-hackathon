@@ -77,6 +77,40 @@ Score P against F, A, S, and H on held-out cells:
 .venv/bin/python -m pursuit05 eval --all
 ```
 
+Run the demo on one regime with Muse Spark in the loop:
+
+```sh
+.venv/bin/python -m pursuit05 demo "cut wasted cultivation volume at p = 0.002 without raising infidelity"
+```
+
+The live call needs Muse Code 1.4.14 or later with `api_key`
+authentication (`muse usage` prints `api_key`). The model is
+`muse-spark-1.3-contributor` throughout, as proposer and explainer.
+Without Muse Code, run the whole demo from recorded transcripts:
+
+```sh
+.venv/bin/python -m pursuit05 demo --offline "cut wasted cultivation volume at p = 0.002 without raising infidelity"
+```
+
+The demo scores the proposed policy L with the same exact harness as
+every other arm on held-out test cells, prints the arm table with
+`F, A, S, H, L` plus `P` when a committed 05-3 checkpoint exists,
+writes a witness, and prints the replay command. L passes a cell when
+its exact W sits below F's W within the F-anchored infidelity bound,
+else the table marks the failing cell. Re-score any witness
+with no model call:
+
+```sh
+.venv/bin/python -m pursuit05 replay witnesses/<id>.json
+```
+
+The spend guard sums model input and output tokens across the run and
+refuses the next call past `PURSUIT05_MAX_TOKENS` (default 200000).
+Each call also stays within the operator-approved per-call budget of
+25000 input tokens; see `runs/exec-overhead.json` for the flag matrix
+and the chosen set. The proposer gets one initial call plus two
+repairs per cell.
+
 Run the checks:
 
 ```sh

@@ -1,0 +1,39 @@
+{
+ "additionalProperties": false,
+ "properties": {
+  "abort_thresholds": {
+   "items": {
+    "enum": [
+     0,
+     1,
+     2,
+     3,
+     99
+    ],
+    "type": "integer"
+   },
+   "maxItems": 2,
+   "minItems": 2,
+   "type": "array"
+  },
+  "final_threshold": {
+   "enum": [
+    0,
+    1,
+    2
+   ],
+   "type": "integer"
+  },
+  "rationale": {
+   "minLength": 1,
+   "type": "string"
+  }
+ },
+ "required": [
+  "abort_thresholds",
+  "final_threshold",
+  "rationale"
+ ],
+ "title": "pursuit05-proposal-T3",
+ "type": "object"
+}
