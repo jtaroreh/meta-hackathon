@@ -59,6 +59,24 @@ optimum H on all cells:
 .venv/bin/python -m pursuit05 optimum
 ```
 
+Train one pooled policy for a regime (BC from H, then PPO):
+
+```sh
+.venv/bin/python -m pursuit05 train --stage 9 --rate 0.002
+```
+
+Sweep nominal lam per regime and write the frontier:
+
+```sh
+.venv/bin/python -m pursuit05 sweep
+```
+
+Score P against F, A, S, and H on held-out cells:
+
+```sh
+.venv/bin/python -m pursuit05 eval --all
+```
+
 Run the checks:
 
 ```sh
@@ -79,8 +97,29 @@ abort point, `Vf` the full volume. A policy maps a prefix
 policy within the F-anchored infidelity bound; its `inference_cost_s`
 is the enumeration wall time. `joint_win` judges every arm against the
 screen's F/G/A infidelity bar. Train seeds are 1, 2, 3 and test seeds
-are 4, 5. The registry holds out `n = 12` for stage transfer in a
-later step.
+are 4, 5. Policy numbers cover held-out cells only: `eval` refuses
+train seeds, and receipts hold test-seed scores only.
+
+## Training
+
+`train` distills the H decision tables of a regime's train cells into
+the policy with behavior cloning, then fine-tunes with PPO in
+PufferLib, and keeps the better checkpoint on exact train-seed W,
+preferring checkpoints within the F-anchored bound. The receipt logs
+which start each reported policy kept. `sweep` repeats this per
+nominal lam in {1000, 5000, 10000} and writes `runs/frontier.json`
+and `runs/frontier.png`, the learned volume-versus-infidelity
+frontier on test seeds with F, S, H, and A as points. P per regime is
+the lam with the lowest exact train-seed W within the bound.
+
+PuffeRL clamps step rewards to [-1, 1], so the env gets lam / 10000:
+effective penalties {0.1, 0.5, 1.0} against the pinned accept bonus
+1.0. Raw lam values would collapse to one operating point under the
+clamp. Receipts record both the nominal lam and the mapping.
+
+One `decision_table` forward per cell costs milliseconds, and the
+annealing arm costs tens of evaluations near 1 ms each. Both are
+small, so no speed win is claimed.
 
 ## Decider protocol
 
