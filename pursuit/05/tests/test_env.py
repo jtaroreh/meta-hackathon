@@ -138,7 +138,7 @@ def test_env_masks_all_zero_to_match_scorer():
 
 
 def test_env_obs_values_match_prefixes():
-    from pursuit05.policy import _obs_row
+    from pursuit05.policy import obs_row
 
     reg = CellRegistry()
     for cid in ("6/0.001/1", "12/0.002/1"):
@@ -164,7 +164,7 @@ def test_env_obs_values_match_prefixes():
                     for _ in range(k):
                         env.step(np.zeros(1, dtype=np.int64))
                     want = np.asarray(
-                        _obs_row(k, vals, cell.stage_idx, cell.rate_idx, t),
+                        obs_row(k, vals, cell.stage_idx, cell.rate_idx, t),
                         dtype=np.float32,
                     )
                     assert np.array_equal(env.observations[0], want), (cid, k, vals)

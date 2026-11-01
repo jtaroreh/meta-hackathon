@@ -94,3 +94,41 @@ def test_env_smoke_small_passes():
     assert proc.returncode == 0, proc.stderr
     assert "agent-steps/s = " in proc.stdout
     assert "within MC error" in proc.stdout
+
+
+def test_parse_lams_rejects_bad_values():
+    import pytest
+
+    from pursuit05.cli import _parse_lams
+
+    for bad in ("nan", "inf", "-inf", "0", "-5", "1000,1000", "abc", ""):
+        with pytest.raises(ValueError):
+            _parse_lams(bad, (1000,))
+    assert _parse_lams("1000,5000", (1,)) == [1000.0, 5000.0]
+    assert _parse_lams(None, (1000,)) == [1000]
+
+
+def test_checked_beta_and_lam():
+    import pytest
+
+    from pursuit05.cli import _checked_beta, _checked_lam
+
+    assert _checked_beta({"beta": 1.0}) == 1.0
+    for bad in (float("nan"), float("inf"), -1.0, "abc", None):
+        with pytest.raises(ValueError):
+            _checked_beta({"beta": bad})
+    assert _checked_lam(5000) == 5000.0
+    for bad in (float("nan"), float("inf"), 0, -3, "abc", None):
+        with pytest.raises(ValueError):
+            _checked_lam(bad)
+
+
+def test_nonneg_int_rejects_non_ints():
+    import pytest
+
+    from pursuit05.cli import _nonneg_int
+
+    assert _nonneg_int(0, "--seed") == 0
+    for bad in ("abc", None, -1):
+        with pytest.raises(ValueError):
+            _nonneg_int(bad, "--seed")

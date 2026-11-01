@@ -8,6 +8,7 @@ dependencies = [
     "torch==2.15.0",
     "numpy==1.26.4",
     "gymnasium==0.29.1",
+    "pillow==13.0.0",
     "pytest>=8.3",
     "ruff>=0.8",
 ]

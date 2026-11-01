@@ -186,6 +186,7 @@ pettingzoo==1.24.1
     # via pufferlib
 pillow==13.0.0
     # via
+    #   pursuit05 (pyproject.toml)
     #   imageio
     #   neptune
 platformdirs==4.14.2
