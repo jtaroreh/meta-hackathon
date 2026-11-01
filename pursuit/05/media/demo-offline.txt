@@ -1,10 +1,12 @@
+/Users/joeltaroreh/.t3/worktrees/meta-hackathon/pursuit-05-4-demo/pursuit/05/.venv/lib/python3.12/site-packages/torch/cuda/__init__.py:70: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
 provider meta, model muse-spark-1.3-contributor
 input tokens 41803, output tokens 3116
 transcript: fixture
-no 05-3 checkpoint for 9/0.002; table without P
-cell                   F_W            F_inf              A_W            A_inf              S_W            S_inf              H_W            H_inf              L_W            L_inf
-9/0.002/4       78.1908708  0.0005527982407      35.83604643  0.0005527982407      35.83604643  0.0005527982407      35.83604643  0.0005527982407      35.83604643  0.0005527982407
-9/0.002/5      130.3678354  0.0003405339572       59.3375399  0.0003405339572       59.3375399  0.0003405339572       59.3375399  0.0003405339572      127.7872691  0.0003405339572
+policy checkpoint: /Users/joeltaroreh/.t3/worktrees/meta-hackathon/pursuit-05-4-demo/pursuit/05/runs/9-0.002/policy.pt
+cell                   F_W            F_inf              A_W            A_inf              S_W            S_inf              H_W            H_inf              L_W            L_inf              P_W            P_inf
+9/0.002/4       78.1908708  0.0005527982407      35.83604643  0.0005527982407      35.83604643  0.0005527982407      35.83604643  0.0005527982407      35.83604643  0.0005527982407      35.83604643  0.0005527982407
+9/0.002/5      130.3678354  0.0003405339572       59.3375399  0.0003405339572       59.3375399  0.0003405339572       59.3375399  0.0003405339572      127.7872691  0.0003405339572       59.3375399  0.0003405339572
 Offline read of the exact table for goal 'cut wasted cultivation volume at p = 0.002 without raising infidelity': the learned policy matches the best static policy on every prefix, so history buys nothing on these cells within the pinned decider class.
 Next experiment: Sweep the PPO penalty weight and re-score exactly on the held-out cells to trace the learned volume-versus-infidelity frontier.
-witness written to /tmp/pursuit05-exec/wit-media2/8485df184c6e.json; replay with python -m pursuit05 replay /tmp/pursuit05-exec/wit-media2/8485df184c6e.json
+witness written to witnesses/494e0eca1b3b.json; replay with python -m pursuit05 replay witnesses/494e0eca1b3b.json

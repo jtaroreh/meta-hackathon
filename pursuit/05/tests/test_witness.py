@@ -122,6 +122,17 @@ def test_fixture_cell_tag_mismatch_refused(tmp_path, capsys, monkeypatch):
     assert "does not match" in capsys.readouterr().err
 
 
+def test_find_policy_checkpoint_discovers_committed_receipt():
+    from pathlib import Path
+
+    found = cli._find_policy_checkpoint(9, 0.002)
+    assert found is not None
+    assert Path(found).name == "policy.pt"
+    assert Path(found).parent.name == "9-0.002"
+    assert Path(found).is_file()
+    assert cli._find_policy_checkpoint(12, 0.007) is None
+
+
 def test_offline_wrong_regime_refused(tmp_path, capsys):
     rc = cli.main(["demo", "--offline", "--regime", "6/0.002",
                    "--witness-dir", str(tmp_path), "goal"])

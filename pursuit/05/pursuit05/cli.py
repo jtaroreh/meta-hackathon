@@ -905,23 +905,32 @@ def _collect_versions() -> dict:
 
 
 def _find_policy_checkpoint(n: int, p: float):
-    runs = _pursuit05_dir() / "runs"
-    if not runs.is_dir():
+    from pursuit05 import train
+
+    rid = train.regime_id([n], [p])
+    run_dir = train.RUNS_DIR / rid
+    receipt_path = run_dir / "receipt.json"
+    policy_path = run_dir / "policy.pt"
+    if not receipt_path.is_file() or not policy_path.is_file():
         return None
-    for receipt_path in sorted(runs.glob("*/receipt.json")):
-        try:
-            obj = json.loads(receipt_path.read_text())
-        except (OSError, ValueError):
-            continue
-        if not isinstance(obj, dict):
-            continue
-        rn = obj.get("stage", obj.get("n"))
-        rp = obj.get("rate", obj.get("p"))
-        if rn == n and rp == p:
-            policy_path = receipt_path.parent / "policy.pt"
-            if policy_path.is_file():
-                return policy_path
-    return None
+    try:
+        obj = json.loads(receipt_path.read_text())
+    except (OSError, ValueError):
+        return None
+    if not isinstance(obj, dict) or obj.get("kind") != "regime":
+        return None
+    if obj.get("id") != rid:
+        trained = obj.get("trained_on") or {}
+        if not isinstance(trained, dict):
+            return None
+        if n not in trained.get("stages", []) or p not in trained.get("rates", []):
+            return None
+    lam = obj.get("selected_lam")
+    if isinstance(lam, float) and lam.is_integer():
+        lam = int(lam)
+    if not isinstance(lam, int) or not (run_dir / f"policy-lam{lam}.pt").is_file():
+        return None
+    return policy_path
 
 
 def _score_policy_checkpoint(policy_path: Path, reg, cells):
